@@ -52,7 +52,7 @@ BuildRequires: minizip-devel
 BuildRequires: opus-devel
 BuildRequires: pkgconfig(gtk+-3.0)
 BuildRequires: dee-devel
-BuildRequires: xz-devel
+BuildRequires: kgconfig(liblzma)
 BuildRequires: pkgconfig(appindicator3-0.1)
 BuildRequires: cmake(Qt5Gui)
 BuildRequires: python2
