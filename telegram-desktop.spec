@@ -24,19 +24,17 @@ URL: https://github.com/telegramdesktop/%{appname}
 # architecture: https://github.com/telegramdesktop/tdesktop/issues/4101
 ExclusiveArch: i686 x86_64
 
-Source0: %{url}/archive/v%{version}.tar.gz#/%{appname}-%{version}.tar.gz
+Source0: %{url}/archive/v%{version}.tar.gz
 Source1: https://github.com/telegramdesktop/crl/archive/%{commit1}.tar.gz#/crl-%{shortcommit1}.tar.gz
 Patch0: %{name}-build-fixes.patch
 #Patch1: %{name}-api-tokens.patch
 
-Recommends: libappindicator-gtk3%{?_isa}
 Requires: qt5-qtimageformats%{?_isa}
 Requires: hicolor-icon-theme
 Requires: gtk3%{?_isa}
 
 # Compilers and tools...
 BuildRequires: desktop-file-utils
-BuildRequires: libappstream-glib
 BuildRequires: cmake
 BuildRequires: gyp
 
