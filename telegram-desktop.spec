@@ -54,7 +54,7 @@ BuildRequires: pkgconfig(gtk+-3.0)
 BuildRequires: dee-devel
 BuildRequires: pkgconfig(liblzma)
 BuildRequires: pkgconfig(appindicator3-0.1)
-BuildRequires: cmake(Qt5Gui)
+BuildRequires: pkgconfig(Qt5Gui)
 BuildRequires: python2
 
 %description
