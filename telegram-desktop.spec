@@ -21,7 +21,7 @@ License: GPLv3+ and LGPLv3
 URL: https://github.com/telegramdesktop/%{appname}
 
 Source0: %{url}/archive/v%{version}.tar.gz
-Source1: https://github.com/telegramdesktop/crl/archive/%{commit1}.tar.gz#/crl-%{shortcommit1}.tar.gz
+Source1: https://github.com/telegramdesktop/crl/archive/%{commit1}.tar.gz
 Patch0: %{name}-build-fixes.patch
 #Patch1: %{name}-api-tokens.patch
 
