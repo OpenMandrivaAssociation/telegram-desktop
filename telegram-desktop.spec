@@ -99,7 +99,7 @@ popd
 %install
 # Installing executables...
 mkdir -p "%{buildroot}%{_bindir}"
-install -m 0755 -p out/Release/Telegram "%{buildroot}%{_bindir}/%{name}"
+install -m 0755 -p out/Release/build/Telegram "%{buildroot}%{_bindir}/%{name}"
 
 # Installing desktop shortcut...
 mv lib/xdg/telegramdesktop.desktop lib/xdg/%{name}.desktop
