@@ -10,7 +10,7 @@
 
 Summary: Telegram Desktop official messaging app
 Name: telegram-desktop
-Version: 1.2.21
+Version: 1.2.24
 Release: 1
 
 # Application and 3rd-party modules licensing:
@@ -70,7 +70,6 @@ business messaging needs.
 %setup -n %{appname}-%{version}
 %apply_patches
 
-sed -i 's!appindicator-0.1!appindicator3-0.1!g' Telegram/gyp/telegram_linux.gypi
 # Unpacking crl...
 pushd Telegram/ThirdParty
     rm -rf crl
