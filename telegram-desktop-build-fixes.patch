@@ -652,19 +652,15 @@ index 22f3e16..fc01687 100644
          ],
        }]
 diff --git a/Telegram/gyp/telegram_sources.txt b/Telegram/gyp/telegram_sources.txt
-index f60aba5..d01a9ef 100644
---- a/Telegram/gyp/telegram_sources.txt
-+++ b/Telegram/gyp/telegram_sources.txt
-@@ -753,7 +753,7 @@
+@@ -776,6 +776,7 @@
+ <(src_loc)/observer_peer.cpp
  <(src_loc)/observer_peer.h
- <(src_loc)/passcodewidget.cpp
- <(src_loc)/passcodewidget.h
--<(src_loc)/qt_static_plugins.cpp
+ <(src_loc)/qt_static_plugins.cpp
 +<(src_loc)/qt_functions.cpp
  <(src_loc)/settings.cpp
  <(src_loc)/settings.h
  <(src_loc)/shortcuts.cpp
-@@ -764,13 +764,6 @@
+@@ -786,13 +787,6 @@
  <(emoji_suggestions_loc)/emoji_suggestions.h
  
  platforms: !win
