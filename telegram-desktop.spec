@@ -2,7 +2,7 @@
 %global appname tdesktop
 
 # Git revision of crl...
-%global commit1 c739b14bc04ca3ce740893fef9bffe2bcca99629
+%global commit1 9bc641f2d4ab140a84aea64c7f2d4669f7633246
 %global shortcommit1 %(c=%{commit1}; echo ${c:0:7})
 
 # Decrease debuginfo verbosity to reduce memory consumption...
@@ -10,7 +10,7 @@
 
 Summary: Telegram Desktop official messaging app
 Name: telegram-desktop
-Version: 1.3.7
+Version: 1.3.12
 Release: 1
 
 # Application and 3rd-party modules licensing:
@@ -21,9 +21,8 @@ License: GPLv3+ and LGPLv3
 URL: https://github.com/telegramdesktop/%{appname}
 
 Source0: %{url}/archive/v%{version}.tar.gz
-Source1: https://github.com/telegramdesktop/crl/archive/%{commit1}.tar.gz
+Source1: https://github.com/telegramdesktop/crl/archive/crl-%{shortcommit1}.tar.gz
 Patch0: %{name}-build-fixes.patch
-Patch2: %{name}-system-fonts.patch
 #Patch1: %{name}-api-tokens.patch
 
 Requires: qt5-qtimageformats
@@ -68,8 +67,9 @@ business messaging needs.
 
 %prep
 # Unpacking Telegram Desktop source archive...
-%setup -n %{appname}-%{version}
+%setup -qn %{appname}-%{version}
 %apply_patches
+sed -i 's!appindicator-0.1!appindicator3-0.1!g' Telegram/gyp/telegram_linux.gypi
 
 # Unpacking crl...
 pushd Telegram/ThirdParty
@@ -77,7 +77,6 @@ pushd Telegram/ThirdParty
     tar -xf %{SOURCE1}
     mv crl-%{commit1} crl
 popd
-sed -i 's!appindicator-0.1!appindicator3-0.1!g' Telegram/gyp/telegram_linux.gypi
 
 %build
 export CC=/usr/bin/gcc
