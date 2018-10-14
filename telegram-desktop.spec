@@ -53,6 +53,7 @@ BuildRequires: pkgconfig(liblzma)
 BuildRequires: pkgconfig(appindicator3-0.1)
 BuildRequires: pkgconfig(Qt5Gui)
 BuildRequires: python2
+BuildRequires: python2-pkg-resources
 
 %description
 Telegram is a messaging app with a focus on speed and security, it’s super
