@@ -2,7 +2,7 @@
 %global appname tdesktop
 
 # Git revision of crl...
-%global commit1 9bc641f2d4ab140a84aea64c7f2d4669f7633246
+%global commit1 4291015efab76bda5886a56b5007f4531be17d46
 %global shortcommit1 %(c=%{commit1}; echo ${c:0:7})
 
 # Decrease debuginfo verbosity to reduce memory consumption...
@@ -10,7 +10,7 @@
 
 Summary: Telegram Desktop official messaging app
 Name: telegram-desktop
-Version: 1.3.12
+Version: 1.4.3
 Release: 1
 
 # Application and 3rd-party modules licensing:
@@ -24,6 +24,7 @@ Source0: %{url}/archive/v%{version}.tar.gz
 Source1: https://github.com/telegramdesktop/crl/archive/crl-%{shortcommit1}.tar.gz
 Patch0: %{name}-build-fixes.patch
 #Patch1: %{name}-api-tokens.patch
+Patch3:	remove-weird-optflags.patch
 
 Requires: qt5-qtimageformats
 Requires: hicolor-icon-theme
@@ -44,6 +45,7 @@ BuildRequires: libstdc++-devel
 BuildRequires: range-v3-devel
 BuildRequires: openssl-devel
 BuildRequires: minizip-devel
+BuildRequires: xxhash-devel
 BuildRequires: pkgconfig(opus)
 BuildRequires: pkgconfig(gtk+-3.0)
 BuildRequires: pkgconfig(dee-1.0)
