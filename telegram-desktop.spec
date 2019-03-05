@@ -1,8 +1,10 @@
 # Telegram Desktop's constants...
 %global appname tdesktop
+%global apiid 208164
+%global apihash dfbe1bc42dc9d20507e17d1814cc2f0a
 
 # Git revision of crl...
-%global commit1 4291015efab76bda5886a56b5007f4531be17d46
+%global commit1 40063abec74e560220891443f6d5157de15e1b62
 %global shortcommit1 %(c=%{commit1}; echo ${c:0:7})
 
 # Decrease debuginfo verbosity to reduce memory consumption...
@@ -10,8 +12,8 @@
 
 Summary: Telegram Desktop official messaging app
 Name: telegram-desktop
-Version: 1.4.3
-Release: 1
+Version: 1.5.15
+Release: 1%{?dist}
 
 # Application and 3rd-party modules licensing:
 # * S0 (Telegram Desktop) - GPLv3+ with OpenSSL exception -- main source;
@@ -20,10 +22,15 @@ Release: 1
 License: GPLv3+ and LGPLv3
 URL: https://github.com/telegramdesktop/%{appname}
 
-Source0: %{url}/archive/v%{version}.tar.gz
-Source1: https://github.com/telegramdesktop/crl/archive/crl-%{shortcommit1}.tar.gz
+# Warning! Builds on i686 may fail due to technical limitations of this
+# architecture: https://github.com/telegramdesktop/tdesktop/issues/4101
+ExclusiveArch: i686 x86_64 znver1
+
+Source0: %{url}/archive/v%{version}.tar.gz#/%{appname}-%{version}.tar.gz
+Source1: https://github.com/telegramdesktop/crl/archive/%{commit1}.tar.gz#/crl-%{shortcommit1}.tar.gz
 Patch0: %{name}-build-fixes.patch
-#Patch1: %{name}-api-tokens.patch
+Patch1: %{name}-system-fonts.patch
+Patch2: %{name}-unbundle-minizip.patch
 Patch3:	remove-weird-optflags.patch
 
 Requires: qt5-qtimageformats
@@ -70,9 +77,7 @@ business messaging needs.
 
 %prep
 # Unpacking Telegram Desktop source archive...
-%setup -qn %{appname}-%{version}
-%apply_patches
-sed -i 's!appindicator-0.1!appindicator3-0.1!g' Telegram/gyp/telegram_linux.gypi
+%autosetup -n %{appname}-%{version} -p1
 
 # Unpacking crl...
 pushd Telegram/ThirdParty
@@ -82,21 +87,33 @@ pushd Telegram/ThirdParty
 popd
 
 %build
-export CC=/usr/bin/gcc
-export CXX=/usr/bin/g++
+# Setting build definitions...
+TDESKTOP_BUILD_DEFINES+='TDESKTOP_DISABLE_OPENAL_EFFECTS,'
+TDESKTOP_BUILD_DEFINES+='TDESKTOP_DISABLE_AUTOUPDATE,'
+TDESKTOP_BUILD_DEFINES+='TDESKTOP_DISABLE_REGISTER_CUSTOM_SCHEME,'
+TDESKTOP_BUILD_DEFINES+='TDESKTOP_DISABLE_DESKTOP_FILE_GENERATION,'
+TDESKTOP_BUILD_DEFINES+='TDESKTOP_DISABLE_CRASH_REPORTS,'
+export CC=gcc
+export CXX=g++
+
 # Generating cmake script using GYP...
 pushd Telegram/gyp
-    gyp --depth=. --generator-output=../.. -Goutput_dir=out Telegram.gyp --format=cmake
+    gyp --depth=. --generator-output=../.. -Goutput_dir=out -Dapi_id=%{apiid} -Dapi_hash=%{apihash} -Dbuild_defines=$TDESKTOP_BUILD_DEFINES Telegram.gyp --format=cmake
 popd
 
 # Patching generated cmake script...
 LEN=$(($(wc -l < out/Release/CMakeLists.txt) - 2))
 sed -i "$LEN r Telegram/gyp/CMakeLists.inj" out/Release/CMakeLists.txt
 
+# Exporting correct paths to AR and RANLIB in order to use FLTO optimizations...
+%ifarch x86_64
+sed -e '/set(configuration "Release")/a\' -e 'set(CMAKE_AR "%{_bindir}/gcc-ar")\' -e 'set(CMAKE_RANLIB "%{_bindir}/gcc-ranlib")\' -e 'set(CMAKE_NM "%{_bindir}/gcc-nm")' -i out/Release/CMakeLists.txt
+%endif
+
 # Building Telegram Desktop using cmake...
 pushd out/Release
     %cmake
-    %make
+    %make_build
 popd
 
 %install
@@ -115,18 +132,17 @@ for size in 16 32 48 64 128 256 512; do
     install -m 0644 -p Telegram/Resources/art/icon${size}.png "$dir/%{name}.png"
 done
 
-# Installing tg protocol handler...
-install -d "%{buildroot}%{_datadir}/kde4/services"
-install -m 0644 -p lib/xdg/tg.protocol "%{buildroot}%{_datadir}/kde4/services/tg.protocol"
-
 # Installing appdata for Gnome Software...
 install -d "%{buildroot}%{_datadir}/metainfo"
 install -m 0644 -p lib/xdg/telegramdesktop.appdata.xml "%{buildroot}%{_datadir}/metainfo/%{name}.appdata.xml"
 
+%check
+appstream-util validate-relax --nonet "%{buildroot}%{_datadir}/metainfo/%{name}.appdata.xml"
+
 %files
 %doc README.md changelog.txt
+%license LICENSE LEGAL
 %{_bindir}/%{name}
 %{_datadir}/applications/%{name}.desktop
-%{_datadir}/kde4/services/tg.protocol
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
 %{_datadir}/metainfo/%{name}.appdata.xml

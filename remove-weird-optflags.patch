@@ -1,5 +1,5 @@
 diff --git a/Telegram/gyp/qt_moc.gypi b/Telegram/gyp/qt_moc.gypi
-index 909c4c5..6c76a18 100644
+index 6f20dbb..1d70760 100644
 --- a/Telegram/gyp/qt_moc.gypi
 +++ b/Telegram/gyp/qt_moc.gypi
 @@ -17,7 +17,6 @@
@@ -7,6 +7,6 @@ index 909c4c5..6c76a18 100644
        '--no-notes',
  
 -      '<!@(rpm --eval "%{optflags}" | grep -Po "[-]([IDU]\s*\S*|E)")',
-       '<!@(python2 -c "for s in \'<@(_defines)\'.split(\' \'): print(\'-D\' + s)")',
+       '<!@(python3 -c "for s in \'<@(_defines)\'.split(\' \'): print(\'-D\' + s)")',
        # '<!@(python -c "for s in \'<@(_include_dirs)\'.split(\' \'): print(\'-I\' + s)")',
        '<(RULE_INPUT_PATH)',
