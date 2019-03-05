@@ -137,9 +137,6 @@ done
 install -d "%{buildroot}%{_datadir}/metainfo"
 install -m 0644 -p lib/xdg/telegramdesktop.appdata.xml "%{buildroot}%{_datadir}/metainfo/%{name}.appdata.xml"
 
-%check
-appstream-util validate-relax --nonet "%{buildroot}%{_datadir}/metainfo/%{name}.appdata.xml"
-
 %files
 %doc README.md changelog.txt
 %license LICENSE LEGAL
