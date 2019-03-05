@@ -59,6 +59,7 @@ BuildRequires: pkgconfig(dee-1.0)
 BuildRequires: pkgconfig(liblzma)
 BuildRequires: pkgconfig(appindicator3-0.1)
 BuildRequires: pkgconfig(Qt5Gui)
+BuildRequires: pkgconfig(json11)
 BuildRequires: python2
 BuildRequires: python2-pkg-resources
 
