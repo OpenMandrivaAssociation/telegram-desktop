@@ -4,7 +4,7 @@
 %global apihash dfbe1bc42dc9d20507e17d1814cc2f0a
 
 # Git revision of crl...
-%global commit1 40063abec74e560220891443f6d5157de15e1b62
+%global commit1 84072fba75f14620935e5e91788ce603daeb1988
 %global shortcommit1 %(c=%{commit1}; echo ${c:0:7})
 
 # Decrease debuginfo verbosity to reduce memory consumption...
@@ -12,7 +12,7 @@
 
 Summary: Telegram Desktop official messaging app
 Name: telegram-desktop
-Version: 1.5.15
+Version: 1.6.7
 Release: 1%{?dist}
 
 # Application and 3rd-party modules licensing:
