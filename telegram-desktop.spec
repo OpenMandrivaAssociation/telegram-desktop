@@ -73,6 +73,7 @@ BuildRequires: pkgconfig(liblzma)
 BuildRequires: pkgconfig(appindicator3-0.1)
 BuildRequires: pkgconfig(Qt5Gui)
 BuildRequires: pkgconfig(json11)
+BuildRequires: cmake(RapidJSON)
 BuildRequires: python2
 BuildRequires: python2-pkg-resources
 
