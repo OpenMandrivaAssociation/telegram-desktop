@@ -8,7 +8,7 @@
 %global shortcommit1 %(c=%{commit1}; echo ${c:0:7})
 
 # Git revision of qtlottie...
-%global commit2 ddccffed3c87ce6763dd73a6453b1edfb1389743
+%global commit2 a3fac9db920b167a5f91d678ee7968f100f6fe51
 %global shortcommit2 %(c=%{commit2}; echo ${c:0:7})
 
 # Decrease debuginfo verbosity to reduce memory consumption...
