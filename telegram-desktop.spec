@@ -22,7 +22,7 @@
 
 Summary: Telegram Desktop official messaging app
 Name: telegram-desktop
-Version: 1.7.3
+Version: 1.7.6
 Release: 1%{?dist}
 
 # Application and 3rd-party modules licensing:
