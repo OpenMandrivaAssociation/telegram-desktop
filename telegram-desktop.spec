@@ -4,15 +4,25 @@
 %global apihash dfbe1bc42dc9d20507e17d1814cc2f0a
 
 # Git revision of crl...
-%global commit1 84072fba75f14620935e5e91788ce603daeb1988
+%global commit1 d259aebc11df52cb6ff8c738580dc4d8f245d681
 %global shortcommit1 %(c=%{commit1}; echo ${c:0:7})
+
+# Git revision of qtlottie...
+%global commit2 ddccffed3c87ce6763dd73a6453b1edfb1389743
+%global shortcommit2 %(c=%{commit2}; echo ${c:0:7})
 
 # Decrease debuginfo verbosity to reduce memory consumption...
 %global optflags %(echo %{optflags} | sed 's/-g /-g1 /')
 
+%bcond_without clang
+# Applying workaround to RHBZ#1559007...
+%if %{with clang}
+%global optflags %(echo %{optflags} | sed -e 's/-mcet//g' -e 's/-fcf-protection//g' -e 's/-fstack-clash-protection//g' -e 's/$/-Qunused-arguments -Wno-unknown-warning-option/')
+%endif
+
 Summary: Telegram Desktop official messaging app
 Name: telegram-desktop
-Version: 1.6.7
+Version: 1.7.3
 Release: 1%{?dist}
 
 # Application and 3rd-party modules licensing:
@@ -25,9 +35,12 @@ URL: https://github.com/telegramdesktop/%{appname}
 # Warning! Builds on i686 may fail due to technical limitations of this
 # architecture: https://github.com/telegramdesktop/tdesktop/issues/4101
 ExclusiveArch: i686 x86_64 znver1
-
+# Source files...
 Source0: %{url}/archive/v%{version}.tar.gz#/%{appname}-%{version}.tar.gz
-Source1: https://github.com/telegramdesktop/crl/archive/%{commit1}.tar.gz#/crl-%{shortcommit1}.tar.gz
+Source1: %{upstreambase}/crl/archive/%{commit1}.tar.gz#/crl-%{shortcommit1}.tar.gz
+Source2: %{upstreambase}/qtlottie/archive/%{commit2}.tar.gz#/qtlottie-%{shortcommit2}.tar.gz
+
+# Downstream patches...
 Patch0: %{name}-build-fixes.patch
 Patch1: %{name}-system-fonts.patch
 Patch2: %{name}-unbundle-minizip.patch
@@ -87,6 +100,13 @@ pushd Telegram/ThirdParty
     mv crl-%{commit1} crl
 popd
 
+# Unpacking qtlottie...
+pushd Telegram/ThirdParty
+    rm -rf qtlottie
+    tar -xf %{SOURCE2}
+    mv qtlottie-%{commit2} qtlottie
+popd
+
 %build
 # Setting build definitions...
 TDESKTOP_BUILD_DEFINES+='TDESKTOP_DISABLE_OPENAL_EFFECTS,'
@@ -94,8 +114,6 @@ TDESKTOP_BUILD_DEFINES+='TDESKTOP_DISABLE_AUTOUPDATE,'
 TDESKTOP_BUILD_DEFINES+='TDESKTOP_DISABLE_REGISTER_CUSTOM_SCHEME,'
 TDESKTOP_BUILD_DEFINES+='TDESKTOP_DISABLE_DESKTOP_FILE_GENERATION,'
 TDESKTOP_BUILD_DEFINES+='TDESKTOP_DISABLE_CRASH_REPORTS,'
-export CC=gcc
-export CXX=g++
 
 # Generating cmake script using GYP...
 pushd Telegram/gyp
@@ -106,16 +124,21 @@ popd
 LEN=$(($(wc -l < out/Release/CMakeLists.txt) - 2))
 sed -i "$LEN r Telegram/gyp/CMakeLists.inj" out/Release/CMakeLists.txt
 
-# Exporting correct paths to AR and RANLIB in order to use FLTO optimizations...
-%ifarch x86_64
-sed -e '/set(configuration "Release")/a\' -e 'set(CMAKE_AR "%{_bindir}/gcc-ar")\' -e 'set(CMAKE_RANLIB "%{_bindir}/gcc-ranlib")\' -e 'set(CMAKE_NM "%{_bindir}/gcc-nm")' -i out/Release/CMakeLists.txt
-%endif
-
 # Building Telegram Desktop using cmake...
 pushd out/Release
-    %cmake
+    %cmake \
+%if %{with clang}
+    -DCMAKE_C_COMPILER=clang \
+    -DCMAKE_CXX_COMPILER=clang++ \
+    -DCMAKE_AR=%{_bindir}/llvm-ar \
+    -DCMAKE_RANLIB=%{_bindir}/llvm-ranlib \
+    -DCMAKE_LINKER=%{_bindir}/llvm-ld \
+    -DCMAKE_OBJDUMP=%{_bindir}/llvm-objdump \
+    -DCMAKE_NM=%{_bindir}/llvm-nm
+%endif
     %make_build
 popd
+
 
 %install
 # Installing executables...
