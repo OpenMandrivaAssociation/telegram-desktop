@@ -74,6 +74,7 @@ BuildRequires: pkgconfig(Qt5Gui)
 BuildRequires: pkgconfig(json11)
 BuildRequires: pkgconfig(liblz4)
 BuildRequires: cmake(RapidJSON)
+BuildRequires: cmake(Qt5Network)
 BuildRequires: python2-pkg-resources
 BuildRequires: rlottie-devel
 
