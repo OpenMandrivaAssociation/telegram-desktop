@@ -24,7 +24,7 @@
 
 Summary: Telegram Desktop official messaging app
 Name: telegram-desktop
-Version: 1.7.15
+Version: 1.7.14
 Release: 1%{?dist}
 
 # Application and 3rd-party modules licensing:
@@ -45,6 +45,7 @@ Patch0: %{name}-build-fixes.patch
 Patch1: %{name}-system-fonts.patch
 Patch2: %{name}-unbundle-minizip.patch
 Patch3:	tdesktop_lottie_animation_qtdebug.patch
+Patch4: tdesktop-ffmpeg-fix-convertFromARGB32PM.patch
 
 %{?_qt5:Requires: %{_qt5} = %{_qt5_version}}
 Requires: qt5-qtimageformats
