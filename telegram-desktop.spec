@@ -21,6 +21,7 @@
 %if %{with clang}
 %global optflags %(echo %{optflags} | sed -e 's/-mcet//g' -e 's/-fcf-protection//g' -e 's/-fstack-clash-protection//g' -e 's/$/ -Qunused-arguments -Wno-unknown-warning-option/')
 %endif
+%global _metainfodir %{_datadir}/metainfo
 
 Summary: Telegram Desktop official messaging app
 Name: telegram-desktop
@@ -161,10 +162,9 @@ popd
 %install
 # Installing executables...
 %{__mkdir_p} "%{buildroot}%{_bindir}"
-%{__install} -m 0755 -p out/Release/Telegram "%{buildroot}%{_bindir}/%{name}"
+%{__install} -m 0755 -p out/Release/build/Telegram "%{buildroot}%{_bindir}/%{name}"
 
 # Installing desktop shortcut...
-%{__mv} lib/xdg/telegramdesktop.desktop lib/xdg/%{name}.desktop
 desktop-file-install --dir="%{buildroot}%{_datadir}/applications" lib/xdg/%{name}.desktop
 
 # Installing icons...
