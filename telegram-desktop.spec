@@ -26,7 +26,7 @@
 Summary: Telegram Desktop official messaging app
 Name: telegram-desktop
 Version: 1.7.14
-Release: 1%{?dist}
+Release: 2%{?dist}
 
 # Application and 3rd-party modules licensing:
 # * S0 (Telegram Desktop) - GPLv3+ with OpenSSL exception -- main source;
@@ -51,7 +51,7 @@ Patch4: tdesktop-ffmpeg-fix-convertFromARGB32PM.patch
 %{?_qt5:Requires: %{_qt5} = %{_qt5_version}}
 Requires: qt5-qtimageformats
 Requires: hicolor-icon-theme
-#Requires: open-sans-fonts
+Requires: open-sans-fonts
 
 # Compilers and tools...
 BuildRequires: desktop-file-utils
