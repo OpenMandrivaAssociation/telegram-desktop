@@ -14,6 +14,10 @@
 %global commit1 9ea870038a2a667add7f621be6252db909068386
 %global shortcommit1 %(c=%{commit1}; echo ${c:0:7})
 
+# Git revision of patched rlottie...
+%global commit2 589db026ec211bc4979e3bffe074f6e48ce7cedc
+%global shortcommit2 %(c=%{commit2}; echo ${c:0:7})
+
 # Decrease debuginfo verbosity to reduce memory consumption...
 %global optflags %(echo %{optflags} | sed 's/-g /-g1 /')
 
@@ -25,8 +29,8 @@
 
 Summary: Telegram Desktop official messaging app
 Name: telegram-desktop
-Version: 1.7.14
-Release: 2%{?dist}
+Version: 1.8.8
+Release: 1%{?dist}
 
 # Application and 3rd-party modules licensing:
 # * S0 (Telegram Desktop) - GPLv3+ with OpenSSL exception -- main source;
@@ -40,13 +44,15 @@ ExclusiveArch: %{ix86} %{x86_64}
 # Source files...
 Source0: %{url}/archive/v%{version}.tar.gz#/%{appname}-%{version}.tar.gz
 Source1: %{upstreambase}/crl/archive/%{commit1}.tar.gz#/crl-%{shortcommit1}.tar.gz
+Source2: https://github.com/john-preston/rlottie/archive/%{commit2}.tar.gz#/rlottie-%{shortcommit2}.tar.gz
 
 # Downstream patches...
 Patch0: %{name}-build-fixes.patch
 Patch1: %{name}-system-fonts.patch
 Patch2: %{name}-unbundle-minizip.patch
 Patch3:	tdesktop_lottie_animation_qtdebug.patch
-Patch4: tdesktop-ffmpeg-fix-convertFromARGB32PM.patch
+Patch4: Ignore-emoji-pack.patch
+Patch5:	make_span.patch
 
 %{?_qt5:Requires: %{_qt5} = %{_qt5_version}}
 Requires: qt5-qtimageformats
@@ -79,7 +85,6 @@ BuildRequires: cmake(RapidJSON)
 BuildRequires: cmake(Qt5Network)
 BuildRequires: cmake(Qt5Core)
 BuildRequires: python2-pkg-resources
-BuildRequires: rlottie-devel
 
 %if %{with gtk3}
 BuildRequires: pkgconfig(appindicator3-0.1)
@@ -117,6 +122,13 @@ pushd Telegram/ThirdParty
     rm -rf crl
     tar -xf %{SOURCE1}
     mv crl-%{commit1} crl
+popd
+
+# Unpacking patched rlottie...
+pushd Telegram/ThirdParty
+    rm -rf rlottie
+    tar -xf %{SOURCE2}
+    mv rlottie-%{commit2} rlottie
 popd
 
 %build
