@@ -29,8 +29,8 @@
 
 Summary: Telegram Desktop official messaging app
 Name: telegram-desktop
-Version: 1.8.8
-Release: 1%{?dist}
+Version:	1.8.9
+Release:	1
 
 # Application and 3rd-party modules licensing:
 # * S0 (Telegram Desktop) - GPLv3+ with OpenSSL exception -- main source;
