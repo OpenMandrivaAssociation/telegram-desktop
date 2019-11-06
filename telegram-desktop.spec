@@ -11,7 +11,7 @@
 %global upstreambase https://github.com/telegramdesktop
 
 # Git revision of crl...
-%global commit1 9ea870038a2a667add7f621be6252db909068386
+%global commit1 52baf11aaeb7f5ea6955a438abaa1aee4c4308d8
 %global shortcommit1 %(c=%{commit1}; echo ${c:0:7})
 
 # Git revision of patched rlottie...
@@ -29,7 +29,7 @@
 
 Summary: Telegram Desktop official messaging app
 Name: telegram-desktop
-Version:	1.8.9
+Version:	1.8.15
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -51,8 +51,6 @@ Patch0: %{name}-build-fixes.patch
 Patch1: %{name}-system-fonts.patch
 Patch2: %{name}-unbundle-minizip.patch
 Patch3:	tdesktop_lottie_animation_qtdebug.patch
-Patch4: Ignore-emoji-pack.patch
-Patch5:	make_span.patch
 
 %{?_qt5:Requires: %{_qt5} = %{_qt5_version}}
 Requires: qt5-qtimageformats

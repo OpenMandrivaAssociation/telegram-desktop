@@ -1,4 +1,5 @@
 sources:
+  crl-52baf11.tar.gz: 3624cf942be48dce0f905ee4d82a2110466c8891
   crl-9ea8700.tar.gz: 31ee89f8f172fb21bbb2f2abc16e89718ad5b9d4
   rlottie-589db02.tar.gz: c994f8433719ebb49fc3acf1767f0d085540ab1c
-  tdesktop-1.8.9.tar.gz: 8659193b757db9a221ea21f773529391254718b3
+  tdesktop-1.8.15.tar.gz: 19cc6c817b498541ba75c8cc3db98315491184c0
