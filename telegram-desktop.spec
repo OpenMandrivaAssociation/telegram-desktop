@@ -132,6 +132,7 @@ BuildRequires: range-v3-devel
 BuildRequires: openssl-devel
 BuildRequires: minizip-devel
 BuildRequires: xxhash-devel
+BuildRequires: appstream-util
 BuildRequires: pkgconfig(opus)
 BuildRequires: pkgconfig(liblzma)
 BuildRequires: pkgconfig(Qt5Gui)
