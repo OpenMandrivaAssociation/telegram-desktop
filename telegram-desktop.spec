@@ -117,6 +117,9 @@ BuildRequires: gyp
 BuildRequires: guidelines-support-library-devel
 BuildRequires: mapbox-variant-devel
 BuildRequires: ffmpeg-devel
+BuildRequires: expected-devel
+BuildRequires: libqrcodegen-devel
+BuildRequires: libqrcodegen-c++-devel
 BuildRequires: openal-soft-devel
 BuildRequires: qt5-qtbase-devel
 BuildRequires: tgvoip-devel
@@ -294,8 +297,9 @@ popd
     -DTDESKTOP_DISABLE_REGISTER_CUSTOM_SCHEME:BOOL=ON \
     -DTDESKTOP_DISABLE_DESKTOP_FILE_GENERATION:BOOL=ON \
     -DTDESKTOP_LAUNCHER_FILENAME=%{launcher}.desktop \
+    -DINCLUDE_INSTALL_DIR=%{_includedir}
 
-%ninja_build -C build
+%ninja_build
 
 %install
 # Installing executables...
