@@ -122,8 +122,8 @@ BuildRequires: guidelines-support-library-devel
 BuildRequires: mapbox-variant-devel
 BuildRequires: ffmpeg-devel
 BuildRequires: expected-devel
-BuildRequires: libqrcodegen-devel
-BuildRequires: libqrcodegen-c++-devel
+BuildRequires: qr-code-generator-devel
+BuildRequires: qr-code-generator-c++-devel
 BuildRequires: openal-soft-devel
 BuildRequires: qt5-qtbase-devel
 BuildRequires: tgvoip-devel
