@@ -1,0 +1,11 @@
+diff -up tdesktop-1.9.4/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp.omv~ tdesktop-1.9.4/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp
+--- tdesktop-1.9.4/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp.omv~	2020-01-21 04:58:01.896354063 +0100
++++ tdesktop-1.9.4/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp	2020-01-21 04:58:13.939353478 +0100
+@@ -12,6 +12,7 @@ https://github.com/telegramdesktop/tdesk
+ #include "facades.h"
+ 
+ #include <QtCore/QBuffer>
++#include <QtCore/QVersionNumber>
+ #include <QtDBus/QDBusConnection>
+ #include <QtDBus/QDBusReply>
+ #include <QtDBus/QDBusMetaType>

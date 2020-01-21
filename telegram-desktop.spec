@@ -99,6 +99,10 @@ Patch11: cmake_helpers-system-gsl.patch
 Patch12: cmake_helpers-system-qrcode.patch
 Patch13: cmake_helpers-system-variant.patch
 
+# Patches that likely won't be required in the next version...
+# Fix build with Qt 5.14
+Patch20: tdesktop-1.9.4-fix-missing-include.patch
+
 %{?_qt5:Requires: %{_qt5} = %{_qt5_version}}
 Requires: qt5-qtimageformats
 Requires: hicolor-icon-theme
@@ -262,6 +266,8 @@ popd
 %patch11 -d cmake -p1 -b .system-gsl
 %patch12 -d cmake -p1 -b .system-qrcode
 %patch13 -d cmake -p1 -b .system-variant
+
+%patch20 -p1 -b .compile~
 
 %build
 # Building Telegram Desktop using cmake...
