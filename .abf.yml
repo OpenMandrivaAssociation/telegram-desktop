@@ -1,17 +1,2 @@
 sources:
-  cmake_helpers-458fec9.tar.gz: 392e7c37bed445d04b62c63ab4cf034940b9da5a
-  codegen-d14ae77.tar.gz: 2f48004cd37f8ea82ff942218a807767e7438ce9
-  crl-52baf11.tar.gz: 3624cf942be48dce0f905ee4d82a2110466c8891
-  crl-9ea8700.tar.gz: 31ee89f8f172fb21bbb2f2abc16e89718ad5b9d4
-  lib_base-8ba8607.tar.gz: abef4e70931e55549b1fb6454f6e83c72b35b35f
-  lib_crl-5a740bf.tar.gz: e842df8670e5126c6fb6ba85ff6b0598b0792fa6
-  lib_lottie-a0a0269.tar.gz: 9faa24d577606478625b2e7c746bf89e5c2e9647
-  lib_qr-9877397.tar.gz: 6846537be4b3263e23c179229fc05f0588bca209
-  lib_rpl-2888aab.tar.gz: e37b9d76fedbb6603c95a7d77d4d134d44838f72
-  lib_spellcheck-4784796.tar.gz: e795501a27aeb7e9a719aaace847060bef249855
-  lib_storage-b0388a1.tar.gz: 11a1f2ff84a289d2057cc70a89ba2f9391bb8b0f
-  lib_storage-cb56ad4.tar.gz: 090a70dba9cf3f3ee37ab27e5dbe681122014099
-  lib_ui-c0b0745.tar.gz: 78ef9fdd80870b6c672e676b4908e6aedbb8920a
-  rlottie-589db02.tar.gz: c994f8433719ebb49fc3acf1767f0d085540ab1c
-  rlottie-c490c7a.tar.gz: 7acef817f8550788836dc7e05fb3190341437d44
-  tdesktop-1.9.4.tar.gz: 8a9760d5941c08117e7b9108a821dd99f535f424
+  tdesktop-1.9.16-full.tar.gz: 7c5f6ee5f744b7121c697c712097bd75b4f9c1c8
