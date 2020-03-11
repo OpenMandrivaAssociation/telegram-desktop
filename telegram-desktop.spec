@@ -27,7 +27,7 @@
 %endif
 
 Name: telegram-desktop
-Version: 1.9.16
+Version: 1.9.19
 Release: 1%{?dist}
 
 # Application and 3rd-party modules licensing:
@@ -85,6 +85,7 @@ BuildRequires: pkgconfig(liblzma)
 BuildRequires: pkgconfig(Qt5Gui)
 BuildRequires: pkgconfig(json11)
 BuildRequires: pkgconfig(liblz4)
+BuildRequires: pkgconfig(hunspell)
 BuildRequires: cmake(RapidJSON)
 BuildRequires: cmake(Qt5Network)
 BuildRequires: cmake(Qt5Core)
