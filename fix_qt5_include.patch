@@ -1,0 +1,12 @@
+diff --git a/Telegram/lib_ui/ui/effects/animation_value.h b/Telegram/lib_ui/ui/effects/animation_value.h
+index 46d76e4..cab1fa9 100644
+--- a/Telegram/lib_ui/ui/effects/animation_value.h
++++ b/Telegram/lib_ui/ui/effects/animation_value.h
+@@ -9,6 +9,7 @@
+ #include "base/basic_types.h"
+ 
+ #include "ui/style/style_core.h"
++#include <QPainterPath>
+ 
+ namespace anim {
+ 

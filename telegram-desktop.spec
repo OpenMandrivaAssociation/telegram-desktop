@@ -27,7 +27,7 @@
 %endif
 
 Name: telegram-desktop
-Version: 1.9.21
+Version: 1.9.22
 Release: 1%{?dist}
 
 # Application and 3rd-party modules licensing:
@@ -37,10 +37,11 @@ Release: 1%{?dist}
 License: GPLv3+ and LGPLv2+ and LGPLv3
 URL: https://github.com/telegramdesktop/%{appname}
 Summary: Telegram Desktop official messaging app
-ExclusiveArch: x86_64
+ExclusiveArch: %{x86_64}
 
 # Source files...
 Source0: %{url}/releases/download/v%{version}/%{appname}-%{version}%{tarsuffix}.tar.gz
+Patch0:	fix_qt5_include.patch
 
 # Telegram Desktop require exact version of Qt due to Qt private API usage.
 %{?_qt5:Requires: %{_qt5}%{?_isa} = %{_qt5_version}}
@@ -168,6 +169,8 @@ desktop-file-edit --set-key=Exec --set-value="%{_bindir}/%{name} -- %u" --copy-n
     -DCMAKE_AR=%{_bindir}/gcc-ar \
     -DCMAKE_RANLIB=%{_bindir}/gcc-ranlib \
     -DCMAKE_NM=%{_bindir}/gcc-nm \
+    -DCMAKE_C_COMPILER=gcc \
+    -DCMAKE_CXX_COMPILER=g++ \
 %endif
     -DTDESKTOP_API_ID=%{apiid} \
     -DTDESKTOP_API_HASH=%{apihash} \
