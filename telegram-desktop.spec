@@ -190,7 +190,7 @@ desktop-file-edit --set-key=Exec --set-value="%{_bindir}/%{name} -- %u" --copy-n
 %ninja_build
 
 %install
-%ninja_install
+%ninja_install -C build
 
 %check
 appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/%{launcher}.appdata.xml
