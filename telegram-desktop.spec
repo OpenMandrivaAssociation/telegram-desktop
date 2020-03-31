@@ -1,7 +1,7 @@
 # Build conditionals (with - OFF, without - ON)...
 %bcond_without rlottie
 %bcond_with gtk3
-%bcond_with clang
+%bcond_without clang
 %bcond_without spellcheck
 %bcond_without fonts
 %bcond_without ipo
@@ -28,7 +28,7 @@
 
 Name: telegram-desktop
 Version: 1.9.22
-Release: 1%{?dist}
+Release: 1
 
 # Application and 3rd-party modules licensing:
 # * Telegram Desktop - GPLv3+ with OpenSSL exception -- main tarball;
@@ -42,6 +42,7 @@ ExclusiveArch: %{x86_64}
 # Source files...
 Source0: %{url}/releases/download/v%{version}/%{appname}-%{version}%{tarsuffix}.tar.gz
 Patch0:	fix_qt5_include.patch
+Patch1: telegram-1.9.22-compile.patch
 
 # Telegram Desktop require exact version of Qt due to Qt private API usage.
 %{?_qt5:Requires: %{_qt5}%{?_isa} = %{_qt5_version}}
