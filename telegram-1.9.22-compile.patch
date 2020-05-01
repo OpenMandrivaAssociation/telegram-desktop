@@ -1,28 +1,8 @@
-diff -up tdesktop-1.9.22-full/Telegram/lib_base/base/thread_safe_wrap.h.omv~ tdesktop-1.9.22-full/Telegram/lib_base/base/thread_safe_wrap.h
---- tdesktop-1.9.22-full/Telegram/lib_base/base/thread_safe_wrap.h.omv~	2020-03-31 02:20:10.672196685 +0200
-+++ tdesktop-1.9.22-full/Telegram/lib_base/base/thread_safe_wrap.h	2020-03-31 02:23:13.367727858 +0200
-@@ -7,6 +7,8 @@
- #pragma once
- 
- #include <utility>
-+#include <QMutex>
-+#include <QMutexLocker>
- 
- namespace base {
- 
-@@ -31,7 +33,7 @@ public:
- 
- private:
- 	T _value;
--	QMutex _mutex;
-+	mutable QMutex _mutex;
- 
- };
- 
-diff -up tdesktop-1.9.22-full/Telegram/SourceFiles/calls/calls_call.cpp.omv~ tdesktop-1.9.22-full/Telegram/SourceFiles/calls/calls_call.cpp
---- tdesktop-1.9.22-full/Telegram/SourceFiles/calls/calls_call.cpp.omv~	2020-03-31 02:19:45.738122726 +0200
-+++ tdesktop-1.9.22-full/Telegram/SourceFiles/calls/calls_call.cpp	2020-03-31 02:19:52.045141471 +0200
-@@ -583,7 +583,7 @@ void Call::createAndStartController(cons
+diff --git a/Telegram/SourceFiles/calls/calls_call.cpp b/Telegram/SourceFiles/calls/calls_call.cpp
+index 732c516..d272bf3 100644
+--- a/Telegram/SourceFiles/calls/calls_call.cpp
++++ b/Telegram/SourceFiles/calls/calls_call.cpp
+@@ -583,7 +583,7 @@ void Call::createAndStartController(const MTPDphoneCall &call) {
  #else // Q_OS_WIN
  		const auto callLogUtf = QFile::encodeName(callLogNative);
  		config.logFilePath.resize(callLogUtf.size());
@@ -31,10 +11,11 @@ diff -up tdesktop-1.9.22-full/Telegram/SourceFiles/calls/calls_call.cpp.omv~ tde
  #endif // Q_OS_WIN
  		QFile(callLogPath).remove();
  		QDir().mkpath(callLogFolder);
-diff -up tdesktop-1.9.22-full/Telegram/SourceFiles/settings/settings_calls.cpp.omv~ tdesktop-1.9.22-full/Telegram/SourceFiles/settings/settings_calls.cpp
---- tdesktop-1.9.22-full/Telegram/SourceFiles/settings/settings_calls.cpp.omv~	2020-03-31 02:24:18.196912538 +0200
-+++ tdesktop-1.9.22-full/Telegram/SourceFiles/settings/settings_calls.cpp	2020-03-31 02:24:39.026971524 +0200
-@@ -76,7 +76,7 @@ void Calls::setupContent(not_null<Window
+diff --git a/Telegram/SourceFiles/settings/settings_calls.cpp b/Telegram/SourceFiles/settings/settings_calls.cpp
+index 56acbb9..c13a6e2 100644
+--- a/Telegram/SourceFiles/settings/settings_calls.cpp
++++ b/Telegram/SourceFiles/settings/settings_calls.cpp
+@@ -76,7 +76,7 @@ void Calls::setupContent(not_null<Window::SessionController*> controller) {
  			return tr::lng_settings_call_device_default(tr::now);
  		}
  		const auto &list = VoIP::EnumerateAudioOutputs();
@@ -43,7 +24,7 @@ diff -up tdesktop-1.9.22-full/Telegram/SourceFiles/settings/settings_calls.cpp.o
  			list,
  			Global::CallOutputDeviceID(),
  			getId);
-@@ -90,7 +90,7 @@ void Calls::setupContent(not_null<Window
+@@ -90,7 +90,7 @@ void Calls::setupContent(not_null<Window::SessionController*> controller) {
  			return tr::lng_settings_call_device_default(tr::now);
  		}
  		const auto &list = VoIP::EnumerateAudioInputs();
@@ -52,7 +33,7 @@ diff -up tdesktop-1.9.22-full/Telegram/SourceFiles/settings/settings_calls.cpp.o
  			list,
  			Global::CallInputDeviceID(),
  			getId);
-@@ -112,11 +112,11 @@ void Calls::setupContent(not_null<Window
+@@ -112,11 +112,11 @@ void Calls::setupContent(not_null<Window::SessionController*> controller) {
  		st::settingsButton
  	)->addClickHandler([=] {
  		const auto &devices = VoIP::EnumerateAudioOutputs();
@@ -69,7 +50,7 @@ diff -up tdesktop-1.9.22-full/Telegram/SourceFiles/settings/settings_calls.cpp.o
  			devices,
  			Global::CallOutputDeviceID(),
  			getId);
-@@ -187,11 +187,11 @@ void Calls::setupContent(not_null<Window
+@@ -187,11 +187,11 @@ void Calls::setupContent(not_null<Window::SessionController*> controller) {
  		st::settingsButton
  	)->addClickHandler([=] {
  		const auto &devices = VoIP::EnumerateAudioInputs();
@@ -86,3 +67,16 @@ diff -up tdesktop-1.9.22-full/Telegram/SourceFiles/settings/settings_calls.cpp.o
  			devices,
  			Global::CallInputDeviceID(),
  			getId);
+diff --git a/Telegram/lib_base/base/thread_safe_wrap.h b/Telegram/lib_base/base/thread_safe_wrap.h
+index d5f4e4a..d7f14bd 100644
+--- a/Telegram/lib_base/base/thread_safe_wrap.h
++++ b/Telegram/lib_base/base/thread_safe_wrap.h
+@@ -7,6 +7,8 @@
+ #pragma once
+ 
+ #include <utility>
++#include <QMutex>
++#include <QMutexLocker>
+ 
+ namespace base {
+ 

@@ -6,6 +6,7 @@
 %bcond_without fonts
 %bcond_without ipo
 %bcond_without mindbg
+%bcond_without gsl
 
 # Telegram Desktop's constants...
 %global appname tdesktop
@@ -27,7 +28,7 @@
 %endif
 
 Name: telegram-desktop
-Version: 2.0.1
+Version: 2.1.1
 Release: 1
 
 # Application and 3rd-party modules licensing:
