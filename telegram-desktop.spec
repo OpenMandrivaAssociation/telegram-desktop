@@ -28,7 +28,7 @@
 %endif
 
 Name: telegram-desktop
-Version: 2.1.1
+Version: 2.1.2
 Release: 1
 
 # Application and 3rd-party modules licensing:
@@ -64,23 +64,23 @@ Provides: bundled(lxqt-qtplugin) = 0.14.0~git
 # Compilers and tools...
 BuildRequires: desktop-file-utils
 BuildRequires: cmake
-BuildRequires: gyp
 
 # Development packages for Telegram Desktop...
-BuildRequires: guidelines-support-library-devel
+BuildRequires: cmake(Microsoft.GSL)
 BuildRequires: mapbox-variant-devel
-BuildRequires: ffmpeg-devel
-BuildRequires: expected-devel
+BuildRequires: pkgconfig(libavcodec)
+BuildRequires: pkgconfig(libavformat)
+BuildRequires: cmake(tl-expected)
 BuildRequires: qr-code-generator-devel
 BuildRequires: qr-code-generator-c++-devel
-BuildRequires: openal-soft-devel
+BuildRequires: cmake(OpenAL)
 BuildRequires: qt5-qtbase-devel
-BuildRequires: tgvoip-devel
+BuildRequires: pkgconfig(tgvoip)
 BuildRequires: libstdc++-devel
 BuildRequires: range-v3-devel
-BuildRequires: openssl-devel
-BuildRequires: minizip-devel
-BuildRequires: xxhash-devel
+BuildRequires: pkgconfig(openssl)
+BuildRequires: pkgconfig(minizip)
+BuildRequires: pkgconfig(libxxhash)
 BuildRequires: appstream-util
 BuildRequires: pkgconfig(opus)
 BuildRequires: pkgconfig(liblzma)
@@ -137,7 +137,6 @@ rm -rf Telegram/ThirdParty/{Catch,GSL,QR,SPMediaKeyTap,expected,libdbusmenu-qt,l
 # Patching default desktop file...
 desktop-file-edit --set-key=Exec --set-value="%{_bindir}/%{name} -- %u" --copy-name-to-generic-name lib/xdg/telegramdesktop.desktop
 
-%build
 %cmake -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
 %if %{without gtk3}
@@ -187,8 +186,8 @@ desktop-file-edit --set-key=Exec --set-value="%{_bindir}/%{name} -- %u" --copy-n
     -DTDESKTOP_DISABLE_DESKTOP_FILE_GENERATION:BOOL=ON \
     -DTDESKTOP_LAUNCHER_BASENAME=%{launcher}
 
-
-%ninja_build
+%build
+%ninja_build -C build
 
 %install
 %ninja_install -C build
