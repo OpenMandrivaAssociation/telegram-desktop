@@ -73,7 +73,7 @@ BuildRequires: pkgconfig(libavformat)
 BuildRequires: cmake(tl-expected)
 BuildRequires: qr-code-generator-devel
 BuildRequires: qr-code-generator-c++-devel
-BuildRequires: cmake(OpenAL)
+BuildRequires: pkgconfig(openal)
 BuildRequires: qt5-qtbase-devel
 BuildRequires: pkgconfig(tgvoip)
 BuildRequires: libstdc++-devel
