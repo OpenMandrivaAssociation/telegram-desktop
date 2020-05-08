@@ -28,8 +28,8 @@
 %endif
 
 Name: telegram-desktop
-Version: 2.1.2
-Release: 1
+Version:	2.1.3
+Release:	1
 
 # Application and 3rd-party modules licensing:
 # * Telegram Desktop - GPLv3+ with OpenSSL exception -- main tarball;
