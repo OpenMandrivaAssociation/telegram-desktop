@@ -1,0 +1,12 @@
+diff -up tdesktop-2.1.7-full/Telegram/SourceFiles/core/utils.cpp.omv~ tdesktop-2.1.7-full/Telegram/SourceFiles/core/utils.cpp
+--- tdesktop-2.1.7-full/Telegram/SourceFiles/core/utils.cpp.omv~	2020-06-05 01:26:30.336759285 +0200
++++ tdesktop-2.1.7-full/Telegram/SourceFiles/core/utils.cpp	2020-06-05 01:27:21.148511538 +0200
+@@ -186,7 +186,7 @@ namespace ThirdParty {
+ 		av_lockmgr_register(nullptr);
+ 
+ 		CRYPTO_cleanup_all_ex_data();
+-#ifndef LIBRESSL_VERSION_NUMBER
++#if !defined(LIBRESSL_VERSION_NUMBER) && OPENSSL_VERSION_MAJOR < 3
+ 		FIPS_mode_set(0);
+ #endif
+ 		ENGINE_cleanup();
