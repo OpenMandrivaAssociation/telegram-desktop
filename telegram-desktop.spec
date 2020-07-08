@@ -28,7 +28,7 @@
 %endif
 
 Name: telegram-desktop
-Version:	2.1.7
+Version:	2.1.17
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -41,8 +41,6 @@ Summary: Telegram Desktop official messaging app
 
 # Source files...
 Source0: %{url}/releases/download/v%{version}/%{appname}-%{version}%{tarsuffix}.tar.gz
-Patch0:	fix_qt5_include.patch
-Patch1: telegram-1.9.22-compile.patch
 Patch2:	tdesktop-2.1.7-openssl3.patch
 
 # Telegram Desktop require exact version of Qt due to Qt private API usage.
