@@ -28,7 +28,7 @@
 %endif
 
 Name: telegram-desktop
-Version:	2.1.17
+Version:	2.1.18
 Release:	1
 
 # Application and 3rd-party modules licensing:
