@@ -28,7 +28,7 @@
 %endif
 
 Name: telegram-desktop
-Version:	2.1.18
+Version:	2.1.20
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -91,6 +91,11 @@ BuildRequires: cmake(RapidJSON)
 BuildRequires: cmake(Qt5Network)
 BuildRequires: cmake(Qt5Core)
 BuildRequires: cmake(dbusmenu-qt5)
+BuildRequires: cmake(Qt5WaylandClient)
+BuildRequires: cmake(Qt5XkbCommonSupport)
+BuildRequires: qt5-qtwayland-private-devel
+BuildRequires: wayland-devel
+BuildRequires: qt5-qtwayland
 BuildRequires: ninja
 
 %if %{with gtk3}
