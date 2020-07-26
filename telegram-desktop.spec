@@ -28,7 +28,7 @@
 %endif
 
 Name: telegram-desktop
-Version:	2.1.20
+Version:	2.2.0
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -69,6 +69,7 @@ BuildRequires: cmake(Microsoft.GSL)
 BuildRequires: mapbox-variant-devel
 BuildRequires: pkgconfig(libavcodec)
 BuildRequires: pkgconfig(libavformat)
+BuildRequires: pkgconfig(xkbcommon)
 BuildRequires: cmake(tl-expected)
 BuildRequires: qr-code-generator-devel
 BuildRequires: qr-code-generator-c++-devel
@@ -77,6 +78,7 @@ BuildRequires: qt5-qtbase-devel
 BuildRequires: pkgconfig(tgvoip)
 BuildRequires: libstdc++-devel
 BuildRequires: range-v3-devel
+BuildRequires: atomic-devel
 BuildRequires: pkgconfig(openssl)
 BuildRequires: pkgconfig(minizip)
 BuildRequires: pkgconfig(libxxhash)
