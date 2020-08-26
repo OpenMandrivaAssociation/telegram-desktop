@@ -28,7 +28,7 @@
 %endif
 
 Name: telegram-desktop
-Version:	2.3.0
+Version:	2.3.2
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -41,7 +41,11 @@ Summary: Telegram Desktop official messaging app
 
 # Source files...
 Source0: %{url}/releases/download/v%{version}/%{appname}-%{version}%{tarsuffix}.tar.gz
+# Missing bits and pieces for some features
+Source1: https://github.com/desktop-app/tg_owt/archive/master/tg_owt.tar.gz
+Patch1: tg_owt-20200826-compile.patch
 Patch2:	tdesktop-2.1.7-openssl3.patch
+Patch3: tdesktop-2.3.2-no-underlinking.patch
 
 # Telegram Desktop require exact version of Qt due to Qt private API usage.
 %{?_qt5:Requires: %{_qt5}%{?_isa} = %{_qt5_version}}
@@ -51,7 +55,7 @@ Requires: hicolor-icon-theme
 # Telegram Desktop require patched version of rlottie since 1.8.0.
 # Pull Request pending: https://github.com/Samsung/rlottie/pull/252
 %if %{with rlottie}
-BuildRequires: rlottie-devel
+BuildRequires: rlottie-devel >= 0-7.20200825gitff8ddfc
 %else
 Provides: bundled(rlottie) = 0~git
 %endif
@@ -136,9 +140,22 @@ business messaging needs.
 
 %prep
 # Unpacking Telegram Desktop source archive...
-%autosetup -n %{appname}-%{version}%{tarsuffix} -p1
+%autosetup -p1 -n %{appname}-%{version}%{tarsuffix} -a 1
 # Unbundling libraries...
 rm -rf Telegram/ThirdParty/{Catch,GSL,QR,SPMediaKeyTap,expected,libdbusmenu-qt,libtgvoip,lz4,minizip,variant,xxHash}
+
+TOP="$(pwd)"
+
+# Build dependencies
+rm -rf ../Libraries
+mkdir ../Libraries
+mv tg_owt-master ../Libraries/tg_owt
+cd ../Libraries/tg_owt
+mkdir -p out/Release
+cd out/Release
+cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ../..
+%ninja_build
+cd "$TOP"
 
 # Patching default desktop file...
 desktop-file-edit --set-key=Exec --set-value="%{_bindir}/%{name} -- %u" --copy-name-to-generic-name lib/xdg/telegramdesktop.desktop
@@ -187,8 +204,7 @@ desktop-file-edit --set-key=Exec --set-value="%{_bindir}/%{name} -- %u" --copy-n
     -DDESKTOP_APP_USE_PACKAGED_QRCODE:BOOL=ON \
     -DDESKTOP_APP_USE_GLIBC_WRAPS:BOOL=OFF \
     -DDESKTOP_APP_DISABLE_CRASH_REPORTS:BOOL=ON \
-    -DDESKTOP_APP_DISABLE_WEBRTC_INTEGRATION:BOOL=ON \
-    -DTDESKTOP_USE_PACKAGED_TGVOIP:BOOL=ON \
+    -DTDESKTOP_USE_PACKAGED_TGVOIP:BOOL=OFF \
     -DTDESKTOP_DISABLE_REGISTER_CUSTOM_SCHEME:BOOL=ON \
     -DTDESKTOP_DISABLE_DESKTOP_FILE_GENERATION:BOOL=ON \
     -DTDESKTOP_LAUNCHER_BASENAME=%{launcher}

@@ -1,0 +1,90 @@
+diff -up td/tg_owt-master/cmake/init_target.cmake.omv~ td/tg_owt-master/cmake/init_target.cmake
+--- td/tg_owt-master/cmake/init_target.cmake.omv~	2020-08-26 00:37:53.006770287 +0200
++++ td/tg_owt-master/cmake/init_target.cmake	2020-08-26 00:37:59.134827696 +0200
+@@ -10,7 +10,7 @@ function(init_target target_name) # init
+     elseif (APPLE)
+         target_compile_features(${target_name} PUBLIC cxx_std_14)
+     else()
+-        target_compile_features(${target_name} PUBLIC cxx_std_20)
++        target_compile_features(${target_name} PUBLIC cxx_std_17)
+     endif()
+     if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+         set_target_properties(${target_name} PROPERTIES
+diff -up td/tg_owt-master/src/call/rtx_receive_stream.h.omv~ td/tg_owt-master/src/call/rtx_receive_stream.h
+--- td/tg_owt-master/src/call/rtx_receive_stream.h.omv~	2020-08-26 00:41:10.046500352 +0200
++++ td/tg_owt-master/src/call/rtx_receive_stream.h	2020-08-26 00:41:15.422544603 +0200
+@@ -12,6 +12,7 @@
+ #define CALL_RTX_RECEIVE_STREAM_H_
+ 
+ #include <map>
++#include <cstdint>
+ 
+ #include "call/rtp_packet_sink_interface.h"
+ 
+diff -up td/tg_owt-master/src/common_video/h264/pps_parser.h.omv~ td/tg_owt-master/src/common_video/h264/pps_parser.h
+--- td/tg_owt-master/src/common_video/h264/pps_parser.h.omv~	2020-08-26 00:41:26.854638254 +0200
++++ td/tg_owt-master/src/common_video/h264/pps_parser.h	2020-08-26 00:41:32.336682948 +0200
+@@ -12,6 +12,7 @@
+ #define COMMON_VIDEO_H264_PPS_PARSER_H_
+ 
+ #include "absl/types/optional.h"
++#include <cstdint>
+ 
+ namespace rtc {
+ class BitBuffer;
+diff -up td/tg_owt-master/src/common_video/h264/prefix_parser.h.omv~ td/tg_owt-master/src/common_video/h264/prefix_parser.h
+--- td/tg_owt-master/src/common_video/h264/prefix_parser.h.omv~	2020-08-26 00:41:57.410885647 +0200
++++ td/tg_owt-master/src/common_video/h264/prefix_parser.h	2020-08-26 00:42:03.314932973 +0200
+@@ -12,6 +12,7 @@
+ #define COMMON_VIDEO_H264_PREFIX_PARSER_H_
+ 
+ #include "absl/types/optional.h"
++#include <cstdint>
+ 
+ namespace rtc {
+ class BitBuffer;
+diff -up td/tg_owt-master/src/common_video/h264/sps_parser.h.omv~ td/tg_owt-master/src/common_video/h264/sps_parser.h
+--- td/tg_owt-master/src/common_video/h264/sps_parser.h.omv~	2020-08-26 00:42:13.095011039 +0200
++++ td/tg_owt-master/src/common_video/h264/sps_parser.h	2020-08-26 00:42:18.759056066 +0200
+@@ -12,6 +12,7 @@
+ #define COMMON_VIDEO_H264_SPS_PARSER_H_
+ 
+ #include "absl/types/optional.h"
++#include <cstdint>
+ 
+ namespace rtc {
+ class BitBuffer;
+diff -up td/tg_owt-master/src/common_video/h265/h265_pps_parser.h.omv~ td/tg_owt-master/src/common_video/h265/h265_pps_parser.h
+--- td/tg_owt-master/src/common_video/h265/h265_pps_parser.h.omv~	2020-08-26 00:42:37.539204412 +0200
++++ td/tg_owt-master/src/common_video/h265/h265_pps_parser.h	2020-08-26 00:42:43.402250432 +0200
+@@ -12,6 +12,7 @@
+ #define COMMON_VIDEO_H265_PPS_PARSER_H_
+ 
+ #include "absl/types/optional.h"
++#include <cstdint>
+ 
+ namespace rtc {
+ class BitBuffer;
+diff -up td/tg_owt-master/src/modules/audio_processing/aec3/clockdrift_detector.h.omv~ td/tg_owt-master/src/modules/audio_processing/aec3/clockdrift_detector.h
+--- td/tg_owt-master/src/modules/audio_processing/aec3/clockdrift_detector.h.omv~	2020-08-26 00:39:15.467521985 +0200
++++ td/tg_owt-master/src/modules/audio_processing/aec3/clockdrift_detector.h	2020-08-26 00:39:18.452548394 +0200
+@@ -31,7 +31,7 @@ class ClockdriftDetector {
+  private:
+   std::array<int, 3> delay_history_;
+   Level level_;
+-  size_t stability_counter_;
++  std::size_t stability_counter_;
+ };
+ }  // namespace webrtc
+ 
+diff -up td/tg_owt-master/src/modules/include/module_common_types_public.h.omv~ td/tg_owt-master/src/modules/include/module_common_types_public.h
+--- td/tg_owt-master/src/modules/include/module_common_types_public.h.omv~	2020-08-26 00:40:43.329278359 +0200
++++ td/tg_owt-master/src/modules/include/module_common_types_public.h	2020-08-26 00:40:51.098343273 +0200
+@@ -12,6 +12,7 @@
+ #define MODULES_INCLUDE_MODULE_COMMON_TYPES_PUBLIC_H_
+ 
+ #include <limits>
++#include <cstdint>
+ 
+ #include "absl/types/optional.h"
+ 
