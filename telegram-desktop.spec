@@ -98,6 +98,7 @@ BuildRequires: pkgconfig(libjpeg)
 BuildRequires: pkgconfig(hunspell)
 BuildRequires: pkgconfig(alsa)
 BuildRequires: pkgconfig(libpulse)
+BuildRequires: pkgconfig(openh264)
 BuildRequires: pkgconfig(vpx)
 BuildRequires: cmake(RapidJSON)
 BuildRequires: cmake(Qt5Network)
@@ -161,7 +162,7 @@ mkdir ../Libraries
 mv tg_owt-master ../Libraries/tg_owt
 cd ../Libraries/tg_owt
 # Let's use system libvpx instead of duplicating the world
-rm -rf src/third_party/libvpx cmake/libvpx.cmake
+rm -rf src/third_party/libvpx cmake/libvpx.cmake src/third_party/openh264 cmake/libopenh264.cmake
 mkdir -p out/Release
 cd out/Release
 cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ../..

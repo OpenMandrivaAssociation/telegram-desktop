@@ -1,7 +1,12 @@
 diff -up Libraries/tg_owt-master/CMakeLists.txt.omv~ Libraries/tg_owt-master/CMakeLists.txt
 --- Libraries/tg_owt-master/CMakeLists.txt.omv~	2020-08-28 05:06:25.873536499 +0200
 +++ Libraries/tg_owt-master/CMakeLists.txt	2020-08-28 05:06:38.719663168 +0200
-@@ -39,7 +39,6 @@ include(cmake/libpffft.cmake)
+@@ -34,12 +34,10 @@ include(cmake/init_target.cmake)
+ include(cmake/target_yasm_sources.cmake)
+ include(cmake/external.cmake)
+ include(cmake/libabsl.cmake)
+-include(cmake/libopenh264.cmake)
+ include(cmake/libpffft.cmake)
  include(cmake/librnnoise.cmake)
  include(cmake/libsrtp.cmake)
  include(cmake/libusrsctp.cmake)
@@ -9,7 +14,13 @@ diff -up Libraries/tg_owt-master/CMakeLists.txt.omv~ Libraries/tg_owt-master/CMa
  include(cmake/libwebrtcbuild.cmake)
  include(cmake/libyuv.cmake)
  if (NOT WIN32 AND NOT APPLE)
-@@ -60,13 +59,7 @@ PUBLIC
+@@ -54,28 +52,16 @@ init_target(tg_owt)
+ target_link_libraries(tg_owt
+ PUBLIC
+     tg_owt::libabsl
+-    tg_owt::libopenh264
++    openh264
+     tg_owt::libpffft
      tg_owt::librnnoise
      tg_owt::libsrtp
      tg_owt::libusrsctp
@@ -24,3 +35,43 @@ diff -up Libraries/tg_owt-master/CMakeLists.txt.omv~ Libraries/tg_owt-master/CMa
      tg_owt::libwebrtcbuild
      tg_owt::libyuv
  )
+ 
+-target_sources(tg_owt
+-PUBLIC
+-    ${libvpx_yasm_objects}
+-    ${libopenh264_yasm_objects}
+-)
+-
+ if (NOT WIN32 AND NOT APPLE)
+     target_link_libraries(tg_owt PUBLIC tg_owt::libevent)
+ endif()
+diff -up Libraries/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.cc.omv~ Libraries/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.cc
+--- Libraries/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.cc.omv~	2020-08-28 13:54:19.154306214 +0200
++++ Libraries/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.cc	2020-08-28 13:54:50.419997183 +0200
+@@ -29,10 +29,10 @@
+ #include "system_wrappers/include/metrics.h"
+ #include "third_party/libyuv/include/libyuv/convert.h"
+ #include "third_party/libyuv/include/libyuv/scale.h"
+-#include "third_party/openh264/src/codec/api/svc/codec_api.h"
+-#include "third_party/openh264/src/codec/api/svc/codec_app_def.h"
+-#include "third_party/openh264/src/codec/api/svc/codec_def.h"
+-#include "third_party/openh264/src/codec/api/svc/codec_ver.h"
++#include <wels/codec_api.h>
++#include <wels/codec_app_def.h>
++#include <wels/codec_def.h>
++#include <wels/codec_ver.h>
+ 
+ namespace webrtc {
+ 
+diff -up Libraries/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.h.omv~ Libraries/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.h
+--- Libraries/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.h.omv~	2020-08-28 13:53:55.012565924 +0200
++++ Libraries/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.h	2020-08-28 13:54:03.026477610 +0200
+@@ -25,7 +25,7 @@
+ #include "common_video/h264/h264_bitstream_parser.h"
+ #include "modules/video_coding/codecs/h264/include/h264.h"
+ #include "modules/video_coding/utility/quality_scaler.h"
+-#include "third_party/openh264/src/codec/api/svc/codec_app_def.h"
++#include <wels/codec_app_def.h>
+ 
+ class ISVCEncoder;
+ 
