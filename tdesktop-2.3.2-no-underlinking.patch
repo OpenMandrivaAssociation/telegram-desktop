@@ -5,7 +5,7 @@ diff -up tdesktop-2.3.2-full/Telegram/CMakeLists.txt.omv~ tdesktop-2.3.2-full/Te
          desktop-app::external_materialdecoration
          desktop-app::external_nimf_qt5
          desktop-app::external_qt5ct_support
-+	-ldl -ljpeg -lvpx
++	-ldl -ljpeg -lvpx -lopenh264
      )
  
      if (NOT DESKTOP_APP_DISABLE_DBUS_INTEGRATION)
