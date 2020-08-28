@@ -104,6 +104,9 @@ BuildRequires: qt5-qtwayland-private-devel
 BuildRequires: wayland-devel
 BuildRequires: qt5-qtwayland
 BuildRequires: ninja
+%ifarch %{x86_64} %{ix86}
+BuildRequires: yasm
+%endif
 
 %if %{with gtk3}
 BuildRequires: pkgconfig(appindicator3-0.1)
