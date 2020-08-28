@@ -18,3 +18,67 @@ diff -up Libraries/tg_owt-master/cmake/init_target.cmake.omv~ Libraries/tg_owt-m
          target_compile_definitions(${target_name}
          PRIVATE
              HAVE_NETINET_IN_H
+diff -up Libraries/tg_owt-master/CMakeLists.txt.omv~ Libraries/tg_owt-master/CMakeLists.txt
+--- Libraries/tg_owt-master/CMakeLists.txt.omv~	2020-08-28 12:51:05.430783766 +0000
++++ Libraries/tg_owt-master/CMakeLists.txt	2020-08-28 13:10:03.779621282 +0000
+@@ -74,8 +74,29 @@ link_openssl(tg_owt)
+ link_ffmpeg(tg_owt)
+ link_opus(tg_owt)
+ 
++if (CMAKE_SYSTEM_PROCESSOR MATCHES "(x86)|(X86)|(amd64)|(AMD64)")
++    set(arch_sources
++    modules/audio_processing/utility/ooura_fft_sse2.cc
++    modules/video_processing/util/denoiser_filter_sse2.cc
++    common_audio/fir_filter_sse.cc
++    common_audio/fir_filter_sse.h
++    common_audio/resampler/sinc_resampler_sse.cc)
++    add_definitions(-DWEBRTC_ARCH_X86_FAMILY)
++elseif (CMAKE_SYSTEM_PROCESSOR MATCHES "(arm)|(aarch64)|(arm64)|(ARM64)")
++    set(arch_sources
++    modules/audio_processing/utility/ooura_fft_neon.cc
++    modules/video_processing/util/denoiser_filter_neon.cc
++    common_audio/fir_filter_neon.cc
++    common_audio/fir_filter_neon.h
++    common_audio/resampler/sinc_resampler_neon.cc)
++    add_definitions(-DWEBRTC_HAS_NEON)
++else ()
++    set(arch_sources)
++endif ()
++
+ nice_target_sources(tg_owt ${webrtc_loc}
+ PRIVATE
++    ${arch_sources}
+     rtc_base/async_invoker.cc
+     rtc_base/async_invoker.h
+     rtc_base/async_invoker_inl.h
+@@ -1028,7 +1049,6 @@ PRIVATE
+     modules/audio_processing/utility/ooura_fft.cc
+     modules/audio_processing/utility/ooura_fft.h
+     modules/audio_processing/utility/ooura_fft_tables_common.h
+-    modules/audio_processing/utility/ooura_fft_sse2.cc
+     modules/audio_processing/utility/ooura_fft_tables_neon_sse2.h
+     modules/audio_processing/vad/gmm.cc
+     modules/audio_processing/vad/pitch_based_vad.cc
+@@ -1325,7 +1345,6 @@ PRIVATE
+     modules/video_coding/codecs/vp9/vp9_impl.cc
+     modules/video_processing/util/denoiser_filter.cc
+     modules/video_processing/util/denoiser_filter_c.cc
+-    modules/video_processing/util/denoiser_filter_sse2.cc
+     modules/video_processing/util/noise_estimation.cc
+     modules/video_processing/util/skin_detection.cc
+     modules/video_processing/video_denoiser.cc
+@@ -1360,14 +1379,11 @@ PRIVATE
+     common_audio/channel_buffer.cc
+     common_audio/fir_filter_c.cc
+     common_audio/fir_filter_factory.cc
+-    common_audio/fir_filter_sse.cc
+-    common_audio/fir_filter_sse.h
+     common_audio/real_fourier.cc
+     common_audio/real_fourier_ooura.cc
+     common_audio/resampler/push_resampler.cc
+     common_audio/resampler/push_sinc_resampler.cc
+     common_audio/resampler/resampler.cc
+-    common_audio/resampler/sinc_resampler_sse.cc
+     common_audio/resampler/sinc_resampler.cc
+     common_audio/resampler/sinusoidal_linear_chirp_source.cc
+     common_audio/signal_processing/dot_product_with_scale.cc
