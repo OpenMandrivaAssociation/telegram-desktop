@@ -44,8 +44,10 @@ Source0: %{url}/releases/download/v%{version}/%{appname}-%{version}%{tarsuffix}.
 # Missing bits and pieces for some features
 Source1: https://github.com/desktop-app/tg_owt/archive/master/tg_owt.tar.gz
 Patch1: tg_owt-20200826-compile.patch
-Patch2:	tdesktop-2.1.7-openssl3.patch
-Patch3: tdesktop-2.3.2-no-underlinking.patch
+Patch2: tg_owt-system-libvpx.patch
+Patch3: tg_owt-non-x86.patch
+Patch4:	tdesktop-2.1.7-openssl3.patch
+Patch5: tdesktop-2.3.2-no-underlinking.patch
 
 # Telegram Desktop require exact version of Qt due to Qt private API usage.
 %{?_qt5:Requires: %{_qt5}%{?_isa} = %{_qt5_version}}
@@ -96,6 +98,7 @@ BuildRequires: pkgconfig(libjpeg)
 BuildRequires: pkgconfig(hunspell)
 BuildRequires: pkgconfig(alsa)
 BuildRequires: pkgconfig(libpulse)
+BuildRequires: pkgconfig(vpx)
 BuildRequires: cmake(RapidJSON)
 BuildRequires: cmake(Qt5Network)
 BuildRequires: cmake(Qt5Core)
@@ -157,6 +160,8 @@ rm -rf ../Libraries
 mkdir ../Libraries
 mv tg_owt-master ../Libraries/tg_owt
 cd ../Libraries/tg_owt
+# Let's use system libvpx instead of duplicating the world
+rm -rf src/third_party/libvpx cmake/libvpx.cmake
 mkdir -p out/Release
 cd out/Release
 cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ../..

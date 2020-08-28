@@ -1,0 +1,26 @@
+diff -up Libraries/tg_owt-master/CMakeLists.txt.omv~ Libraries/tg_owt-master/CMakeLists.txt
+--- Libraries/tg_owt-master/CMakeLists.txt.omv~	2020-08-28 05:06:25.873536499 +0200
++++ Libraries/tg_owt-master/CMakeLists.txt	2020-08-28 05:06:38.719663168 +0200
+@@ -39,7 +39,6 @@ include(cmake/libpffft.cmake)
+ include(cmake/librnnoise.cmake)
+ include(cmake/libsrtp.cmake)
+ include(cmake/libusrsctp.cmake)
+-include(cmake/libvpx.cmake)
+ include(cmake/libwebrtcbuild.cmake)
+ include(cmake/libyuv.cmake)
+ if (NOT WIN32 AND NOT APPLE)
+@@ -60,13 +59,7 @@ PUBLIC
+     tg_owt::librnnoise
+     tg_owt::libsrtp
+     tg_owt::libusrsctp
+-    tg_owt::libvpx
+-    tg_owt::libvpx_mmx
+-    tg_owt::libvpx_sse2
+-    tg_owt::libvpx_ssse3
+-    tg_owt::libvpx_sse4
+-    tg_owt::libvpx_avx
+-    tg_owt::libvpx_avx2
++    libvpx
+     tg_owt::libwebrtcbuild
+     tg_owt::libyuv
+ )
