@@ -82,3 +82,35 @@ diff -up Libraries/tg_owt-master/CMakeLists.txt.omv~ Libraries/tg_owt-master/CMa
      common_audio/resampler/sinc_resampler.cc
      common_audio/resampler/sinusoidal_linear_chirp_source.cc
      common_audio/signal_processing/dot_product_with_scale.cc
+diff -up Libraries/tg_owt-master/cmake/libyuv.cmake.omv~ Libraries/tg_owt-master/cmake/libyuv.cmake
+--- Libraries/tg_owt-master/cmake/libyuv.cmake.omv~	2020-08-28 18:53:21.974383123 +0000
++++ Libraries/tg_owt-master/cmake/libyuv.cmake	2020-08-28 18:56:46.235605549 +0000
+@@ -6,8 +6,28 @@ link_libjpeg(libyuv)
+ 
+ set(libyuv_loc ${third_party_loc}/libyuv)
+ 
++if (CMAKE_SYSTEM_PROCESSOR MATCHES "(aarch64)|(arm64)|(ARM64)")
++    set(libyuv_arch_sources
++	source/compare_neon64.cc
++	source/rotate_neon64.cc
++	source/row_neon64.cc
++	source/scale_neon64.cc
++    )
++elseif (CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
++    set(libyuv_arch_sources
++	source/compare_neon.cc
++	source/rotate_neon.cc
++	source/row_neon.cc
++	source/scale_neon.cc
++    )
++else ()
++    set(libyuv_arch_sources
++    )
++endif()
++
+ nice_target_sources(libyuv ${libyuv_loc}
+ PRIVATE
++    ${libyuv_arch_sources}
+     include/libyuv.h
+     include/libyuv/basic_types.h
+     include/libyuv/compare.h
