@@ -1,6 +1,6 @@
-diff -up Libraries/tg_owt-master/CMakeLists.txt.omv~ Libraries/tg_owt-master/CMakeLists.txt
---- Libraries/tg_owt-master/CMakeLists.txt.omv~	2020-08-28 05:06:25.873536499 +0200
-+++ Libraries/tg_owt-master/CMakeLists.txt	2020-08-28 05:06:38.719663168 +0200
+diff -up tdesktop-2.4.2-full/tg_owt-master/CMakeLists.txt.1~ tdesktop-2.4.2-full/tg_owt-master/CMakeLists.txt
+--- tdesktop-2.4.2-full/tg_owt-master/CMakeLists.txt.1~	2020-09-29 17:52:14.000000000 +0200
++++ tdesktop-2.4.2-full/tg_owt-master/CMakeLists.txt	2020-10-06 23:21:13.201061104 +0200
 @@ -34,12 +34,10 @@ include(cmake/init_target.cmake)
  include(cmake/target_yasm_sources.cmake)
  include(cmake/external.cmake)
@@ -14,40 +14,85 @@ diff -up Libraries/tg_owt-master/CMakeLists.txt.omv~ Libraries/tg_owt-master/CMa
  include(cmake/libwebrtcbuild.cmake)
  include(cmake/libyuv.cmake)
  if (NOT WIN32 AND NOT APPLE)
-@@ -54,28 +52,16 @@ init_target(tg_owt)
- target_link_libraries(tg_owt
- PUBLIC
-     tg_owt::libabsl
--    tg_owt::libopenh264
-+    openh264
-     tg_owt::libpffft
-     tg_owt::librnnoise
-     tg_owt::libsrtp
-     tg_owt::libusrsctp
--    tg_owt::libvpx
--    tg_owt::libvpx_mmx
--    tg_owt::libvpx_sse2
--    tg_owt::libvpx_ssse3
--    tg_owt::libvpx_sse4
--    tg_owt::libvpx_avx
--    tg_owt::libvpx_avx2
-+    libvpx
-     tg_owt::libwebrtcbuild
-     tg_owt::libyuv
- )
+@@ -58,18 +56,12 @@ if (is_x86 OR is_x64)
+         tg_owt::libwebrtcbuild
+     PRIVATE
+         tg_owt::libabsl
+-        tg_owt::libopenh264
++        openh264
+         tg_owt::libpffft
+         tg_owt::librnnoise
+         tg_owt::libsrtp
+         tg_owt::libusrsctp
+-        tg_owt::libvpx
+-        tg_owt::libvpx_mmx
+-        tg_owt::libvpx_sse2
+-        tg_owt::libvpx_ssse3
+-        tg_owt::libvpx_sse4
+-        tg_owt::libvpx_avx
+-        tg_owt::libvpx_avx2
++        vpx
+         tg_owt::libyuv
+     )
+ else()
+@@ -78,22 +70,16 @@ else()
+         tg_owt::libwebrtcbuild
+     PRIVATE
+         tg_owt::libabsl
+-        tg_owt::libopenh264
++        openh264
+         tg_owt::libpffft
+         tg_owt::librnnoise
+         tg_owt::libsrtp
+         tg_owt::libusrsctp
+-        tg_owt::libvpx
++        vpx
+         tg_owt::libyuv
+     )
+ endif()
  
 -target_sources(tg_owt
--PUBLIC
+-PRIVATE
 -    ${libvpx_yasm_objects}
 -    ${libopenh264_yasm_objects}
 -)
 -
  if (NOT WIN32 AND NOT APPLE)
-     target_link_libraries(tg_owt PUBLIC tg_owt::libevent)
+     target_link_libraries(tg_owt PRIVATE tg_owt::libevent)
  endif()
-diff -up Libraries/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.cc.omv~ Libraries/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.cc
---- Libraries/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.cc.omv~	2020-08-28 13:54:19.154306214 +0200
-+++ Libraries/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.cc	2020-08-28 13:54:50.419997183 +0200
+@@ -1819,29 +1805,14 @@ elseif (APPLE)
+     )
+ endif()
+ 
+-set(vpx_export)
+-if (is_x86 OR is_x64)
+-    set(vpx_export
+-        libvpx_mmx
+-        libvpx_sse2
+-        libvpx_ssse3
+-        libvpx_sse4
+-        libvpx_avx
+-        libvpx_avx2
+-    )
+-endif()
+-
+ export(
+ TARGETS
+     tg_owt
+     libabsl
+-    libopenh264
+     libpffft
+     librnnoise
+     libsrtp
+     libusrsctp
+-    libvpx
+-    ${vpx_export}
+     libwebrtcbuild
+     libyuv
+     ${platform_export}
+diff -up tdesktop-2.4.2-full/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.cc.1~ tdesktop-2.4.2-full/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.cc
+--- tdesktop-2.4.2-full/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.cc.1~	2020-09-29 17:52:14.000000000 +0200
++++ tdesktop-2.4.2-full/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.cc	2020-10-06 23:19:40.545972851 +0200
 @@ -29,10 +29,10 @@
  #include "system_wrappers/include/metrics.h"
  #include "third_party/libyuv/include/libyuv/convert.h"
@@ -63,9 +108,9 @@ diff -up Libraries/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encod
  
  namespace webrtc {
  
-diff -up Libraries/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.h.omv~ Libraries/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.h
---- Libraries/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.h.omv~	2020-08-28 13:53:55.012565924 +0200
-+++ Libraries/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.h	2020-08-28 13:54:03.026477610 +0200
+diff -up tdesktop-2.4.2-full/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.h.1~ tdesktop-2.4.2-full/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.h
+--- tdesktop-2.4.2-full/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.h.1~	2020-09-29 17:52:14.000000000 +0200
++++ tdesktop-2.4.2-full/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.h	2020-10-06 23:19:40.545972851 +0200
 @@ -25,7 +25,7 @@
  #include "common_video/h264/h264_bitstream_parser.h"
  #include "modules/video_coding/codecs/h264/include/h264.h"

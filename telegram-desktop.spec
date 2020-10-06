@@ -28,7 +28,7 @@
 %endif
 
 Name: telegram-desktop
-Version:	2.3.2
+Version:	2.4.2
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -43,9 +43,8 @@ Summary: Telegram Desktop official messaging app
 Source0: %{url}/releases/download/v%{version}/%{appname}-%{version}%{tarsuffix}.tar.gz
 # Missing bits and pieces for some features
 Source1: https://github.com/desktop-app/tg_owt/archive/master/tg_owt.tar.gz
-Patch1: tg_owt-20200826-compile.patch
 Patch2: tg_owt-system-libvpx.patch
-Patch3: tg_owt-non-x86.patch
+#Patch3: tg_owt-non-x86.patch
 Patch4:	tdesktop-2.1.7-openssl3.patch
 Patch5: tdesktop-2.3.2-no-underlinking.patch
 
@@ -207,6 +206,7 @@ desktop-file-edit --set-key=Exec --set-value="%{_bindir}/%{name} -- %u" --copy-n
     -DCMAKE_C_COMPILER=gcc \
     -DCMAKE_CXX_COMPILER=g++ \
 %endif
+    -Dtg_owt_DIR="$TOP"/../Libraries/tg_owt/out/Release \
     -DTDESKTOP_API_ID=%{apiid} \
     -DTDESKTOP_API_HASH=%{apihash} \
     -DDESKTOP_APP_USE_PACKAGED:BOOL=ON \
