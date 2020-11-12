@@ -1,7 +1,8 @@
-diff -up tdesktop-2.4.2-full/tg_owt-master/CMakeLists.txt.1~ tdesktop-2.4.2-full/tg_owt-master/CMakeLists.txt
---- tdesktop-2.4.2-full/tg_owt-master/CMakeLists.txt.1~	2020-09-29 17:52:14.000000000 +0200
-+++ tdesktop-2.4.2-full/tg_owt-master/CMakeLists.txt	2020-10-06 23:21:13.201061104 +0200
-@@ -34,12 +34,10 @@ include(cmake/init_target.cmake)
+diff --git a/tg_owt-master/CMakeLists.txt b/tg_owt-master/CMakeLists.txt
+index 58e65a06..5cedfd8f 100644
+--- a/tg_owt-master/CMakeLists.txt
++++ b/tg_owt-master/CMakeLists.txt
+@@ -40,12 +40,10 @@ include(cmake/init_target.cmake)
  include(cmake/target_yasm_sources.cmake)
  include(cmake/external.cmake)
  include(cmake/libabsl.cmake)
@@ -14,7 +15,7 @@ diff -up tdesktop-2.4.2-full/tg_owt-master/CMakeLists.txt.1~ tdesktop-2.4.2-full
  include(cmake/libwebrtcbuild.cmake)
  include(cmake/libyuv.cmake)
  if (NOT WIN32 AND NOT APPLE)
-@@ -58,18 +56,12 @@ if (is_x86 OR is_x64)
+@@ -72,18 +70,12 @@ if (is_x86 OR is_x64)
          tg_owt::libwebrtcbuild
      PRIVATE
          tg_owt::libabsl
@@ -35,19 +36,22 @@ diff -up tdesktop-2.4.2-full/tg_owt-master/CMakeLists.txt.1~ tdesktop-2.4.2-full
          tg_owt::libyuv
      )
  else()
-@@ -78,22 +70,16 @@ else()
+@@ -92,12 +84,12 @@ else()
          tg_owt::libwebrtcbuild
      PRIVATE
          tg_owt::libabsl
 -        tg_owt::libopenh264
-+        openh264
++	openh264
          tg_owt::libpffft
          tg_owt::librnnoise
          tg_owt::libsrtp
          tg_owt::libusrsctp
 -        tg_owt::libvpx
-+        vpx
++	vpx
          tg_owt::libyuv
+     )
+ endif()
+@@ -109,12 +101,6 @@ if (TG_OWT_USE_PROTOBUF)
      )
  endif()
  
@@ -60,7 +64,7 @@ diff -up tdesktop-2.4.2-full/tg_owt-master/CMakeLists.txt.1~ tdesktop-2.4.2-full
  if (NOT WIN32 AND NOT APPLE)
      target_link_libraries(tg_owt PRIVATE tg_owt::libevent)
  endif()
-@@ -1819,29 +1805,14 @@ elseif (APPLE)
+@@ -1851,28 +1837,13 @@ elseif (APPLE)
      )
  endif()
  
@@ -76,8 +80,7 @@ diff -up tdesktop-2.4.2-full/tg_owt-master/CMakeLists.txt.1~ tdesktop-2.4.2-full
 -    )
 -endif()
 -
- export(
- TARGETS
+ set(export_targets
      tg_owt
      libabsl
 -    libopenh264
@@ -90,9 +93,10 @@ diff -up tdesktop-2.4.2-full/tg_owt-master/CMakeLists.txt.1~ tdesktop-2.4.2-full
      libwebrtcbuild
      libyuv
      ${platform_export}
-diff -up tdesktop-2.4.2-full/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.cc.1~ tdesktop-2.4.2-full/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.cc
---- tdesktop-2.4.2-full/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.cc.1~	2020-09-29 17:52:14.000000000 +0200
-+++ tdesktop-2.4.2-full/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.cc	2020-10-06 23:19:40.545972851 +0200
+diff --git a/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.cc b/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.cc
+index ffe852b7..6a9da710 100644
+--- a/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.cc
++++ b/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.cc
 @@ -29,10 +29,10 @@
  #include "system_wrappers/include/metrics.h"
  #include "third_party/libyuv/include/libyuv/convert.h"
@@ -108,9 +112,10 @@ diff -up tdesktop-2.4.2-full/tg_owt-master/src/modules/video_coding/codecs/h264/
  
  namespace webrtc {
  
-diff -up tdesktop-2.4.2-full/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.h.1~ tdesktop-2.4.2-full/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.h
---- tdesktop-2.4.2-full/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.h.1~	2020-09-29 17:52:14.000000000 +0200
-+++ tdesktop-2.4.2-full/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.h	2020-10-06 23:19:40.545972851 +0200
+diff --git a/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.h b/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.h
+index 7fb87eae..59f4ae72 100644
+--- a/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.h
++++ b/tg_owt-master/src/modules/video_coding/codecs/h264/h264_encoder_impl.h
 @@ -25,7 +25,7 @@
  #include "common_video/h264/h264_bitstream_parser.h"
  #include "modules/video_coding/codecs/h264/include/h264.h"
