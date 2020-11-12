@@ -71,6 +71,7 @@ BuildRequires: cmake
 
 # Development packages for Telegram Desktop...
 BuildRequires: cmake(Microsoft.GSL)
+BuildRequires: pkgconfig(protobuf)
 BuildRequires: mapbox-variant-devel
 BuildRequires: pkgconfig(libavcodec)
 BuildRequires: pkgconfig(libavformat)
