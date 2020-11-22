@@ -22,7 +22,7 @@
 %global optflags %(echo %{optflags} | sed -e 's/-mcet//g' -e 's/-fcf-protection//g' -e 's/-fstack-clash-protection//g' -e 's/$/ -Qunused-arguments -Wno-unknown-warning-option/')
 %endif
 
-%global ldflags %(echo %{ldflags} -Wl,-z,notext)
+%global build_ldflags %(echo %{build_ldflags} -Wl,-z,notext)
 
 # Decrease debuginfo verbosity to reduce memory consumption...
 %if %{with mindbg}
@@ -167,7 +167,16 @@ cd ../Libraries/tg_owt
 rm -rf src/third_party/libvpx cmake/libvpx.cmake src/third_party/openh264 cmake/libopenh264.cmake
 mkdir -p out/Release
 cd out/Release
-cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ../..
+cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ../.. \
+	-DCMAKE_C_FLAGS="%{optflags} -fPIC" \
+	-DCMAKE_C_FLAGS_RELEASE="%{optflags} -fPIC" \
+	-DCMAKE_C_FLAGS_RELWITHDEBINFO="%{optflags} -fPIC" \
+	-DCMAKE_CXX_FLAGS="%{optflags} -fPIC" \
+	-DCMAKE_CXX_FLAGS_RELEASE="%{optflags} -fPIC" \
+	-DCMAKE_CXX_FLAGS_RELWITHDEBINFO="%{optflags} -fPIC" \
+	-DCMAKE_EXE_LINKER_FLAGS="%{build_ldflags} -fPIC" \
+	-DCMAKE_SHARED_LINKER_FLAGS="%{build_ldflags} -fPIC" \
+	-DCMAKE_MODULE_LINKER_FLAGS="%{build_ldflags} -fPIC"
 %ninja_build
 cd "$TOP"
 
