@@ -22,13 +22,15 @@
 %global optflags %(echo %{optflags} | sed -e 's/-mcet//g' -e 's/-fcf-protection//g' -e 's/-fstack-clash-protection//g' -e 's/$/ -Qunused-arguments -Wno-unknown-warning-option/')
 %endif
 
+%global ldflags %(echo %{ldflags} -Wl,-z,notext)
+
 # Decrease debuginfo verbosity to reduce memory consumption...
 %if %{with mindbg}
 %global optflags %(echo %{optflags} | sed 's/-g /-g1 /')
 %endif
 
 Name: telegram-desktop
-Version:	2.4.9
+Version:	2.4.11
 Release:	1
 
 # Application and 3rd-party modules licensing:
