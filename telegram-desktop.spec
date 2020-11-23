@@ -43,7 +43,6 @@ Summary: Telegram Desktop official messaging app
 
 # Source files...
 Source0: %{url}/releases/download/v%{version}/%{appname}-%{version}%{tarsuffix}.tar.gz
-# Missing bits and pieces for some features
 Patch4:	tdesktop-2.1.7-openssl3.patch
 Patch5: tdesktop-2.3.2-no-underlinking.patch
 
