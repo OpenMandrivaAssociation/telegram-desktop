@@ -30,6 +30,8 @@
 %endif
 
 Name: telegram-desktop
+# before every upgrade
+# try to up tg_owt project first
 Version:	2.4.11
 Release:	1
 
