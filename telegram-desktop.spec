@@ -44,9 +44,6 @@ Summary: Telegram Desktop official messaging app
 # Source files...
 Source0: %{url}/releases/download/v%{version}/%{appname}-%{version}%{tarsuffix}.tar.gz
 # Missing bits and pieces for some features
-Source1: https://github.com/desktop-app/tg_owt/archive/master/tg_owt.tar.gz
-Patch2: tg_owt-system-libvpx.patch
-#Patch3: tg_owt-non-x86.patch
 Patch4:	tdesktop-2.1.7-openssl3.patch
 Patch5: tdesktop-2.3.2-no-underlinking.patch
 
@@ -108,6 +105,7 @@ BuildRequires: cmake(Qt5Core)
 BuildRequires: cmake(dbusmenu-qt5)
 BuildRequires: cmake(Qt5WaylandClient)
 BuildRequires: cmake(Qt5XkbCommonSupport)
+BuildRequires: cmake(tg_owt)
 BuildRequires: qt5-qtwayland-private-devel
 BuildRequires: wayland-devel
 BuildRequires: qt5-qtwayland
@@ -152,33 +150,9 @@ business messaging needs.
 
 %prep
 # Unpacking Telegram Desktop source archive...
-%autosetup -p1 -n %{appname}-%{version}%{tarsuffix} -a 1
+%autosetup -p1 -n %{appname}-%{version}%{tarsuffix}
 # Unbundling libraries...
 rm -rf Telegram/ThirdParty/{Catch,GSL,QR,SPMediaKeyTap,expected,libdbusmenu-qt,libtgvoip,lz4,minizip,variant,xxHash}
-
-TOP="$(pwd)"
-
-# Build dependencies
-rm -rf ../Libraries
-mkdir ../Libraries
-mv tg_owt-master ../Libraries/tg_owt
-cd ../Libraries/tg_owt
-# Let's use system libvpx instead of duplicating the world
-rm -rf src/third_party/libvpx cmake/libvpx.cmake src/third_party/openh264 cmake/libopenh264.cmake
-mkdir -p out/Release
-cd out/Release
-cmake -DCMAKE_BUILD_TYPE=Release -G Ninja ../.. \
-	-DCMAKE_C_FLAGS="%{optflags} -fPIC" \
-	-DCMAKE_C_FLAGS_RELEASE="%{optflags} -fPIC" \
-	-DCMAKE_C_FLAGS_RELWITHDEBINFO="%{optflags} -fPIC" \
-	-DCMAKE_CXX_FLAGS="%{optflags} -fPIC" \
-	-DCMAKE_CXX_FLAGS_RELEASE="%{optflags} -fPIC" \
-	-DCMAKE_CXX_FLAGS_RELWITHDEBINFO="%{optflags} -fPIC" \
-	-DCMAKE_EXE_LINKER_FLAGS="%{build_ldflags} -fPIC" \
-	-DCMAKE_SHARED_LINKER_FLAGS="%{build_ldflags} -fPIC" \
-	-DCMAKE_MODULE_LINKER_FLAGS="%{build_ldflags} -fPIC"
-%ninja_build
-cd "$TOP"
 
 # Patching default desktop file...
 desktop-file-edit --set-key=Exec --set-value="%{_bindir}/%{name} -- %u" --copy-name-to-generic-name lib/xdg/telegramdesktop.desktop
@@ -218,7 +192,6 @@ desktop-file-edit --set-key=Exec --set-value="%{_bindir}/%{name} -- %u" --copy-n
     -DCMAKE_C_COMPILER=gcc \
     -DCMAKE_CXX_COMPILER=g++ \
 %endif
-    -Dtg_owt_DIR="$TOP"/../Libraries/tg_owt/out/Release \
     -DTDESKTOP_API_ID=%{apiid} \
     -DTDESKTOP_API_HASH=%{apihash} \
     -DDESKTOP_APP_USE_PACKAGED:BOOL=ON \
