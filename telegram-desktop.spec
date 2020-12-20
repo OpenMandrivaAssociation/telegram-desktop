@@ -32,7 +32,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	2.4.11
+Version:	2.4.14
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -82,6 +82,7 @@ BuildRequires: qr-code-generator-c++-devel
 BuildRequires: pkgconfig(openal)
 BuildRequires: qt5-qtbase-devel
 BuildRequires: pkgconfig(tgvoip)
+BuildRequires: pkgconfig(xcb-keysyms)
 BuildRequires: libstdc++-devel
 BuildRequires: range-v3-devel
 BuildRequires: atomic-devel
@@ -208,6 +209,7 @@ desktop-file-edit --set-key=Exec --set-value="%{_bindir}/%{name} -- %u" --copy-n
     -DTDESKTOP_LAUNCHER_BASENAME=%{launcher}
 
 %build
+touch build/changelog.txt 
 %ninja_build -C build
 
 %install
