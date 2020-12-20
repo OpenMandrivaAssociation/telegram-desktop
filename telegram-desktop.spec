@@ -77,6 +77,7 @@ BuildRequires: pkgconfig(libavcodec)
 BuildRequires: pkgconfig(libavformat)
 BuildRequires: pkgconfig(xkbcommon)
 BuildRequires: cmake(tl-expected)
+BuildRequires: pkgconfig(libyuv)
 BuildRequires: qr-code-generator-devel
 BuildRequires: qr-code-generator-c++-devel
 BuildRequires: pkgconfig(openal)
