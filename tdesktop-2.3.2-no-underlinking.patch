@@ -1,17 +1,17 @@
-diff -up tdesktop-2.4.4-full/Telegram/CMakeLists.txt.3~ tdesktop-2.4.4-full/Telegram/CMakeLists.txt
---- tdesktop-2.4.4-full/Telegram/CMakeLists.txt.3~	2020-10-26 22:00:27.019700784 +0100
-+++ tdesktop-2.4.4-full/Telegram/CMakeLists.txt	2020-10-26 22:01:51.529027982 +0100
-@@ -109,6 +109,7 @@ if (LINUX)
-         desktop-app::external_xcb_screensaver
+diff -up tdesktop-2.5.2-full/Telegram/CMakeLists.txt.2~ tdesktop-2.5.2-full/Telegram/CMakeLists.txt
+--- tdesktop-2.5.2-full/Telegram/CMakeLists.txt.2~	2021-01-11 23:08:07.028862524 +0100
++++ tdesktop-2.5.2-full/Telegram/CMakeLists.txt	2021-01-11 23:24:29.306689468 +0100
+@@ -74,6 +74,7 @@ if (LINUX)
+     PRIVATE
          desktop-app::external_xcb
          desktop-app::external_glib
 +	-ldl -ljpeg -lvpx -lopenh264
      )
  
      if (NOT DESKTOP_APP_DISABLE_DBUS_INTEGRATION)
-diff -up tdesktop-2.4.4-full/Telegram/lib_lottie/lottie/lottie_animation.cpp.3~ tdesktop-2.4.4-full/Telegram/lib_lottie/lottie/lottie_animation.cpp
---- tdesktop-2.4.4-full/Telegram/lib_lottie/lottie/lottie_animation.cpp.3~	2020-08-31 11:03:37.000000000 +0200
-+++ tdesktop-2.4.4-full/Telegram/lib_lottie/lottie/lottie_animation.cpp	2020-10-26 22:00:27.019700784 +0100
+diff -up tdesktop-2.5.2-full/Telegram/lib_lottie/lottie/lottie_animation.cpp.2~ tdesktop-2.5.2-full/Telegram/lib_lottie/lottie/lottie_animation.cpp
+--- tdesktop-2.5.2-full/Telegram/lib_lottie/lottie/lottie_animation.cpp.2~	2020-11-04 13:32:26.000000000 +0100
++++ tdesktop-2.5.2-full/Telegram/lib_lottie/lottie/lottie_animation.cpp	2021-01-11 23:08:07.028862524 +0100
 @@ -138,7 +138,7 @@ std::unique_ptr<rlottie::Animation> Crea
  	const auto string = UnpackGzip(content);
  	Assert(string.size() <= kMaxFileSize);
