@@ -32,7 +32,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	2.5.2
+Version:	2.5.8
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -109,6 +109,7 @@ BuildRequires: cmake(dbusmenu-qt5)
 BuildRequires: cmake(Qt5WaylandClient)
 BuildRequires: cmake(Qt5XkbCommonSupport)
 BuildRequires: cmake(tg_owt)
+BuildRequires: cmake(kf5wayland)
 BuildRequires: qt5-qtwayland-private-devel
 BuildRequires: wayland-devel
 BuildRequires: qt5-qtwayland
