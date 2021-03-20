@@ -1,5 +1,5 @@
 # Build conditionals (with - OFF, without - ON)...
-%bcond_without rlottie
+%bcond_with rlottie
 %bcond_with gtk3
 %bcond_without clang
 %bcond_without spellcheck
@@ -32,7 +32,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	2.5.8
+Version:	2.7.1
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -47,6 +47,7 @@ Summary: Telegram Desktop official messaging app
 Source0: %{url}/releases/download/v%{version}/%{appname}-%{version}%{tarsuffix}.tar.gz
 Patch4:	tdesktop-2.1.7-openssl3.patch
 Patch5: tdesktop-2.3.2-no-underlinking.patch
+Patch6:	fix-include.patch
 
 # Telegram Desktop require exact version of Qt due to Qt private API usage.
 %{?_qt5:Requires: %{_qt5}%{?_isa} = %{_qt5_version}}
@@ -76,6 +77,7 @@ BuildRequires: mapbox-variant-devel
 BuildRequires: pkgconfig(libavcodec)
 BuildRequires: pkgconfig(libavformat)
 BuildRequires: pkgconfig(xkbcommon)
+BuildRequires: pkgconfig(glibmm-2.4)
 BuildRequires: cmake(tl-expected)
 BuildRequires: pkgconfig(libyuv)
 BuildRequires: qr-code-generator-devel
@@ -211,7 +213,7 @@ desktop-file-edit --set-key=Exec --set-value="%{_bindir}/%{name} -- %u" --copy-n
     -DTDESKTOP_LAUNCHER_BASENAME=%{launcher}
 
 %build
-touch build/changelog.txt 
+touch build/changelog.txt
 %ninja_build -C build
 
 %install
