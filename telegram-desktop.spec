@@ -32,7 +32,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	2.7.4
+Version:	2.7.5
 Release:	1
 
 # Application and 3rd-party modules licensing:
