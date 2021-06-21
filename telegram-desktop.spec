@@ -32,7 +32,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	2.7.5
+Version:	2.7.9
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -44,10 +44,12 @@ URL: https://github.com/telegramdesktop/%{appname}
 Summary: Telegram Desktop official messaging app
 
 # Source files...
+# Upstream frequently forgets to make the -full release. When that happens,
+# use the package-source.sh script in this repository.
 Source0: %{url}/releases/download/v%{version}/%{appname}-%{version}%{tarsuffix}.tar.gz
 Patch4:	tdesktop-2.1.7-openssl3.patch
 Patch5: tdesktop-2.3.2-no-underlinking.patch
-Patch6: tdesktop-2.7.4-zlib-ng.patch
+#Patch6: tdesktop-2.7.4-zlib-ng.patch
 
 # Telegram Desktop require exact version of Qt due to Qt private API usage.
 %{?_qt5:Requires: %{_qt5}%{?_isa} = %{_qt5_version}}
@@ -104,6 +106,7 @@ BuildRequires: pkgconfig(alsa)
 BuildRequires: pkgconfig(libpulse)
 BuildRequires: pkgconfig(openh264)
 BuildRequires: pkgconfig(vpx)
+BuildRequires: pkgconfig(rnnoise)
 BuildRequires: cmake(RapidJSON)
 BuildRequires: cmake(Qt5Network)
 BuildRequires: cmake(Qt5Core)
