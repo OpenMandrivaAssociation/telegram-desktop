@@ -49,7 +49,7 @@ Summary: Telegram Desktop official messaging app
 Source0: %{url}/releases/download/v%{version}/%{appname}-%{version}%{tarsuffix}.tar.gz
 Patch4:	tdesktop-2.1.7-openssl3.patch
 Patch5: tdesktop-2.3.2-no-underlinking.patch
-#Patch6: tdesktop-2.7.4-zlib-ng.patch
+Patch6: tdesktop-2.7.9-compile.patch
 
 # Telegram Desktop require exact version of Qt due to Qt private API usage.
 %{?_qt5:Requires: %{_qt5}%{?_isa} = %{_qt5_version}}
