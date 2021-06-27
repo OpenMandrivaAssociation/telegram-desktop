@@ -163,6 +163,7 @@ like SMS and email combined — and can take care of all your personal or
 business messaging needs.
 
 %prep
+export LC_ALL=en_US.utf-8
 # Unpacking Telegram Desktop source archive...
 %autosetup -p1 -n %{appname}-%{version}%{tarsuffix}
 # Unbundling libraries...
