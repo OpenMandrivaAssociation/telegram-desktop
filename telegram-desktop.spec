@@ -1,7 +1,12 @@
 # Build conditionals (with - OFF, without - ON)...
 %bcond_with rlottie
 %bcond_with gtk3
-%bcond_without clang
+# FIXME as of 2.8.1, telegram-desktop crashes on startup with
+# an illegal instruction while calling global constructors
+# if built with clang.
+# It works fine when built with gcc - but we need to figure
+# out why at some point.
+%bcond_with clang
 %bcond_without spellcheck
 %bcond_without fonts
 %bcond_without ipo
@@ -32,7 +37,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	2.7.9
+Version:	2.8.1
 Release:	1
 
 # Application and 3rd-party modules licensing:

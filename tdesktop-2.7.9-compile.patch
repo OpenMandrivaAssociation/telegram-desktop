@@ -82,21 +82,6 @@ diff -up tdesktop-2.7.9-full/Telegram/lib_base/base/zlib_help.h.omv~ tdesktop-2.
  		}
  		return error();
  	}
-diff -up tdesktop-2.7.9-full/Telegram/lib_spellcheck/spellcheck/third_party/hunspell_controller.cpp.omv~ tdesktop-2.7.9-full/Telegram/lib_spellcheck/spellcheck/third_party/hunspell_controller.cpp
---- tdesktop-2.7.9-full/Telegram/lib_spellcheck/spellcheck/third_party/hunspell_controller.cpp.omv~	2021-06-21 18:14:07.827990827 +0200
-+++ tdesktop-2.7.9-full/Telegram/lib_spellcheck/spellcheck/third_party/hunspell_controller.cpp	2021-06-21 18:24:02.651335297 +0200
-@@ -8,7 +8,10 @@
- #include "spellcheck/third_party/hunspell_controller.h"
- 
- #include "hunspell/hunspell.hxx"
--#include "hunspell/csutil.hxx"
-+//#include "hunspell/csutil.hxx"
-+// from hunspell, but not exported in any header that gets installed by "make install"
-+extern void initialize_utf_tbl();
-+extern void free_utf_tbl();
- #include "spellcheck/spellcheck_value.h"
- 
- #include <mutex>
 diff -up tdesktop-2.7.9-full/Telegram/SourceFiles/core/crash_report_window.cpp.omv~ tdesktop-2.7.9-full/Telegram/SourceFiles/core/crash_report_window.cpp
 --- tdesktop-2.7.9-full/Telegram/SourceFiles/core/crash_report_window.cpp.omv~	2021-06-21 18:42:04.572475092 +0200
 +++ tdesktop-2.7.9-full/Telegram/SourceFiles/core/crash_report_window.cpp	2021-06-21 18:43:55.438118196 +0200
