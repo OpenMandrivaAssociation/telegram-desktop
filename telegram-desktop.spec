@@ -85,6 +85,7 @@ BuildRequires: pkgconfig(libavcodec)
 BuildRequires: pkgconfig(libavformat)
 BuildRequires: pkgconfig(xkbcommon)
 BuildRequires: pkgconfig(glibmm-2.4)
+BuildRequires: cmake(ECM)
 BuildRequires: cmake(tl-expected)
 BuildRequires: pkgconfig(libyuv)
 BuildRequires: qr-code-generator-devel
