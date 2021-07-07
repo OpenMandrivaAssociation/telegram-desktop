@@ -37,7 +37,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	2.8.1
+Version:	2.8.5
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -52,6 +52,8 @@ Summary: Telegram Desktop official messaging app
 # Upstream frequently forgets to make the -full release. When that happens,
 # use the package-source.sh script in this repository.
 Source0: %{url}/releases/download/v%{version}/%{appname}-%{version}%{tarsuffix}.tar.gz
+Patch2: telegram-2.8.5-no-custom-malloc.patch
+Patch3: tdesktop-2.8.5-compile.patch
 Patch4:	tdesktop-2.1.7-openssl3.patch
 Patch5: tdesktop-2.3.2-no-underlinking.patch
 Patch6: tdesktop-2.7.9-compile.patch
@@ -168,7 +170,7 @@ export LC_ALL=en_US.utf-8
 # Unpacking Telegram Desktop source archive...
 %autosetup -p1 -n %{appname}-%{version}%{tarsuffix}
 # Unbundling libraries...
-rm -rf Telegram/ThirdParty/{Catch,GSL,QR,SPMediaKeyTap,expected,libdbusmenu-qt,libtgvoip,lz4,minizip,variant,xxHash}
+rm -rf Telegram/ThirdParty/{Catch,GSL,QR,SPMediaKeyTap,expected,libdbusmenu-qt,libtgvoip,lz4,minizip,variant,xxHash,mallocng}
 
 # Patching default desktop file...
 desktop-file-edit --set-key=Exec --set-value="%{_bindir}/%{name} -- %u" --copy-name-to-generic-name lib/xdg/telegramdesktop.desktop

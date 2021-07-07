@@ -1,0 +1,153 @@
+diff -up tdesktop-2.8.5-full/cmake/external/CMakeLists.txt.omv~ tdesktop-2.8.5-full/cmake/external/CMakeLists.txt
+--- tdesktop-2.8.5-full/cmake/external/CMakeLists.txt.omv~	2021-07-07 01:28:23.274314583 +0200
++++ tdesktop-2.8.5-full/cmake/external/CMakeLists.txt	2021-07-07 01:28:29.814420298 +0200
+@@ -37,9 +37,6 @@ if (add_hunspell_library)
+ 	add_checked_subdirectory(hunspell)
+ endif()
+ add_checked_subdirectory(iconv)
+-if (LINUX)
+-    add_checked_subdirectory(jemalloc)
+-endif()
+ add_checked_subdirectory(jpeg)
+ if (LINUX AND NOT DESKTOP_APP_DISABLE_WAYLAND_INTEGRATION)
+     add_checked_subdirectory(kwayland)
+diff -up tdesktop-2.8.5-full/cmake/external/jemalloc/CMakeLists.txt.omv~ tdesktop-2.8.5-full/cmake/external/jemalloc/CMakeLists.txt
+--- tdesktop-2.8.5-full/cmake/external/jemalloc/CMakeLists.txt.omv~	2021-07-07 01:28:44.597992561 +0200
++++ tdesktop-2.8.5-full/cmake/external/jemalloc/CMakeLists.txt	2021-07-07 01:29:36.135491817 +0200
+@@ -4,55 +4,55 @@
+ # For license and copyright information please follow this link:
+ # https://github.com/desktop-app/legal/blob/master/LEGAL
+ 
+-add_library(external_jemalloc INTERFACE IMPORTED GLOBAL)
+-add_library(desktop-app::external_jemalloc ALIAS external_jemalloc)
+-
+-if (DESKTOP_APP_USE_PACKAGED)
+-    find_package(PkgConfig REQUIRED)
+-    pkg_check_modules(JEMALLOC IMPORTED_TARGET jemalloc)
+-
+-    if (JEMALLOC_FOUND)
+-        target_link_libraries(external_jemalloc INTERFACE PkgConfig::JEMALLOC)
+-    endif()
+-endif()
+-
+-if (NOT JEMALLOC_FOUND)
+-    add_library(external_jemalloc_bundled STATIC IMPORTED GLOBAL)
+-
+-    include(ExternalProject)
+-    ExternalProject_Add(jemalloc
+-        URL https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2
+-        CONFIGURE_COMMAND cd "${CMAKE_CURRENT_BINARY_DIR}/jemalloc-prefix/src/jemalloc" && ./configure
+-        BUILD_IN_SOURCE 1
+-    )
+-
+-    ExternalProject_Get_property(jemalloc SOURCE_DIR)
+-    ExternalProject_Get_property(jemalloc BINARY_DIR)
+-
+-    file(MAKE_DIRECTORY "${SOURCE_DIR}/include")
+-
+-    set_target_properties(external_jemalloc_bundled PROPERTIES
+-        IMPORTED_LOCATION "${BINARY_DIR}/lib/libjemalloc.a"
+-    )
+-
+-    target_include_directories(external_jemalloc_bundled
+-    INTERFACE
+-        ${SOURCE_DIR}/include
+-    )
+-
+-    target_link_libraries(external_jemalloc_bundled
+-    INTERFACE
+-        dl
+-        pthread
+-    )
+-
+-    add_dependencies(external_jemalloc_bundled jemalloc)
+-
+-    target_link_libraries(external_jemalloc
+-    INTERFACE
+-        -Wl,--whole-archive
+-        $<TARGET_FILE:external_jemalloc_bundled>
+-        -Wl,--no-whole-archive
+-        external_jemalloc_bundled
+-    )
+-endif()
++#add_library(external_jemalloc INTERFACE IMPORTED GLOBAL)
++#add_library(desktop-app::external_jemalloc ALIAS external_jemalloc)
++#
++#if (DESKTOP_APP_USE_PACKAGED)
++#    find_package(PkgConfig REQUIRED)
++#    pkg_check_modules(JEMALLOC IMPORTED_TARGET jemalloc)
++#
++#    if (JEMALLOC_FOUND)
++#        target_link_libraries(external_jemalloc INTERFACE PkgConfig::JEMALLOC)
++#    endif()
++#endif()
++#
++#if (NOT JEMALLOC_FOUND)
++#    add_library(external_jemalloc_bundled STATIC IMPORTED GLOBAL)
++#
++#    include(ExternalProject)
++#    ExternalProject_Add(jemalloc
++#        URL https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2
++#        CONFIGURE_COMMAND cd "${CMAKE_CURRENT_BINARY_DIR}/jemalloc-prefix/src/jemalloc" && ./configure
++#        BUILD_IN_SOURCE 1
++#    )
++#
++#    ExternalProject_Get_property(jemalloc SOURCE_DIR)
++#    ExternalProject_Get_property(jemalloc BINARY_DIR)
++#
++#    file(MAKE_DIRECTORY "${SOURCE_DIR}/include")
++#
++#    set_target_properties(external_jemalloc_bundled PROPERTIES
++#        IMPORTED_LOCATION "${BINARY_DIR}/lib/libjemalloc.a"
++#    )
++#
++#    target_include_directories(external_jemalloc_bundled
++#    INTERFACE
++#        ${SOURCE_DIR}/include
++#    )
++#
++#    target_link_libraries(external_jemalloc_bundled
++#    INTERFACE
++#        dl
++#        pthread
++#    )
++#
++#    add_dependencies(external_jemalloc_bundled jemalloc)
++#
++#    target_link_libraries(external_jemalloc
++#    INTERFACE
++#        -Wl,--whole-archive
++#        $<TARGET_FILE:external_jemalloc_bundled>
++#        -Wl,--no-whole-archive
++#        external_jemalloc_bundled
++#    )
++#endif()
+diff -up tdesktop-2.8.5-full/cmake/options_linux.cmake.omv~ tdesktop-2.8.5-full/cmake/options_linux.cmake
+--- tdesktop-2.8.5-full/cmake/options_linux.cmake.omv~	2021-07-07 01:30:05.229294933 +0200
++++ tdesktop-2.8.5-full/cmake/options_linux.cmake	2021-07-07 01:30:33.309748210 +0200
+@@ -48,10 +48,10 @@ if (DESKTOP_APP_SPECIAL_TARGET)
+     endif()
+ endif()
+ 
+-target_link_libraries(common_options
+-INTERFACE
+-    desktop-app::external_jemalloc
+-)
++#target_link_libraries(common_options
++#INTERFACE
++#    desktop-app::external_jemalloc
++#)
+ 
+ if (DESKTOP_APP_USE_PACKAGED)
+     find_library(ATOMIC_LIBRARY atomic)
+diff -up tdesktop-2.8.5-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp.omv~ tdesktop-2.8.5-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp
+--- tdesktop-2.8.5-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp.omv~	2021-07-07 02:37:29.506760690 +0200
++++ tdesktop-2.8.5-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp	2021-07-07 02:37:38.473562609 +0200
+@@ -726,7 +726,6 @@ namespace Platform {
+ 
+ void start() {
+ 	auto backgroundThread = true;
+-	mallctl("background_thread", nullptr, nullptr, &backgroundThread, sizeof(bool));
+ 
+ 	LOG(("Launcher filename: %1").arg(QGuiApplication::desktopFileName()));
+ 
