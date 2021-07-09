@@ -1,0 +1,39 @@
+diff -up tdesktop-2.8.6-full/Telegram/SourceFiles/api/api_media.cpp.omv~ tdesktop-2.8.6-full/Telegram/SourceFiles/api/api_media.cpp
+--- tdesktop-2.8.6-full/Telegram/SourceFiles/api/api_media.cpp.omv~	2021-07-08 21:37:06.088688751 +0200
++++ tdesktop-2.8.6-full/Telegram/SourceFiles/api/api_media.cpp	2021-07-08 21:37:18.492225518 +0200
+@@ -82,7 +82,7 @@ MTPInputMedia PrepareUploadedPhoto(
+ 	return MTP_inputMediaUploadedPhoto(
+ 		MTP_flags(flags),
+ 		file,
+-		MTP_vector<MTPInputDocument>(ranges::to<QVector>(attachedStickers)),
++		MTP_vector<MTPInputDocument>(ranges::_to_::to<QVector>(attachedStickers)),
+ 		MTP_int(0));
+ }
+ 
+@@ -107,7 +107,7 @@ MTPInputMedia PrepareUploadedDocument(
+ 		thumb.value_or(MTPInputFile()),
+ 		MTP_string(document->mimeString()),
+ 		ComposeSendingDocumentAttributes(document),
+-		MTP_vector<MTPInputDocument>(ranges::to<QVector>(attachedStickers)),
++		MTP_vector<MTPInputDocument>(ranges::_to_::to<QVector>(attachedStickers)),
+ 		MTP_int(0));
+ }
+ 
+diff -up tdesktop-2.8.6-full/Telegram/SourceFiles/editor/photo_editor_controls.cpp.omv~ tdesktop-2.8.6-full/Telegram/SourceFiles/editor/photo_editor_controls.cpp
+--- tdesktop-2.8.6-full/Telegram/SourceFiles/editor/photo_editor_controls.cpp.omv~	2021-07-08 21:37:49.709404357 +0200
++++ tdesktop-2.8.6-full/Telegram/SourceFiles/editor/photo_editor_controls.cpp	2021-07-08 21:37:58.606217036 +0200
+@@ -127,11 +127,11 @@ ButtonBar::ButtonBar(
+ 		if (children.empty()) {
+ 			return;
+ 		}
+-		const auto widgets = ranges::view::all(
++		const auto widgets = ranges::views::all(
+ 			children
+-		) | ranges::view::filter([](not_null<const QObject*> object) {
++		) | ranges::views::filter([](not_null<const QObject*> object) {
+ 			return object->isWidgetType();
+-		}) | ranges::view::transform([](not_null<QObject*> object) {
++		}) | ranges::views::transform([](not_null<QObject*> object) {
+ 			return static_cast<Ui::RpWidget*>(object.get());
+ 		}) | ranges::to_vector;
+ 

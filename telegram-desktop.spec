@@ -37,7 +37,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	2.8.5
+Version:	2.8.6
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -52,6 +52,7 @@ Summary: Telegram Desktop official messaging app
 # Upstream frequently forgets to make the -full release. When that happens,
 # use the package-source.sh script in this repository.
 Source0: %{url}/releases/download/v%{version}/%{appname}-%{version}%{tarsuffix}.tar.gz
+Patch1: telegram-2.8.6-compile.patch
 Patch2: telegram-2.8.5-no-custom-malloc.patch
 Patch3: tdesktop-2.8.5-compile.patch
 Patch4:	tdesktop-2.1.7-openssl3.patch
