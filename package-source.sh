@@ -13,6 +13,8 @@ git clone -b v$V --depth 1 https://github.com/telegramdesktop/tdesktop
 cd tdesktop
 git submodule update --init --recursive
 find . -name .git |xargs rm -rf
+# Wipe stuff we'd rather get from the system
+rm -rf Telegram/ThirdParty/{GSL,hunspell,libdbusmenu-qt,libtgvoip,lz4,range-v3,rlottie,xxHash}
 cd ..
 mv tdesktop tdesktop-$V-full
 tar czf "$D/tdesktop-$V-full.tar.gz" tdesktop-$V-full

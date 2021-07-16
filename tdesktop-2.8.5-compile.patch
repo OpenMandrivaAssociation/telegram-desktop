@@ -34,18 +34,6 @@ diff -up tdesktop-2.8.5-full/Telegram/SourceFiles/history/view/media/history_vie
  
  	CountNicePercent(
  		gsl::make_span(VotesStorage).subspan(0, count),
-diff -up tdesktop-2.8.5-full/Telegram/SourceFiles/platform/linux/linux_gtk_integration_dummy.cpp.omv~ tdesktop-2.8.5-full/Telegram/SourceFiles/platform/linux/linux_gtk_integration_dummy.cpp
---- tdesktop-2.8.5-full/Telegram/SourceFiles/platform/linux/linux_gtk_integration_dummy.cpp.omv~	2021-07-06 21:53:48.825842634 +0200
-+++ tdesktop-2.8.5-full/Telegram/SourceFiles/platform/linux/linux_gtk_integration_dummy.cpp	2021-07-06 21:53:52.552565936 +0200
-@@ -41,7 +41,7 @@ QString GtkIntegration::AllowedBackends(
- 	return {};
- }
- 
--int GtkIntegration:Exec(
-+int GtkIntegration::Exec(
- 		Type type,
- 		const QString &parentDBusName,
- 		int ppid,
 diff -up tdesktop-2.8.5-full/Telegram/SourceFiles/ui/grouped_layout.cpp.omv~ tdesktop-2.8.5-full/Telegram/SourceFiles/ui/grouped_layout.cpp
 --- tdesktop-2.8.5-full/Telegram/SourceFiles/ui/grouped_layout.cpp.omv~	2021-07-06 16:37:30.585891475 +0200
 +++ tdesktop-2.8.5-full/Telegram/SourceFiles/ui/grouped_layout.cpp	2021-07-06 16:43:29.332867397 +0200
