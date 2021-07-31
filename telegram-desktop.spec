@@ -37,7 +37,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	2.8.11
+Version:	2.9.0
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -180,6 +180,7 @@ desktop-file-edit --set-key=Exec --set-value="%{_bindir}/%{name} -- %u" --copy-n
     -DCMAKE_BUILD_TYPE=Release \
 %if %{without gtk3}
     -DDESKTOP_APP_DISABLE_GTK_INTEGRATION:BOOL=ON \
+    -DDESKTOP_APP_DISABLE_WEBKITGTK:BOOL=ON \
 %endif
 %if %{without spellcheck}
     -DDESKTOP_APP_DISABLE_SPELLCHECK:BOOL=ON \

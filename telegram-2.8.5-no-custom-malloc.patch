@@ -1,6 +1,6 @@
-diff -up tdesktop-2.8.5-full/cmake/external/CMakeLists.txt.1~ tdesktop-2.8.5-full/cmake/external/CMakeLists.txt
---- tdesktop-2.8.5-full/cmake/external/CMakeLists.txt.1~	2021-07-06 16:03:16.000000000 +0200
-+++ tdesktop-2.8.5-full/cmake/external/CMakeLists.txt	2021-07-07 21:54:20.966012865 +0200
+diff -up tdesktop-2.9.0-full/cmake/external/CMakeLists.txt.2~ tdesktop-2.9.0-full/cmake/external/CMakeLists.txt
+--- tdesktop-2.9.0-full/cmake/external/CMakeLists.txt.2~	2021-07-31 02:47:23.000000000 +0200
++++ tdesktop-2.9.0-full/cmake/external/CMakeLists.txt	2021-07-31 02:50:19.846655022 +0200
 @@ -37,9 +37,6 @@ if (add_hunspell_library)
  	add_checked_subdirectory(hunspell)
  endif()
@@ -11,10 +11,10 @@ diff -up tdesktop-2.8.5-full/cmake/external/CMakeLists.txt.1~ tdesktop-2.8.5-ful
  add_checked_subdirectory(jpeg)
  if (LINUX AND NOT DESKTOP_APP_DISABLE_WAYLAND_INTEGRATION)
      add_checked_subdirectory(kwayland)
-diff -up tdesktop-2.8.5-full/cmake/external/jemalloc/CMakeLists.txt.1~ tdesktop-2.8.5-full/cmake/external/jemalloc/CMakeLists.txt
---- tdesktop-2.8.5-full/cmake/external/jemalloc/CMakeLists.txt.1~	2021-07-06 16:03:16.000000000 +0200
-+++ tdesktop-2.8.5-full/cmake/external/jemalloc/CMakeLists.txt	2021-07-07 21:54:20.966012865 +0200
-@@ -4,55 +4,55 @@
+diff -up tdesktop-2.9.0-full/cmake/external/jemalloc/CMakeLists.txt.2~ tdesktop-2.9.0-full/cmake/external/jemalloc/CMakeLists.txt
+--- tdesktop-2.9.0-full/cmake/external/jemalloc/CMakeLists.txt.2~	2021-07-31 02:50:19.846655022 +0200
++++ tdesktop-2.9.0-full/cmake/external/jemalloc/CMakeLists.txt	2021-07-31 02:51:05.263966849 +0200
+@@ -4,56 +4,56 @@
  # For license and copyright information please follow this link:
  # https://github.com/desktop-app/legal/blob/master/LEGAL
  
@@ -35,8 +35,9 @@ diff -up tdesktop-2.8.5-full/cmake/external/jemalloc/CMakeLists.txt.1~ tdesktop-
 -
 -    include(ExternalProject)
 -    ExternalProject_Add(jemalloc
--        URL https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2
--        CONFIGURE_COMMAND cd "${CMAKE_CURRENT_BINARY_DIR}/jemalloc-prefix/src/jemalloc" && ./configure
+-        SOURCE_DIR ${third_party_loc}/jemalloc
+-        CONFIGURE_COMMAND cd "${third_party_loc}/jemalloc" && ./autogen.sh
+-        INSTALL_COMMAND :
 -        BUILD_IN_SOURCE 1
 -    )
 -
@@ -49,7 +50,7 @@ diff -up tdesktop-2.8.5-full/cmake/external/jemalloc/CMakeLists.txt.1~ tdesktop-
 -        IMPORTED_LOCATION "${BINARY_DIR}/lib/libjemalloc.a"
 -    )
 -
--    target_include_directories(external_jemalloc_bundled
+-    target_include_directories(external_jemalloc_bundled SYSTEM
 -    INTERFACE
 -        ${SOURCE_DIR}/include
 -    )
@@ -87,8 +88,9 @@ diff -up tdesktop-2.8.5-full/cmake/external/jemalloc/CMakeLists.txt.1~ tdesktop-
 +#
 +#    include(ExternalProject)
 +#    ExternalProject_Add(jemalloc
-+#        URL https://github.com/jemalloc/jemalloc/releases/download/5.2.1/jemalloc-5.2.1.tar.bz2
-+#        CONFIGURE_COMMAND cd "${CMAKE_CURRENT_BINARY_DIR}/jemalloc-prefix/src/jemalloc" && ./configure
++#        SOURCE_DIR ${third_party_loc}/jemalloc
++#        CONFIGURE_COMMAND cd "${third_party_loc}/jemalloc" && ./autogen.sh
++#        INSTALL_COMMAND :
 +#        BUILD_IN_SOURCE 1
 +#    )
 +#
@@ -101,7 +103,7 @@ diff -up tdesktop-2.8.5-full/cmake/external/jemalloc/CMakeLists.txt.1~ tdesktop-
 +#        IMPORTED_LOCATION "${BINARY_DIR}/lib/libjemalloc.a"
 +#    )
 +#
-+#    target_include_directories(external_jemalloc_bundled
++#    target_include_directories(external_jemalloc_bundled SYSTEM
 +#    INTERFACE
 +#        ${SOURCE_DIR}/include
 +#    )
@@ -122,10 +124,10 @@ diff -up tdesktop-2.8.5-full/cmake/external/jemalloc/CMakeLists.txt.1~ tdesktop-
 +#        external_jemalloc_bundled
 +#    )
 +#endif()
-diff -up tdesktop-2.8.5-full/cmake/options_linux.cmake.1~ tdesktop-2.8.5-full/cmake/options_linux.cmake
---- tdesktop-2.8.5-full/cmake/options_linux.cmake.1~	2021-07-06 16:03:16.000000000 +0200
-+++ tdesktop-2.8.5-full/cmake/options_linux.cmake	2021-07-07 21:54:20.966012865 +0200
-@@ -48,10 +48,10 @@ if (DESKTOP_APP_SPECIAL_TARGET)
+diff -up tdesktop-2.9.0-full/cmake/options_linux.cmake.2~ tdesktop-2.9.0-full/cmake/options_linux.cmake
+--- tdesktop-2.9.0-full/cmake/options_linux.cmake.2~	2021-07-31 02:47:23.000000000 +0200
++++ tdesktop-2.9.0-full/cmake/options_linux.cmake	2021-07-31 02:50:19.846655022 +0200
+@@ -49,10 +49,10 @@ if (DESKTOP_APP_SPECIAL_TARGET)
      endif()
  endif()
  
@@ -140,18 +142,18 @@ diff -up tdesktop-2.8.5-full/cmake/options_linux.cmake.1~ tdesktop-2.8.5-full/cm
  
  if (DESKTOP_APP_USE_PACKAGED)
      find_library(ATOMIC_LIBRARY atomic)
-diff -up tdesktop-2.8.5-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp.1~ tdesktop-2.8.5-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp
---- tdesktop-2.8.5-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp.1~	2021-07-06 15:52:14.000000000 +0200
-+++ tdesktop-2.8.5-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp	2021-07-07 23:40:51.432827171 +0200
-@@ -48,7 +48,6 @@ https://github.com/telegramdesktop/tdesk
- #include <gio/gio.h>
+diff -up tdesktop-2.9.0-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp.2~ tdesktop-2.9.0-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp
+--- tdesktop-2.9.0-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp.2~	2021-07-31 02:46:27.000000000 +0200
++++ tdesktop-2.9.0-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp	2021-07-31 02:51:20.876074662 +0200
+@@ -45,7 +45,6 @@ https://github.com/telegramdesktop/tdesk
+ #include <private/qguiapplication_p.h>
  #include <glibmm.h>
  #include <giomm.h>
 -#include <jemalloc/jemalloc.h>
  
  #include <sys/stat.h>
  #include <sys/types.h>
-@@ -726,7 +725,6 @@ namespace Platform {
+@@ -642,7 +641,6 @@ namespace Platform {
  
  void start() {
  	auto backgroundThread = true;
