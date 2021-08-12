@@ -1,6 +1,6 @@
-diff -up tdesktop-2.9.0-full/cmake/external/CMakeLists.txt.2~ tdesktop-2.9.0-full/cmake/external/CMakeLists.txt
---- tdesktop-2.9.0-full/cmake/external/CMakeLists.txt.2~	2021-07-31 02:47:23.000000000 +0200
-+++ tdesktop-2.9.0-full/cmake/external/CMakeLists.txt	2021-07-31 02:50:19.846655022 +0200
+diff -up tdesktop-2.9.3-full/cmake/external/CMakeLists.txt.2~ tdesktop-2.9.3-full/cmake/external/CMakeLists.txt
+--- tdesktop-2.9.3-full/cmake/external/CMakeLists.txt.2~	2021-08-11 04:53:00.000000000 +0200
++++ tdesktop-2.9.3-full/cmake/external/CMakeLists.txt	2021-08-12 20:15:03.301907594 +0200
 @@ -37,9 +37,6 @@ if (add_hunspell_library)
  	add_checked_subdirectory(hunspell)
  endif()
@@ -11,13 +11,14 @@ diff -up tdesktop-2.9.0-full/cmake/external/CMakeLists.txt.2~ tdesktop-2.9.0-ful
  add_checked_subdirectory(jpeg)
  if (LINUX AND NOT DESKTOP_APP_DISABLE_WAYLAND_INTEGRATION)
      add_checked_subdirectory(kwayland)
-diff -up tdesktop-2.9.0-full/cmake/external/jemalloc/CMakeLists.txt.2~ tdesktop-2.9.0-full/cmake/external/jemalloc/CMakeLists.txt
---- tdesktop-2.9.0-full/cmake/external/jemalloc/CMakeLists.txt.2~	2021-07-31 02:50:19.846655022 +0200
-+++ tdesktop-2.9.0-full/cmake/external/jemalloc/CMakeLists.txt	2021-07-31 02:51:05.263966849 +0200
-@@ -4,56 +4,56 @@
+diff -up tdesktop-2.9.3-full/cmake/external/jemalloc/CMakeLists.txt.2~ tdesktop-2.9.3-full/cmake/external/jemalloc/CMakeLists.txt
+--- tdesktop-2.9.3-full/cmake/external/jemalloc/CMakeLists.txt.2~	2021-08-12 20:15:03.301907594 +0200
++++ tdesktop-2.9.3-full/cmake/external/jemalloc/CMakeLists.txt	2021-08-12 20:15:49.091165087 +0200
+@@ -3,56 +3,3 @@
+ #
  # For license and copyright information please follow this link:
  # https://github.com/desktop-app/legal/blob/master/LEGAL
- 
+-
 -add_library(external_jemalloc INTERFACE IMPORTED GLOBAL)
 -add_library(desktop-app::external_jemalloc ALIAS external_jemalloc)
 -
@@ -32,27 +33,26 @@ diff -up tdesktop-2.9.0-full/cmake/external/jemalloc/CMakeLists.txt.2~ tdesktop-
 -
 -if (NOT JEMALLOC_FOUND)
 -    add_library(external_jemalloc_bundled STATIC IMPORTED GLOBAL)
+-    set(jemalloc_loc ${third_party_loc}/jemalloc)
 -
 -    include(ExternalProject)
 -    ExternalProject_Add(jemalloc
--        SOURCE_DIR ${third_party_loc}/jemalloc
--        CONFIGURE_COMMAND cd "${third_party_loc}/jemalloc" && ./autogen.sh
+-        SOURCE_DIR ${jemalloc_loc}
+-        CONFIGURE_COMMAND cd "${jemalloc_loc}" && ./autogen.sh
 -        INSTALL_COMMAND :
 -        BUILD_IN_SOURCE 1
+-        BUILD_BYPRODUCTS ${jemalloc_loc}/lib/libjemalloc.a
 -    )
 -
--    ExternalProject_Get_property(jemalloc SOURCE_DIR)
--    ExternalProject_Get_property(jemalloc BINARY_DIR)
--
--    file(MAKE_DIRECTORY "${SOURCE_DIR}/include")
+-    file(MAKE_DIRECTORY "${jemalloc_loc}/include")
 -
 -    set_target_properties(external_jemalloc_bundled PROPERTIES
--        IMPORTED_LOCATION "${BINARY_DIR}/lib/libjemalloc.a"
+-        IMPORTED_LOCATION "${jemalloc_loc}/lib/libjemalloc.a"
 -    )
 -
 -    target_include_directories(external_jemalloc_bundled SYSTEM
 -    INTERFACE
--        ${SOURCE_DIR}/include
+-        ${jemalloc_loc}/include
 -    )
 -
 -    target_link_libraries(external_jemalloc_bundled
@@ -71,63 +71,10 @@ diff -up tdesktop-2.9.0-full/cmake/external/jemalloc/CMakeLists.txt.2~ tdesktop-
 -        external_jemalloc_bundled
 -    )
 -endif()
-+#add_library(external_jemalloc INTERFACE IMPORTED GLOBAL)
-+#add_library(desktop-app::external_jemalloc ALIAS external_jemalloc)
-+#
-+#if (DESKTOP_APP_USE_PACKAGED)
-+#    find_package(PkgConfig REQUIRED)
-+#    pkg_check_modules(JEMALLOC IMPORTED_TARGET jemalloc)
-+#
-+#    if (JEMALLOC_FOUND)
-+#        target_link_libraries(external_jemalloc INTERFACE PkgConfig::JEMALLOC)
-+#    endif()
-+#endif()
-+#
-+#if (NOT JEMALLOC_FOUND)
-+#    add_library(external_jemalloc_bundled STATIC IMPORTED GLOBAL)
-+#
-+#    include(ExternalProject)
-+#    ExternalProject_Add(jemalloc
-+#        SOURCE_DIR ${third_party_loc}/jemalloc
-+#        CONFIGURE_COMMAND cd "${third_party_loc}/jemalloc" && ./autogen.sh
-+#        INSTALL_COMMAND :
-+#        BUILD_IN_SOURCE 1
-+#    )
-+#
-+#    ExternalProject_Get_property(jemalloc SOURCE_DIR)
-+#    ExternalProject_Get_property(jemalloc BINARY_DIR)
-+#
-+#    file(MAKE_DIRECTORY "${SOURCE_DIR}/include")
-+#
-+#    set_target_properties(external_jemalloc_bundled PROPERTIES
-+#        IMPORTED_LOCATION "${BINARY_DIR}/lib/libjemalloc.a"
-+#    )
-+#
-+#    target_include_directories(external_jemalloc_bundled SYSTEM
-+#    INTERFACE
-+#        ${SOURCE_DIR}/include
-+#    )
-+#
-+#    target_link_libraries(external_jemalloc_bundled
-+#    INTERFACE
-+#        dl
-+#        pthread
-+#    )
-+#
-+#    add_dependencies(external_jemalloc_bundled jemalloc)
-+#
-+#    target_link_libraries(external_jemalloc
-+#    INTERFACE
-+#        -Wl,--whole-archive
-+#        $<TARGET_FILE:external_jemalloc_bundled>
-+#        -Wl,--no-whole-archive
-+#        external_jemalloc_bundled
-+#    )
-+#endif()
-diff -up tdesktop-2.9.0-full/cmake/options_linux.cmake.2~ tdesktop-2.9.0-full/cmake/options_linux.cmake
---- tdesktop-2.9.0-full/cmake/options_linux.cmake.2~	2021-07-31 02:47:23.000000000 +0200
-+++ tdesktop-2.9.0-full/cmake/options_linux.cmake	2021-07-31 02:50:19.846655022 +0200
-@@ -49,10 +49,10 @@ if (DESKTOP_APP_SPECIAL_TARGET)
+diff -up tdesktop-2.9.3-full/cmake/options_linux.cmake.2~ tdesktop-2.9.3-full/cmake/options_linux.cmake
+--- tdesktop-2.9.3-full/cmake/options_linux.cmake.2~	2021-08-12 20:15:03.301907594 +0200
++++ tdesktop-2.9.3-full/cmake/options_linux.cmake	2021-08-12 20:15:28.180047097 +0200
+@@ -45,10 +45,10 @@ if (DESKTOP_APP_SPECIAL_TARGET)
      endif()
  endif()
  
@@ -140,11 +87,11 @@ diff -up tdesktop-2.9.0-full/cmake/options_linux.cmake.2~ tdesktop-2.9.0-full/cm
 +#    desktop-app::external_jemalloc
 +#)
  
- if (DESKTOP_APP_USE_PACKAGED)
-     find_library(ATOMIC_LIBRARY atomic)
-diff -up tdesktop-2.9.0-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp.2~ tdesktop-2.9.0-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp
---- tdesktop-2.9.0-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp.2~	2021-07-31 02:46:27.000000000 +0200
-+++ tdesktop-2.9.0-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp	2021-07-31 02:51:20.876074662 +0200
+ if (DESKTOP_APP_USE_ALLOCATION_TRACER)
+     target_link_options(common_options
+diff -up tdesktop-2.9.3-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp.2~ tdesktop-2.9.3-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp
+--- tdesktop-2.9.3-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp.2~	2021-08-11 10:35:48.000000000 +0200
++++ tdesktop-2.9.3-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp	2021-08-12 20:15:03.302907600 +0200
 @@ -45,7 +45,6 @@ https://github.com/telegramdesktop/tdesk
  #include <private/qguiapplication_p.h>
  #include <glibmm.h>
