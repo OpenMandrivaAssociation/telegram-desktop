@@ -1,7 +1,7 @@
-diff -up tdesktop-2.8.5-full/Telegram/CMakeLists.txt.2~ tdesktop-2.8.5-full/Telegram/CMakeLists.txt
---- tdesktop-2.8.5-full/Telegram/CMakeLists.txt.2~	2021-07-06 16:21:37.247864520 +0200
-+++ tdesktop-2.8.5-full/Telegram/CMakeLists.txt	2021-07-06 16:25:24.411366982 +0200
-@@ -87,6 +87,7 @@ if (LINUX)
+diff -up tdesktop-2.9.4-full/Telegram/CMakeLists.txt.5~ tdesktop-2.9.4-full/Telegram/CMakeLists.txt
+--- tdesktop-2.9.4-full/Telegram/CMakeLists.txt.5~	2021-08-17 17:09:18.000000000 +0200
++++ tdesktop-2.9.4-full/Telegram/CMakeLists.txt	2021-08-18 18:13:26.682951589 +0200
+@@ -1264,6 +1264,7 @@ else()
      PRIVATE
          desktop-app::external_glibmm
          desktop-app::external_glib
@@ -9,11 +9,11 @@ diff -up tdesktop-2.8.5-full/Telegram/CMakeLists.txt.2~ tdesktop-2.8.5-full/Tele
      )
  
      if (NOT DESKTOP_APP_DISABLE_DBUS_INTEGRATION)
-diff -up tdesktop-2.8.5-full/Telegram/lib_lottie/lottie/lottie_animation.cpp.2~ tdesktop-2.8.5-full/Telegram/lib_lottie/lottie/lottie_animation.cpp
---- tdesktop-2.8.5-full/Telegram/lib_lottie/lottie/lottie_animation.cpp.2~	2021-07-06 16:03:16.000000000 +0200
-+++ tdesktop-2.8.5-full/Telegram/lib_lottie/lottie/lottie_animation.cpp	2021-07-06 16:21:37.247864520 +0200
-@@ -138,7 +138,7 @@ std::unique_ptr<rlottie::Animation> Crea
- 	const auto string = ReadUtf8(UnpackGzip(content));
+diff -up tdesktop-2.9.4-full/Telegram/lib_lottie/lottie/lottie_animation.cpp.5~ tdesktop-2.9.4-full/Telegram/lib_lottie/lottie/lottie_animation.cpp
+--- tdesktop-2.9.4-full/Telegram/lib_lottie/lottie/lottie_animation.cpp.5~	2021-08-18 18:13:26.682951589 +0200
++++ tdesktop-2.9.4-full/Telegram/lib_lottie/lottie/lottie_animation.cpp	2021-08-18 18:14:17.353032414 +0200
+@@ -104,7 +104,7 @@ std::unique_ptr<rlottie::Animation> Crea
+ 	const auto string = ReadUtf8(Images::UnpackGzip(content));
  	Assert(string.size() <= kMaxFileSize);
  
 -#ifndef DESKTOP_APP_USE_PACKAGED_RLOTTIE
@@ -21,9 +21,9 @@ diff -up tdesktop-2.8.5-full/Telegram/lib_lottie/lottie/lottie_animation.cpp.2~ 
  	auto result = rlottie::Animation::loadFromData(
  		string,
  		std::string(),
-diff -up tdesktop-2.8.5-full/Telegram/lib_lottie/lottie/lottie_icon.cpp.2~ tdesktop-2.8.5-full/Telegram/lib_lottie/lottie/lottie_icon.cpp
---- tdesktop-2.8.5-full/Telegram/lib_lottie/lottie/lottie_icon.cpp.2~	2021-07-06 16:03:16.000000000 +0200
-+++ tdesktop-2.8.5-full/Telegram/lib_lottie/lottie/lottie_icon.cpp	2021-07-06 16:21:37.247864520 +0200
+diff -up tdesktop-2.9.4-full/Telegram/lib_lottie/lottie/lottie_icon.cpp.5~ tdesktop-2.9.4-full/Telegram/lib_lottie/lottie/lottie_icon.cpp
+--- tdesktop-2.9.4-full/Telegram/lib_lottie/lottie/lottie_icon.cpp.5~	2021-08-11 18:54:28.000000000 +0200
++++ tdesktop-2.9.4-full/Telegram/lib_lottie/lottie/lottie_icon.cpp	2021-08-18 18:13:26.682951589 +0200
 @@ -22,7 +22,7 @@ namespace {
  		const QByteArray &content,
  		QColor replacement) {
