@@ -1,11 +1,11 @@
-diff -up tdesktop-2.9.8-full/Telegram/SourceFiles/media/streaming/media_streaming_video_track.cpp.omv~ tdesktop-2.9.8-full/Telegram/SourceFiles/media/streaming/media_streaming_video_track.cpp
---- tdesktop-2.9.8-full/Telegram/SourceFiles/media/streaming/media_streaming_video_track.cpp.omv~	2021-08-23 23:52:45.408930344 +0200
-+++ tdesktop-2.9.8-full/Telegram/SourceFiles/media/streaming/media_streaming_video_track.cpp	2021-08-23 23:54:40.352404127 +0200
-@@ -14,9 +14,11 @@ https://github.com/telegramdesktop/tdesk
- 
+diff -up tdesktop-2.9.12-full/Telegram/SourceFiles/media/streaming/media_streaming_video_track.cpp.7~ tdesktop-2.9.12-full/Telegram/SourceFiles/media/streaming/media_streaming_video_track.cpp
+--- tdesktop-2.9.12-full/Telegram/SourceFiles/media/streaming/media_streaming_video_track.cpp.7~	2021-08-24 20:08:35.000000000 +0200
++++ tdesktop-2.9.12-full/Telegram/SourceFiles/media/streaming/media_streaming_video_track.cpp	2021-08-25 15:52:31.571794564 +0200
+@@ -15,9 +15,11 @@ https://github.com/telegramdesktop/tdesk
  #include "zlib.h"
+ #include <cfenv>
  
-+#ifdef __MSCV__
++#ifdef __MSVC__
  extern "C" {
  extern int __isa_available;
  }
@@ -13,7 +13,7 @@ diff -up tdesktop-2.9.8-full/Telegram/SourceFiles/media/streaming/media_streamin
  
  #define TO_LOG(x) debugLog(QString x)
  
-@@ -203,7 +205,10 @@ VideoTrackObject::VideoTrackObject(
+@@ -229,7 +231,10 @@ VideoTrackObject::VideoTrackObject(
  	Expects(_error != nullptr);
  
  	TO_LOG(("created,speed:%1,mode:%2,position:%3,sync:%4,"
@@ -25,7 +25,7 @@ diff -up tdesktop-2.9.8-full/Telegram/SourceFiles/media/streaming/media_streamin
  		).arg(options.speed
  		).arg(int(options.mode)
  		).arg(options.position
-@@ -212,7 +217,10 @@ VideoTrackObject::VideoTrackObject(
+@@ -238,7 +243,10 @@ VideoTrackObject::VideoTrackObject(
  		).arg(options.waitForMarkAsShown ? "true" : "false"
  		).arg(_stream.duration
  		).arg(_shared->initialized() ? "true" : "false"
