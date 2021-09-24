@@ -55,7 +55,7 @@ Source0: %{url}/releases/download/v%{version}/%{appname}-%{version}%{tarsuffix}.
 Patch1: telegram-2.8.6-compile.patch
 Patch2: telegram-2.8.5-no-custom-malloc.patch
 Patch3: tdesktop-2.8.5-compile.patch
-Patch4:	tdesktop-2.1.7-openssl3.patch
+Patch4: tdesktop-2.1.7-openssl3.patch
 Patch5: tdesktop-2.3.2-no-underlinking.patch
 Patch6: tdesktop-2.7.9-compile.patch
 
@@ -116,6 +116,8 @@ BuildRequires: pkgconfig(libpulse)
 BuildRequires: pkgconfig(openh264)
 BuildRequires: pkgconfig(vpx)
 BuildRequires: pkgconfig(rnnoise)
+BuildRequires: pkgconfig(minizip)
+BuildRequires: pkgconfig(libzip)
 BuildRequires: cmake(RapidJSON)
 BuildRequires: cmake(Qt5Network)
 BuildRequires: cmake(Qt5Core)
