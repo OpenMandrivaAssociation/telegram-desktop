@@ -24,7 +24,9 @@
 
 # Applying workaround to RHBZ#1559007...
 %if %{with clang}
-%global optflags %(echo %{optflags} | sed -e 's/-mcet//g' -e 's/-fcf-protection//g' -e 's/-fstack-clash-protection//g' -e 's/$/ -Qunused-arguments -Wno-unknown-warning-option/')
+%global optflags %(echo %{optflags} | sed -e 's/-mcet//g' -e 's/-fcf-protection//g' -e 's/-fstack-clash-protection//g' -e 's/$/ -Qunused-arguments -Wno-unknown-warning-option/') -I%{_includedir}/minizip
+%else
+%global optflags %{optflags} -I%{_includedir}/minizip
 %endif
 
 %global build_ldflags %(echo %{build_ldflags} -Wl,-z,notext)
@@ -127,6 +129,7 @@ BuildRequires: cmake(Qt5WaylandClient)
 BuildRequires: cmake(Qt5XkbCommonSupport)
 BuildRequires: cmake(tg_owt)
 BuildRequires: cmake(kf5wayland)
+BuildRequires: pkgconfig(rlottie)
 BuildRequires: qt5-qtwayland-private-devel
 BuildRequires: wayland-devel
 BuildRequires: qt5-qtwayland
