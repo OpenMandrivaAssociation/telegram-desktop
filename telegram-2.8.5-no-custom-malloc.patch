@@ -1,6 +1,6 @@
-diff -up tdesktop-3.1.0-full/cmake/external/CMakeLists.txt.2~ tdesktop-3.1.0-full/cmake/external/CMakeLists.txt
---- tdesktop-3.1.0-full/cmake/external/CMakeLists.txt.2~	2021-09-19 11:28:52.000000000 +0200
-+++ tdesktop-3.1.0-full/cmake/external/CMakeLists.txt	2021-09-19 23:34:48.084016329 +0200
+diff -up tdesktop-3.1.5-full/cmake/external/CMakeLists.txt.2~ tdesktop-3.1.5-full/cmake/external/CMakeLists.txt
+--- tdesktop-3.1.5-full/cmake/external/CMakeLists.txt.2~	2021-10-04 14:50:25.000000000 +0200
++++ tdesktop-3.1.5-full/cmake/external/CMakeLists.txt	2021-10-04 14:53:57.278436800 +0200
 @@ -37,9 +37,6 @@ if (add_hunspell_library)
  	add_checked_subdirectory(hunspell)
  endif()
@@ -11,13 +11,15 @@ diff -up tdesktop-3.1.0-full/cmake/external/CMakeLists.txt.2~ tdesktop-3.1.0-ful
  add_checked_subdirectory(jpeg)
  if (LINUX AND NOT DESKTOP_APP_DISABLE_WAYLAND_INTEGRATION)
      add_checked_subdirectory(kwayland)
-diff -up tdesktop-3.1.0-full/cmake/external/jemalloc/CMakeLists.txt.2~ tdesktop-3.1.0-full/cmake/external/jemalloc/CMakeLists.txt
---- tdesktop-3.1.0-full/cmake/external/jemalloc/CMakeLists.txt.2~	2021-09-19 23:34:48.084016329 +0200
-+++ tdesktop-3.1.0-full/cmake/external/jemalloc/CMakeLists.txt	2021-09-19 23:38:28.043189141 +0200
-@@ -3,66 +3,3 @@
- #
- # For license and copyright information please follow this link:
- # https://github.com/desktop-app/legal/blob/master/LEGAL
+diff -up tdesktop-3.1.5-full/cmake/external/jemalloc/CMakeLists.txt.2~ tdesktop-3.1.5-full/cmake/external/jemalloc/CMakeLists.txt
+--- tdesktop-3.1.5-full/cmake/external/jemalloc/CMakeLists.txt.2~	2021-10-04 14:53:57.279436821 +0200
++++ tdesktop-3.1.5-full/cmake/external/jemalloc/CMakeLists.txt	2021-10-04 15:11:11.703131952 +0200
+@@ -1,68 +0,0 @@
+-# This file is part of Desktop App Toolkit,
+-# a set of libraries for developing nice desktop applications.
+-#
+-# For license and copyright information please follow this link:
+-# https://github.com/desktop-app/legal/blob/master/LEGAL
 -
 -add_library(external_jemalloc INTERFACE IMPORTED GLOBAL)
 -add_library(desktop-app::external_jemalloc ALIAS external_jemalloc)
@@ -48,7 +50,7 @@ diff -up tdesktop-3.1.0-full/cmake/external/jemalloc/CMakeLists.txt.2~ tdesktop-
 -    include(ExternalProject)
 -    ExternalProject_Add(jemalloc
 -        SOURCE_DIR ${jemalloc_loc}
--        CONFIGURE_COMMAND cd "${jemalloc_loc}" && CC=clang CXX=clang++ EXTRA_CFLAGS=-fPIE EXTRA_CXXFLAGS=-fPIE ./autogen.sh
+-        CONFIGURE_COMMAND cd "${jemalloc_loc}" && export EXTRA_CFLAGS=-fstack-protector-all\ -fPIC\ -D_FORTIFY_SOURCE=2 && export EXTRA_CXXFLAGS=-fstack-protector-all\ -fPIC\ -D_FORTIFY_SOURCE=2 && CC=clang CXX=clang++ ./autogen.sh
 -        INSTALL_COMMAND :
 -        BUILD_IN_SOURCE 1
 -        BUILD_BYPRODUCTS ${jemalloc_loc}/lib/libjemalloc.a
@@ -81,10 +83,10 @@ diff -up tdesktop-3.1.0-full/cmake/external/jemalloc/CMakeLists.txt.2~ tdesktop-
 -        external_jemalloc_bundled
 -    )
 -endif()
-diff -up tdesktop-3.1.0-full/cmake/options_linux.cmake.2~ tdesktop-3.1.0-full/cmake/options_linux.cmake
---- tdesktop-3.1.0-full/cmake/options_linux.cmake.2~	2021-09-19 11:28:52.000000000 +0200
-+++ tdesktop-3.1.0-full/cmake/options_linux.cmake	2021-09-19 23:34:48.084016329 +0200
-@@ -45,10 +45,10 @@ if (DESKTOP_APP_SPECIAL_TARGET)
+diff -up tdesktop-3.1.5-full/cmake/options_linux.cmake.2~ tdesktop-3.1.5-full/cmake/options_linux.cmake
+--- tdesktop-3.1.5-full/cmake/options_linux.cmake.2~	2021-10-04 14:50:25.000000000 +0200
++++ tdesktop-3.1.5-full/cmake/options_linux.cmake	2021-10-04 14:53:57.279436821 +0200
+@@ -52,10 +52,10 @@ if (DESKTOP_APP_SPECIAL_TARGET)
      target_link_options(common_options INTERFACE $<IF:$<CONFIG:Debug>,,-g -flto -fuse-linker-plugin>)
  endif()
  
@@ -99,9 +101,9 @@ diff -up tdesktop-3.1.0-full/cmake/options_linux.cmake.2~ tdesktop-3.1.0-full/cm
  
  if (DESKTOP_APP_USE_ALLOCATION_TRACER)
      target_link_options(common_options
-diff -up tdesktop-3.1.0-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp.2~ tdesktop-3.1.0-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp
---- tdesktop-3.1.0-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp.2~	2021-09-19 23:34:48.085016344 +0200
-+++ tdesktop-3.1.0-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp	2021-09-19 23:39:00.478923174 +0200
+diff -up tdesktop-3.1.5-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp.2~ tdesktop-3.1.5-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp
+--- tdesktop-3.1.5-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp.2~	2021-10-04 14:47:25.000000000 +0200
++++ tdesktop-3.1.5-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp	2021-10-04 14:53:57.279436821 +0200
 @@ -47,12 +47,6 @@ https://github.com/telegramdesktop/tdesk
  
  #include <private/qguiapplication_p.h>

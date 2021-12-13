@@ -39,8 +39,8 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	3.1.0
-Release:	2
+Version:	3.3.0
+Release:	1
 
 # Application and 3rd-party modules licensing:
 # * Telegram Desktop - GPLv3+ with OpenSSL exception -- main tarball;
@@ -69,7 +69,7 @@ Requires: hicolor-icon-theme
 # Telegram Desktop require patched version of rlottie since 1.8.0.
 # Pull Request pending: https://github.com/Samsung/rlottie/pull/252
 %if %{with rlottie}
-BuildRequires: rlottie-devel >= 0-7.20200825gitff8ddfc
+BuildRequires: pkgconfig(rlottie)
 %else
 Provides: bundled(rlottie) = 0~git
 %endif
@@ -129,7 +129,6 @@ BuildRequires: cmake(Qt5WaylandClient)
 BuildRequires: cmake(Qt5XkbCommonSupport)
 BuildRequires: cmake(tg_owt)
 BuildRequires: cmake(kf5wayland)
-BuildRequires: pkgconfig(rlottie)
 BuildRequires: qt5-qtwayland-private-devel
 BuildRequires: wayland-devel
 BuildRequires: qt5-qtwayland
@@ -182,8 +181,12 @@ rm -rf Telegram/ThirdParty/{Catch,GSL,QR,SPMediaKeyTap,expected,libdbusmenu-qt,l
 # Patching default desktop file...
 desktop-file-edit --set-key=Exec --set-value="%{_bindir}/%{name} -- %u" --copy-name-to-generic-name lib/xdg/telegramdesktop.desktop
 
+# We disable Qt6 below because it's just another toolkit on top of KDE5.
+# Enable it once KDE uses Qt 6!
+
 %cmake -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
+    -DDESKTOP_APP_QT6:BOOL=OFF \
 %if %{without gtk3}
     -DDESKTOP_APP_DISABLE_GTK_INTEGRATION:BOOL=ON \
     -DDESKTOP_APP_DISABLE_WEBKITGTK:BOOL=ON \
@@ -202,6 +205,7 @@ desktop-file-edit --set-key=Exec --set-value="%{_bindir}/%{name} -- %u" --copy-n
     -DDESKTOP_APP_LOTTIE_USE_CACHE:BOOL=OFF \
 %else
     -DDESKTOP_APP_USE_PACKAGED_RLOTTIE:BOOL=OFF \
+    -Drlottie_DIR=`pwd`/../Telegram/ThirdParty/rlottie \
 %endif
 %if %{with clang}
     -DCMAKE_C_COMPILER=clang \
