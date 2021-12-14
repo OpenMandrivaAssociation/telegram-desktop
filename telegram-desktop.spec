@@ -253,4 +253,4 @@ desktop-file-validate %{buildroot}%{_datadir}/applications/%{launcher}.desktop
 %{_bindir}/%{name}
 %{_datadir}/applications/%{launcher}.desktop
 %{_datadir}/icons/hicolor/*/apps/*.png
-%{_metainfodir}/%{launcher}.appdata.xml
+%optional %{_metainfodir}/%{launcher}.appdata.xml
