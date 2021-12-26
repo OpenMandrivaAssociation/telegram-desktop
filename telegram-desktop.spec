@@ -39,8 +39,8 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	3.3.0
-Release:	2
+Version:	3.3.1
+Release:	1
 
 # Application and 3rd-party modules licensing:
 # * Telegram Desktop - GPLv3+ with OpenSSL exception -- main tarball;
@@ -57,7 +57,7 @@ Source0: %{url}/releases/download/v%{version}/%{appname}-%{version}%{tarsuffix}.
 Patch1: telegram-2.8.6-compile.patch
 Patch2: telegram-2.8.5-no-custom-malloc.patch
 Patch3: tdesktop-2.8.5-compile.patch
-Patch4: tdesktop-2.1.7-openssl3.patch
+Patch4: tdesktop-3.3.1-fix-warnings.patch
 Patch5: tdesktop-2.3.2-no-underlinking.patch
 Patch6: tdesktop-2.7.9-compile.patch
 
@@ -244,7 +244,7 @@ touch build/changelog.txt
 %ninja_install -C build
 
 %check
-#appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/%{launcher}.appdata.xml
+appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/%{launcher}.metainfo.xml
 desktop-file-validate %{buildroot}%{_datadir}/applications/%{launcher}.desktop
 
 %files
@@ -253,4 +253,4 @@ desktop-file-validate %{buildroot}%{_datadir}/applications/%{launcher}.desktop
 %{_bindir}/%{name}
 %{_datadir}/applications/%{launcher}.desktop
 %{_datadir}/icons/hicolor/*/apps/*.png
-%optional %{_metainfodir}/%{launcher}.appdata.xml
+%optional %{_metainfodir}/%{launcher}.metainfo.xml
