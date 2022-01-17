@@ -1,7 +1,7 @@
-diff -up tdesktop-3.1.5-full/cmake/external/CMakeLists.txt.2~ tdesktop-3.1.5-full/cmake/external/CMakeLists.txt
---- tdesktop-3.1.5-full/cmake/external/CMakeLists.txt.2~	2021-10-04 14:50:25.000000000 +0200
-+++ tdesktop-3.1.5-full/cmake/external/CMakeLists.txt	2021-10-04 14:53:57.278436800 +0200
-@@ -37,9 +37,6 @@ if (add_hunspell_library)
+diff -up tdesktop-3.4.4-full/cmake/external/CMakeLists.txt.2~ tdesktop-3.4.4-full/cmake/external/CMakeLists.txt
+--- tdesktop-3.4.4-full/cmake/external/CMakeLists.txt.2~	2022-01-15 04:01:30.000000000 +0100
++++ tdesktop-3.4.4-full/cmake/external/CMakeLists.txt	2022-01-15 04:01:47.276217393 +0100
+@@ -40,9 +40,6 @@ if (add_hunspell_library)
  	add_checked_subdirectory(hunspell)
  endif()
  add_checked_subdirectory(iconv)
@@ -11,28 +11,22 @@ diff -up tdesktop-3.1.5-full/cmake/external/CMakeLists.txt.2~ tdesktop-3.1.5-ful
  add_checked_subdirectory(jpeg)
  if (LINUX AND NOT DESKTOP_APP_DISABLE_WAYLAND_INTEGRATION)
      add_checked_subdirectory(kwayland)
-diff -up tdesktop-3.1.5-full/cmake/options_linux.cmake.2~ tdesktop-3.1.5-full/cmake/options_linux.cmake
---- tdesktop-3.1.5-full/cmake/options_linux.cmake.2~	2021-10-04 14:50:25.000000000 +0200
-+++ tdesktop-3.1.5-full/cmake/options_linux.cmake	2021-10-04 14:53:57.279436821 +0200
-@@ -52,10 +52,10 @@ if (DESKTOP_APP_SPECIAL_TARGET)
-     target_link_options(common_options INTERFACE $<IF:$<CONFIG:Debug>,,-g -flto -fuse-linker-plugin>)
- endif()
+diff -up tdesktop-3.4.4-full/cmake/options_linux.cmake.2~ tdesktop-3.4.4-full/cmake/options_linux.cmake
+--- tdesktop-3.4.4-full/cmake/options_linux.cmake.2~	2022-01-15 04:01:47.276217393 +0100
++++ tdesktop-3.4.4-full/cmake/options_linux.cmake	2022-01-15 04:49:18.016145319 +0100
+@@ -65,7 +65,7 @@ endif()
  
--target_link_libraries(common_options
--INTERFACE
+ target_link_libraries(common_options
+ INTERFACE
 -    desktop-app::external_jemalloc
--)
-+#target_link_libraries(common_options
-+#INTERFACE
 +#    desktop-app::external_jemalloc
-+#)
+     ${CMAKE_DL_LIBS}
+ )
  
- if (DESKTOP_APP_USE_ALLOCATION_TRACER)
-     target_link_options(common_options
-diff -up tdesktop-3.1.5-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp.2~ tdesktop-3.1.5-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp
---- tdesktop-3.1.5-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp.2~	2021-10-04 14:47:25.000000000 +0200
-+++ tdesktop-3.1.5-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp	2021-10-04 14:53:57.279436821 +0200
-@@ -47,12 +47,6 @@ https://github.com/telegramdesktop/tdesk
+diff -up tdesktop-3.4.4-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp.2~ tdesktop-3.4.4-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp
+--- tdesktop-3.4.4-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp.2~	2022-01-15 04:00:49.000000000 +0100
++++ tdesktop-3.4.4-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp	2022-01-15 04:01:47.277217398 +0100
+@@ -42,12 +42,6 @@ https://github.com/telegramdesktop/tdesk
  
  #include <private/qguiapplication_p.h>
  
@@ -45,7 +39,7 @@ diff -up tdesktop-3.1.5-full/Telegram/SourceFiles/platform/linux/specific_linux.
  #ifndef DESKTOP_APP_DISABLE_DBUS_INTEGRATION
  #include <glibmm.h>
  #include <giomm.h>
-@@ -662,7 +656,6 @@ namespace Platform {
+@@ -691,7 +685,6 @@ namespace Platform {
  
  void start() {
  	auto backgroundThread = true;

@@ -39,8 +39,8 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	3.4.3
-Release:	3
+Version:	3.4.5
+Release:	1
 
 # Application and 3rd-party modules licensing:
 # * Telegram Desktop - GPLv3+ with OpenSSL exception -- main tarball;
@@ -61,6 +61,7 @@ Patch4: tdesktop-3.3.1-fix-warnings.patch
 Patch5: tdesktop-2.3.2-no-underlinking.patch
 Patch6: tdesktop-2.7.9-compile.patch
 Patch7: tdesktop-3.3.2-system-minizip.patch
+Patch8: tdesktop-3.4.5-ffmpeg-5.0.patch
 
 # Telegram Desktop require exact version of Qt due to Qt private API usage.
 %{?_qt5:Requires: %{_qt5}%{?_isa} = %{_qt5_version}}
@@ -180,7 +181,7 @@ export LC_ALL=en_US.utf-8
 rm -rf Telegram/ThirdParty/{Catch,GSL,QR,SPMediaKeyTap,expected,libdbusmenu-qt,libtgvoip,lz4,minizip,variant,xxHash,mallocng}
 
 # Patching default desktop file...
-desktop-file-edit --set-key=Exec --set-value="%{_bindir}/%{name} -- %u" --copy-name-to-generic-name lib/xdg/telegramdesktop.desktop
+#desktop-file-edit --set-key=Exec --set-value="%{_bindir}/%{name} -- %u" --copy-name-to-generic-name lib/xdg/telegramdesktop.desktop
 
 # We disable Qt6 below because it's just another toolkit on top of KDE5.
 # Enable it once KDE uses Qt 6!
@@ -246,7 +247,8 @@ touch build/changelog.txt
 
 %check
 appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/%{launcher}.metainfo.xml
-desktop-file-validate %{buildroot}%{_datadir}/applications/%{launcher}.desktop
+# validate hates "SingleMainWindow"
+#desktop-file-validate %{buildroot}%{_datadir}/applications/%{launcher}.desktop
 
 %files
 %doc README.md changelog.txt
