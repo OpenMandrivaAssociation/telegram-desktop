@@ -1,17 +1,17 @@
-diff -up tdesktop-3.4.4-full/Telegram/CMakeLists.txt.5~ tdesktop-3.4.4-full/Telegram/CMakeLists.txt
---- tdesktop-3.4.4-full/Telegram/CMakeLists.txt.5~	2022-01-15 04:00:49.000000000 +0100
-+++ tdesktop-3.4.4-full/Telegram/CMakeLists.txt	2022-01-15 04:49:35.447166595 +0100
-@@ -1338,6 +1338,7 @@ else()
-             desktop-app::external_dbusmenu_qt
-             desktop-app::external_glibmm
-             desktop-app::external_glib
-+	    -ldl -ljpeg -lvpx -lopenh264
-         )
-     endif()
+diff -up tdesktop-4.0.2-full/Telegram/CMakeLists.txt.3~ tdesktop-4.0.2-full/Telegram/CMakeLists.txt
+--- tdesktop-4.0.2-full/Telegram/CMakeLists.txt.3~	2022-07-06 00:29:57.551760503 +0200
++++ tdesktop-4.0.2-full/Telegram/CMakeLists.txt	2022-07-06 00:34:03.449800015 +0200
+@@ -93,6 +93,7 @@ PRIVATE
+     desktop-app::external_openssl
+     desktop-app::external_openal
+     desktop-app::external_xxhash
++    -ldl -ljpeg -lvpx -lopenh264
+ )
  
-diff -up tdesktop-3.4.4-full/Telegram/lib_lottie/lottie/lottie_icon.cpp.5~ tdesktop-3.4.4-full/Telegram/lib_lottie/lottie/lottie_icon.cpp
---- tdesktop-3.4.4-full/Telegram/lib_lottie/lottie/lottie_icon.cpp.5~	2022-01-15 04:49:35.447166595 +0100
-+++ tdesktop-3.4.4-full/Telegram/lib_lottie/lottie/lottie_icon.cpp	2022-01-15 04:50:17.010224472 +0100
+ target_precompile_headers(Telegram PRIVATE $<$<COMPILE_LANGUAGE:CXX,OBJCXX>:${src_loc}/stdafx.h>)
+diff -up tdesktop-4.0.2-full/Telegram/lib_lottie/lottie/lottie_icon.cpp.3~ tdesktop-4.0.2-full/Telegram/lib_lottie/lottie/lottie_icon.cpp
+--- tdesktop-4.0.2-full/Telegram/lib_lottie/lottie/lottie_icon.cpp.3~	2022-06-20 19:27:52.000000000 +0200
++++ tdesktop-4.0.2-full/Telegram/lib_lottie/lottie/lottie_icon.cpp	2022-07-06 00:29:57.555093855 +0200
 @@ -23,7 +23,7 @@ namespace {
  		const QByteArray &content,
  		QColor replacement) {

@@ -1,0 +1,11 @@
+diff -up tdesktop-4.0.2-full/Telegram/ThirdParty/tgcalls/tgcalls/utils/gzip.h.omv~ tdesktop-4.0.2-full/Telegram/ThirdParty/tgcalls/tgcalls/utils/gzip.h
+--- tdesktop-4.0.2-full/Telegram/ThirdParty/tgcalls/tgcalls/utils/gzip.h.omv~	2022-07-13 00:32:17.741297548 +0200
++++ tdesktop-4.0.2-full/Telegram/ThirdParty/tgcalls/tgcalls/utils/gzip.h	2022-07-13 00:32:23.029157311 +0200
+@@ -3,6 +3,7 @@
+ 
+ #include <absl/types/optional.h>
+ #include <vector>
++#include <cstdint>
+ 
+ namespace tgcalls {
+ 

@@ -39,7 +39,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	3.4.8
+Version:	4.0.2
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -55,13 +55,11 @@ Summary: Telegram Desktop official messaging app
 # use the package-source.sh script in this repository.
 Source0: %{url}/releases/download/v%{version}/%{appname}-%{version}%{tarsuffix}.tar.gz
 Patch1: telegram-2.8.6-compile.patch
-Patch2: telegram-2.8.5-no-custom-malloc.patch
 Patch3: tdesktop-2.8.5-compile.patch
-Patch4: tdesktop-3.3.1-fix-warnings.patch
 Patch5: tdesktop-2.3.2-no-underlinking.patch
 Patch6: tdesktop-2.7.9-compile.patch
 Patch7: tdesktop-3.3.2-system-minizip.patch
-Patch8: tdesktop-3.4.5-ffmpeg-5.0.patch
+Patch8: tdesktop-4.0.2-compile.patch
 
 # Telegram Desktop require exact version of Qt due to Qt private API usage.
 %{?_qt5:Requires: %{_qt5}%{?_isa} = %{_qt5_version}}
@@ -189,6 +187,7 @@ rm -rf Telegram/ThirdParty/{Catch,GSL,QR,SPMediaKeyTap,expected,libdbusmenu-qt,l
 %cmake -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DDESKTOP_APP_QT6:BOOL=OFF \
+    -DDESKTOP_APP_DISABLE_JEMALLOC:BOOL=ON \
 %if %{without gtk3}
     -DDESKTOP_APP_DISABLE_GTK_INTEGRATION:BOOL=ON \
     -DDESKTOP_APP_DISABLE_WEBKITGTK:BOOL=ON \

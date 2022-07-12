@@ -1,12 +1,12 @@
-diff -up tdesktop-3.3.0-full/Telegram/SourceFiles/api/api_media.cpp.1~ tdesktop-3.3.0-full/Telegram/SourceFiles/api/api_media.cpp
---- tdesktop-3.3.0-full/Telegram/SourceFiles/api/api_media.cpp.1~	2021-12-12 03:59:29.589140809 +0100
-+++ tdesktop-3.3.0-full/Telegram/SourceFiles/api/api_media.cpp	2021-12-12 04:00:30.742420743 +0100
+diff -up tdesktop-4.0.2-full/Telegram/SourceFiles/api/api_media.cpp.1~ tdesktop-4.0.2-full/Telegram/SourceFiles/api/api_media.cpp
+--- tdesktop-4.0.2-full/Telegram/SourceFiles/api/api_media.cpp.1~	2022-07-05 23:33:27.228983307 +0200
++++ tdesktop-4.0.2-full/Telegram/SourceFiles/api/api_media.cpp	2022-07-05 23:34:05.555861695 +0200
 @@ -83,7 +83,7 @@ MTPInputMedia PrepareUploadedPhoto(Remot
  		MTP_flags(flags),
  		info.file,
  		MTP_vector<MTPInputDocument>(
--			ranges::to<QVector>(info.attachedStickers)),
-+			ranges::_to_::to<QVector>(info.attachedStickers)),
+-			ranges::to<QVector<MTPInputDocument>>(info.attachedStickers)),
++			ranges::_to_::to<QVector<MTPInputDocument>>(info.attachedStickers)),
  		MTP_int(0));
  }
  
@@ -14,8 +14,8 @@ diff -up tdesktop-3.3.0-full/Telegram/SourceFiles/api/api_media.cpp.1~ tdesktop-
  		MTP_string(document->mimeString()),
  		ComposeSendingDocumentAttributes(document),
  		MTP_vector<MTPInputDocument>(
--			ranges::to<QVector>(info.attachedStickers)),
-+			ranges::_to_::to<QVector>(info.attachedStickers)),
+-			ranges::to<QVector<MTPInputDocument>>(info.attachedStickers)),
++			ranges::_to_::to<QVector<MTPInputDocument>>(info.attachedStickers)),
  		MTP_int(0));
  }
  

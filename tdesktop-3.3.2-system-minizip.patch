@@ -1,19 +1,18 @@
-diff -up tdesktop-3.3.2-full/cmake/external/CMakeLists.txt.omv~ tdesktop-3.3.2-full/cmake/external/CMakeLists.txt
---- tdesktop-3.3.2-full/cmake/external/CMakeLists.txt.omv~	2021-12-31 02:48:05.491914056 +0100
-+++ tdesktop-3.3.2-full/cmake/external/CMakeLists.txt	2021-12-31 02:51:07.001410771 +0100
-@@ -45,7 +45,7 @@ if (LINUX AND NOT DESKTOP_APP_DISABLE_WA
-     add_checked_subdirectory(kwayland)
+diff -up tdesktop-4.0.2-full/cmake/external/CMakeLists.txt.5~ tdesktop-4.0.2-full/cmake/external/CMakeLists.txt
+--- tdesktop-4.0.2-full/cmake/external/CMakeLists.txt.5~	2022-07-06 00:34:18.376550280 +0200
++++ tdesktop-4.0.2-full/cmake/external/CMakeLists.txt	2022-07-06 00:34:59.853449373 +0200
+@@ -42,7 +42,7 @@ if (LINUX AND NOT DESKTOP_APP_DISABLE_JE
  endif()
+ add_checked_subdirectory(jpeg)
  add_checked_subdirectory(lz4)
 -add_checked_subdirectory(minizip)
 +#add_checked_subdirectory(minizip)
  if (LINUX)
      add_checked_subdirectory(nimf_qt5)
  endif()
-diff -up tdesktop-3.3.2-full/CMakeLists.txt.omv~ tdesktop-3.3.2-full/CMakeLists.txt
-diff -up tdesktop-3.3.2-full/Telegram/CMakeLists.txt.omv~ tdesktop-3.3.2-full/Telegram/CMakeLists.txt
---- tdesktop-3.3.2-full/Telegram/CMakeLists.txt.omv~	2021-12-31 02:47:40.723846408 +0100
-+++ tdesktop-3.3.2-full/Telegram/CMakeLists.txt	2021-12-31 02:47:55.644887157 +0100
+diff -up tdesktop-4.0.2-full/Telegram/CMakeLists.txt.5~ tdesktop-4.0.2-full/Telegram/CMakeLists.txt
+--- tdesktop-4.0.2-full/Telegram/CMakeLists.txt.5~	2022-07-06 00:34:18.356550169 +0200
++++ tdesktop-4.0.2-full/Telegram/CMakeLists.txt	2022-07-06 00:34:18.376550280 +0200
 @@ -64,7 +64,7 @@ PRIVATE
      # include paths (usually ${PREFIX}/include/minizip) before any depend that
      # would add ${PREFIX}/include. This path may have a different <zip.h>,
