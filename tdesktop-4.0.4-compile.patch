@@ -1,0 +1,22 @@
+diff -up tdesktop-4.0.4-full/Telegram/lib_lottie/lottie/lottie_emoji.h.omv~ tdesktop-4.0.4-full/Telegram/lib_lottie/lottie/lottie_emoji.h
+--- tdesktop-4.0.4-full/Telegram/lib_lottie/lottie/lottie_emoji.h.omv~	2022-08-06 13:35:56.845194005 +0200
++++ tdesktop-4.0.4-full/Telegram/lib_lottie/lottie/lottie_emoji.h	2022-08-06 13:36:03.022075848 +0200
+@@ -9,6 +9,7 @@
+ #include "ui/effects/frame_generator.h"
+ 
+ #include <QtGui/QImage>
++#include <memory>
+ 
+ namespace rlottie {
+ class Animation;
+diff -up tdesktop-4.0.4-full/Telegram/SourceFiles/ffmpeg/ffmpeg_emoji.h.omv~ tdesktop-4.0.4-full/Telegram/SourceFiles/ffmpeg/ffmpeg_emoji.h
+--- tdesktop-4.0.4-full/Telegram/SourceFiles/ffmpeg/ffmpeg_emoji.h.omv~	2022-08-06 13:25:08.127464700 +0200
++++ tdesktop-4.0.4-full/Telegram/SourceFiles/ffmpeg/ffmpeg_emoji.h	2022-08-06 13:25:13.852350919 +0200
+@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesk
+ */
+ #pragma once
+ 
++#include <memory>
+ #include "ui/effects/frame_generator.h"
+ 
+ #include <QtGui/QImage>
