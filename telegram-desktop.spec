@@ -129,6 +129,7 @@ BuildRequires: cmake(Qt5WaylandClient)
 BuildRequires: cmake(Qt5XkbCommonSupport)
 BuildRequires: cmake(tg_owt)
 BuildRequires: cmake(kf5wayland)
+BuildRequires: cmake(KF5CoreAddons)
 BuildRequires: qt5-qtwayland-private-devel
 BuildRequires: wayland-devel
 BuildRequires: qt5-qtwayland
