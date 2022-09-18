@@ -39,7 +39,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	4.1.1
+Version:	4.2.0
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -59,8 +59,7 @@ Patch3: tdesktop-2.8.5-compile.patch
 Patch5: tdesktop-2.3.2-no-underlinking.patch
 Patch6: tdesktop-2.7.9-compile.patch
 Patch7: tdesktop-3.3.2-system-minizip.patch
-Patch8: tdesktop-4.0.2-compile.patch
-Patch9: tdesktop-4.0.4-compile.patch
+#Patch9: tdesktop-4.0.4-compile.patch
 
 # Telegram Desktop require exact version of Qt due to Qt private API usage.
 %{?_qt5:Requires: %{_qt5}%{?_isa} = %{_qt5_version}}
