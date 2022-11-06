@@ -39,7 +39,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	4.2.4
+Version:	4.3.0
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -89,7 +89,7 @@ BuildRequires: mapbox-variant-devel
 BuildRequires: pkgconfig(libavcodec)
 BuildRequires: pkgconfig(libavformat)
 BuildRequires: pkgconfig(xkbcommon)
-BuildRequires: pkgconfig(glibmm-2.4)
+BuildRequires: pkgconfig(glibmm-2.68)
 BuildRequires: cmake(ECM)
 BuildRequires: cmake(tl-expected)
 BuildRequires: pkgconfig(libyuv)
