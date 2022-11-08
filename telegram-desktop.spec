@@ -39,7 +39,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	4.3.0
+Version:	4.3.1
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -53,7 +53,7 @@ Summary: Telegram Desktop official messaging app
 # Source files...
 # Upstream frequently forgets to make the -full release. When that happens,
 # use the package-source.sh script in this repository.
-Source0: %{url}/releases/download/v%{version}/%{appname}-%{version}%{tarsuffix}.tar.gz
+Source0: https://github.com/telegramdesktop/tdesktop/releases/download/v%{version}/%{appname}-%{version}%{tarsuffix}.tar.gz
 Patch1: telegram-2.8.6-compile.patch
 Patch3: tdesktop-2.8.5-compile.patch
 Patch5: tdesktop-2.3.2-no-underlinking.patch
