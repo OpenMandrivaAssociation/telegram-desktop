@@ -143,6 +143,7 @@ BuildRequires: yasm
 # FIXME At some point the cmake files should stop looking
 # for libraries that aren't being used
 BuildRequires: cmake(Qt5Svg)
+BuildRequires: cmake(KF5CoreAddons)
 
 %if %{with gtk3}
 BuildRequires: pkgconfig(appindicator3-0.1)
