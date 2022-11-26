@@ -140,6 +140,9 @@ BuildRequires: ninja
 %ifarch %{x86_64} %{ix86}
 BuildRequires: yasm
 %endif
+# FIXME At some point the cmake files should stop looking
+# for libraries that aren't being used
+BuildRequires: cmake(Qt5Svg)
 
 %if %{with gtk3}
 BuildRequires: pkgconfig(appindicator3-0.1)
