@@ -39,7 +39,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	4.3.1
+Version:	4.3.4
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -108,7 +108,6 @@ BuildRequires: pkgconfig(libxxhash)
 BuildRequires: appstream-util
 BuildRequires: pkgconfig(opus)
 BuildRequires: pkgconfig(liblzma)
-BuildRequires: pkgconfig(Qt5Gui)
 BuildRequires: pkgconfig(json11)
 BuildRequires: pkgconfig(liblz4)
 BuildRequires: pkgconfig(libjpeg)
@@ -121,18 +120,22 @@ BuildRequires: pkgconfig(rnnoise)
 BuildRequires: pkgconfig(minizip)
 BuildRequires: pkgconfig(libzip)
 BuildRequires: cmake(RapidJSON)
-BuildRequires: cmake(Qt5Network)
-BuildRequires: cmake(Qt5Core)
-BuildRequires: cmake(Qt5Svg)
-BuildRequires: cmake(dbusmenu-qt5)
-BuildRequires: cmake(Qt5WaylandClient)
-BuildRequires: cmake(Qt5XkbCommonSupport)
+BuildRequires: cmake(Qt6Core)
+BuildRequires: cmake(Qt6Core5Compat)
+BuildRequires: cmake(Qt6DBus)
+BuildRequires: cmake(Qt6Network)
+BuildRequires: cmake(Qt6Gui)
+BuildRequires: cmake(Qt6Svg)
+BuildRequires: cmake(Qt6WaylandClient)
+BuildRequires: cmake(Qt6OpenGL)
+BuildRequires: cmake(Qt6OpenGLWidgets)
+BuildRequires: cmake(Qt6Qml)
+BuildRequires: cmake(Qt6QuickWidgets)
+BuildRequires: cmake(Qt6Widgets)
+BuildRequires: cmake(Qt6WaylandCompositor)
 BuildRequires: cmake(tg_owt)
-BuildRequires: cmake(kf5wayland)
-BuildRequires: cmake(KF5CoreAddons)
-BuildRequires: qt5-qtwayland-private-devel
 BuildRequires: wayland-devel
-BuildRequires: qt5-qtwayland
+BuildRequires: qt6-qtwayland
 BuildRequires: ninja
 %ifarch %{x86_64} %{ix86}
 BuildRequires: yasm
@@ -179,15 +182,10 @@ export LC_ALL=en_US.utf-8
 # Unbundling libraries...
 rm -rf Telegram/ThirdParty/{Catch,GSL,QR,SPMediaKeyTap,expected,libdbusmenu-qt,libtgvoip,lz4,minizip,variant,xxHash,mallocng}
 
-# Patching default desktop file...
-#desktop-file-edit --set-key=Exec --set-value="%{_bindir}/%{name} -- %u" --copy-name-to-generic-name lib/xdg/telegramdesktop.desktop
-
-# We disable Qt6 below because it's just another toolkit on top of KDE5.
-# Enable it once KDE uses Qt 6!
-
+export PATH=%{_libdir}/qt6/bin:$PATH
 %cmake -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
-    -DDESKTOP_APP_QT6:BOOL=OFF \
+    -DDESKTOP_APP_QT6:BOOL=ON \
     -DDESKTOP_APP_DISABLE_JEMALLOC:BOOL=ON \
 %if %{without gtk3}
     -DDESKTOP_APP_DISABLE_GTK_INTEGRATION:BOOL=ON \
@@ -246,7 +244,7 @@ touch build/changelog.txt
 %ninja_install -C build
 
 %check
-appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/%{launcher}.metainfo.xml
+appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/org.telegram.desktop.metainfo.xml
 # validate hates "SingleMainWindow"
 #desktop-file-validate %{buildroot}%{_datadir}/applications/%{launcher}.desktop
 
@@ -254,6 +252,6 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/%{launcher}.me
 %doc README.md changelog.txt
 %license LICENSE LEGAL
 %{_bindir}/%{name}
-%{_datadir}/applications/%{launcher}.desktop
+%{_datadir}/applications/org.telegram.desktop.desktop
 %{_datadir}/icons/hicolor/*/apps/*.png
-%optional %{_metainfodir}/%{launcher}.metainfo.xml
+%optional %{_metainfodir}/org.telegram.desktop.metainfo.xml
