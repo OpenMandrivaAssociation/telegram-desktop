@@ -120,6 +120,8 @@ BuildRequires: pkgconfig(rnnoise)
 BuildRequires: pkgconfig(minizip)
 BuildRequires: pkgconfig(libzip)
 BuildRequires: cmake(RapidJSON)
+BuildRequires: qmake-qt6
+BuildRequires: qt6-qtbase-tools
 BuildRequires: cmake(Qt6Core)
 BuildRequires: cmake(Qt6Core5Compat)
 BuildRequires: cmake(Qt6DBus)
