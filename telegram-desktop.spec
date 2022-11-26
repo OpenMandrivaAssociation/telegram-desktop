@@ -132,8 +132,10 @@ BuildRequires: cmake(Qt6WaylandClient)
 BuildRequires: cmake(Qt6OpenGL)
 BuildRequires: cmake(Qt6OpenGLWidgets)
 BuildRequires: cmake(Qt6Qml)
+BuildRequires: cmake(Qt6Quick)
 BuildRequires: cmake(Qt6QuickWidgets)
 BuildRequires: cmake(Qt6Widgets)
+BuildRequires: cmake(Qt6WaylandClient)
 BuildRequires: cmake(Qt6WaylandCompositor)
 BuildRequires: cmake(tg_owt)
 BuildRequires: wayland-devel
@@ -144,8 +146,8 @@ BuildRequires: yasm
 %endif
 # FIXME At some point the cmake files should stop looking
 # for libraries that aren't being used
-BuildRequires: cmake(Qt5Svg)
-BuildRequires: cmake(KF5CoreAddons)
+#BuildRequires: cmake(Qt5Svg)
+#BuildRequires: cmake(KF5CoreAddons)
 
 %if %{with gtk3}
 BuildRequires: pkgconfig(appindicator3-0.1)
