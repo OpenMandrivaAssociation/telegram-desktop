@@ -61,9 +61,6 @@ Patch6: tdesktop-2.7.9-compile.patch
 Patch7: tdesktop-3.3.2-system-minizip.patch
 #Patch9: tdesktop-4.0.4-compile.patch
 
-# Telegram Desktop require exact version of Qt due to Qt private API usage.
-%{?_qt5:Requires: %{_qt5}%{?_isa} = %{_qt5_version}}
-Requires: qt5-qtimageformats%{?_isa}
 Requires: hicolor-icon-theme
 
 # Telegram Desktop require patched version of rlottie since 1.8.0.
@@ -96,7 +93,6 @@ BuildRequires: pkgconfig(libyuv)
 BuildRequires: qr-code-generator-devel
 BuildRequires: qr-code-generator-c++-devel
 BuildRequires: pkgconfig(openal)
-BuildRequires: qt5-qtbase-devel
 BuildRequires: pkgconfig(tgvoip)
 BuildRequires: pkgconfig(xcb-keysyms)
 BuildRequires: libstdc++-devel
