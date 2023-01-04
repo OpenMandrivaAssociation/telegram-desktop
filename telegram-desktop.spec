@@ -190,6 +190,7 @@ export PATH=%{_libdir}/qt6/bin:$PATH
 %cmake -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DDESKTOP_APP_QT6:BOOL=ON \
+    -DQT_VERSION_MAJOR=6 \
     -DDESKTOP_APP_DISABLE_JEMALLOC:BOOL=ON \
 %if %{without gtk3}
     -DDESKTOP_APP_DISABLE_GTK_INTEGRATION:BOOL=ON \
