@@ -39,7 +39,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	4.5.2
+Version:	4.5.8
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -244,7 +244,14 @@ export PATH=%{_libdir}/qt6/bin:$PATH
 
 %build
 touch build/changelog.txt
-%ninja_build -C build
+
+PROCESSES="$(getconf _NPROCESSORS_ONLN)"
+# Linking Telegram with LTO enabled is VERY RAM intensive
+# and breaks boxes that have loads of CPU cores but not
+# terabytes of RAM...
+[ "$PROCESSES" -gt 4 ] && PROCESSES=4
+
+%ninja_build -C build -j${PROCESSES}
 
 %install
 %ninja_install -C build
