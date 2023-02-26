@@ -1,0 +1,23 @@
+diff -up tdesktop-4.6.5-full/Telegram/lib_ui/ui/emoji_config.cpp.omv~ tdesktop-4.6.5-full/Telegram/lib_ui/ui/emoji_config.cpp
+--- tdesktop-4.6.5-full/Telegram/lib_ui/ui/emoji_config.cpp.omv~	2023-02-26 02:00:26.884264637 +0100
++++ tdesktop-4.6.5-full/Telegram/lib_ui/ui/emoji_config.cpp	2023-02-26 02:30:15.415884716 +0100
+@@ -23,6 +23,8 @@
+ 
+ #include <crl/crl_async.h>
+ 
++#include <iostream>
++
+ namespace Ui {
+ namespace Emoji {
+ namespace {
+@@ -443,7 +445,8 @@ void UniversalImages::draw(
+ 
+ QImage UniversalImages::generate(int size, int index) const {
+ 	Expects(size > 0);
+-	Expects(index < _sprites.size());
++	if(index >= _sprites.size())
++		return QImage();
+ 
+ 	const auto rows = RowsCount(index);
+ 	const auto large = kUniversalSize;
+diff -up tdesktop-4.6.5-full/Telegram/SourceFiles/chat_helpers/stickers_emoji_image_loader.cpp.omv~ tdesktop-4.6.5-full/Telegram/SourceFiles/chat_helpers/stickers_emoji_image_loader.cpp
