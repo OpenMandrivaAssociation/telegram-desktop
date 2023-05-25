@@ -40,7 +40,7 @@ Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
 Version:	4.8.1
-Release:	4
+Release:	5
 
 # Application and 3rd-party modules licensing:
 # * Telegram Desktop - GPLv3+ with OpenSSL exception -- main tarball;
