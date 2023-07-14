@@ -98,6 +98,7 @@ BuildRequires: pkgconfig(xcb-keysyms)
 BuildRequires: libstdc++-devel
 BuildRequires: range-v3-devel
 BuildRequires: atomic-devel
+BuildRequires: boost-devel
 BuildRequires: pkgconfig(openssl)
 BuildRequires: pkgconfig(minizip)
 BuildRequires: pkgconfig(libxxhash)
