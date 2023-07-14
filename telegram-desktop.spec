@@ -117,6 +117,10 @@ BuildRequires: pkgconfig(rnnoise)
 BuildRequires: pkgconfig(minizip)
 BuildRequires: pkgconfig(libzip)
 BuildRequires: pkgconfig(gobject-introspection-1.0)
+# FIXME is this really necessary? It's there because
+# cppgir forces -lstdc++fs, but that may not actually
+# be needed...
+BuildRequires: stdc++-static-devel
 BuildRequires: cmake(fmt)
 BuildRequires: cmake(RapidJSON)
 BuildRequires: qmake-qt6
