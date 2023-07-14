@@ -116,6 +116,7 @@ BuildRequires: pkgconfig(vpx)
 BuildRequires: pkgconfig(rnnoise)
 BuildRequires: pkgconfig(minizip)
 BuildRequires: pkgconfig(libzip)
+BuildRequires: cmake(fmt)
 BuildRequires: cmake(RapidJSON)
 BuildRequires: qmake-qt6
 BuildRequires: qt6-qtbase-tools
