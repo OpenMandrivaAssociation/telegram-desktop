@@ -39,7 +39,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	4.8.4
+Version:	4.8.12
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -57,6 +57,9 @@ Source0: https://github.com/telegramdesktop/tdesktop/releases/download/v%{versio
 Patch1: telegram-2.8.6-compile.patch
 Patch2: tdesktop-4.6.5-workaround-assert-on-startup.patch
 Patch3: tdesktop-4.8.4-compile.patch
+# This is a backport of a revert of upstream commit
+# 74be75339d474df1a2863028ec146744597bd0bb
+Patch4:	telegram-4.8.12-dont-require-unstable-glibmm.patch
 Patch5: tdesktop-2.3.2-no-underlinking.patch
 Patch6: tdesktop-2.7.9-compile.patch
 Patch7: tdesktop-3.3.2-system-minizip.patch
@@ -274,4 +277,5 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/org.telegram.d
 %{_bindir}/%{name}
 %{_datadir}/applications/org.telegram.desktop.desktop
 %{_datadir}/icons/hicolor/*/apps/*.png
+%{_datadir}/dbus-1/services/org.telegram.desktop.service
 %optional %{_metainfodir}/org.telegram.desktop.metainfo.xml
