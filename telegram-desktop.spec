@@ -63,6 +63,7 @@ Patch4:	telegram-4.8.12-dont-require-unstable-glibmm.patch
 Patch5: tdesktop-2.3.2-no-underlinking.patch
 Patch6: tdesktop-2.7.9-compile.patch
 Patch7: tdesktop-3.3.2-system-minizip.patch
+Patch8: tdesktop-4.9.3-compile.patch
 
 Requires: hicolor-icon-theme
 
