@@ -1,6 +1,6 @@
-diff -up tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/integration_linux.cpp.4~ tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/integration_linux.cpp
---- tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/integration_linux.cpp.4~	2023-08-22 16:22:19.000000000 +0200
-+++ tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/integration_linux.cpp	2023-08-22 21:46:10.795594334 +0200
+diff -up tdesktop-4.9.4-full/Telegram/SourceFiles/platform/linux/integration_linux.cpp.4~ tdesktop-4.9.4-full/Telegram/SourceFiles/platform/linux/integration_linux.cpp
+--- tdesktop-4.9.4-full/Telegram/SourceFiles/platform/linux/integration_linux.cpp.4~	2023-08-31 20:43:26.000000000 +0200
++++ tdesktop-4.9.4-full/Telegram/SourceFiles/platform/linux/integration_linux.cpp	2023-08-31 23:00:28.439773589 +0200
 @@ -9,6 +9,7 @@ https://github.com/telegramdesktop/tdesk
  
  #include "platform/platform_integration.h"
@@ -53,9 +53,9 @@ diff -up tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/integration_lin
  
  			crl::on_main([=] {
  				Core::App().settings().setSystemDarkMode(ivalue == 1);
-diff -up tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/linux_xdp_open_with_dialog.cpp.4~ tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/linux_xdp_open_with_dialog.cpp
---- tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/linux_xdp_open_with_dialog.cpp.4~	2023-08-22 16:22:19.000000000 +0200
-+++ tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/linux_xdp_open_with_dialog.cpp	2023-08-22 21:45:10.942980545 +0200
+diff -up tdesktop-4.9.4-full/Telegram/SourceFiles/platform/linux/linux_xdp_open_with_dialog.cpp.4~ tdesktop-4.9.4-full/Telegram/SourceFiles/platform/linux/linux_xdp_open_with_dialog.cpp
+--- tdesktop-4.9.4-full/Telegram/SourceFiles/platform/linux/linux_xdp_open_with_dialog.cpp.4~	2023-08-31 20:43:26.000000000 +0200
++++ tdesktop-4.9.4-full/Telegram/SourceFiles/platform/linux/linux_xdp_open_with_dialog.cpp	2023-08-31 23:08:28.796871218 +0200
 @@ -8,6 +8,7 @@ https://github.com/telegramdesktop/tdesk
  #include "platform/linux/linux_xdp_open_with_dialog.h"
  
@@ -63,8 +63,8 @@ diff -up tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/linux_xdp_open_
 +#include "base/platform/linux/base_linux_glibmm_helper.h"
  #include "base/platform/linux/base_linux_xdp_utilities.h"
  #include "base/platform/linux/base_linux_wayland_integration.h"
- #include "core/application.h"
-@@ -33,16 +34,19 @@ bool ShowXDPOpenWithDialog(const QString
+ #include "base/random.h"
+@@ -31,16 +32,19 @@ bool ShowXDPOpenWithDialog(const QString
  		const auto connection = Gio::DBus::Connection::get_sync(
  			Gio::DBus::BusType::SESSION);
  
@@ -87,7 +87,7 @@ diff -up tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/linux_xdp_open_
  
  		if (version < 3) {
  			return false;
-@@ -107,7 +111,7 @@ bool ShowXDPOpenWithDialog(const QString
+@@ -92,7 +96,7 @@ bool ShowXDPOpenWithDialog(const QString
  				loop->quit();
  			},
  			base::Platform::XDP::kService,
@@ -96,16 +96,17 @@ diff -up tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/linux_xdp_open_
  			"Response",
  			requestPath);
  
-@@ -123,23 +127,26 @@ bool ShowXDPOpenWithDialog(const QString
+@@ -108,23 +112,27 @@ bool ShowXDPOpenWithDialog(const QString
  			base::Platform::XDP::kObjectPath,
  			kXDPOpenURIInterface,
  			"OpenFile",
 -			Glib::create_variant(std::tuple{
--				parentWindowId,
+-				base::Platform::XDP::ParentWindowID(),
 -				Glib::DBusHandle(),
 -				std::map<Glib::ustring, Glib::VariantBase>{
++
 +			Glib::VariantContainerBase::create_tuple({
-+				Glib::Variant<Glib::ustring>::create(parentWindowId),
++				Glib::Variant<Glib::ustring>::create(base::Platform::XDP::ParentWindowID()),
 +				Glib::Variant<int>::create_handle(0),
 +				Glib::Variant<std::map<
 +					Glib::ustring,
@@ -131,9 +132,9 @@ diff -up tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/linux_xdp_open_
  			}),
  			Gio::UnixFDList::create(std::vector<int>{ fd }),
  			outFdList,
-diff -up tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/main_window_linux.cpp.4~ tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/main_window_linux.cpp
---- tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/main_window_linux.cpp.4~	2023-08-22 16:22:19.000000000 +0200
-+++ tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/main_window_linux.cpp	2023-08-22 21:45:10.942980545 +0200
+diff -up tdesktop-4.9.4-full/Telegram/SourceFiles/platform/linux/main_window_linux.cpp.4~ tdesktop-4.9.4-full/Telegram/SourceFiles/platform/linux/main_window_linux.cpp
+--- tdesktop-4.9.4-full/Telegram/SourceFiles/platform/linux/main_window_linux.cpp.4~	2023-08-31 20:43:26.000000000 +0200
++++ tdesktop-4.9.4-full/Telegram/SourceFiles/platform/linux/main_window_linux.cpp	2023-08-31 23:00:28.439773589 +0200
 @@ -26,6 +26,7 @@ https://github.com/telegramdesktop/tdesk
  #include "window/window_controller.h"
  #include "window/window_session_controller.h"
@@ -142,7 +143,7 @@ diff -up tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/main_window_lin
  #include "base/event_filter.h"
  #include "ui/platform/ui_platform_window_title.h"
  #include "ui/widgets/popup_menu.h"
-@@ -251,11 +252,13 @@ void MainWindow::updateUnityCounter() {
+@@ -253,11 +254,13 @@ void MainWindow::updateUnityCounter() {
  		// According to the spec, it should be of 'x' D-Bus signature,
  		// which corresponds to signed 64-bit integer
  		// https://wiki.ubuntu.com/Unity/LauncherAPI#Low_level_DBus_API:_com.canonical.Unity.LauncherEntry
@@ -160,7 +161,7 @@ diff -up tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/main_window_lin
  	}
  
  	try {
-@@ -268,7 +271,7 @@ void MainWindow::updateUnityCounter() {
+@@ -270,7 +273,7 @@ void MainWindow::updateUnityCounter() {
  			"com.canonical.Unity.LauncherEntry",
  			"Update",
  			{},
@@ -169,9 +170,9 @@ diff -up tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/main_window_lin
  				launcherUrl,
  				dbusUnityProperties,
  			}));
-diff -up tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp.4~ tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp
---- tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp.4~	2023-08-22 16:22:19.000000000 +0200
-+++ tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp	2023-08-22 21:45:10.942980545 +0200
+diff -up tdesktop-4.9.4-full/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp.4~ tdesktop-4.9.4-full/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp
+--- tdesktop-4.9.4-full/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp.4~	2023-08-31 20:43:26.000000000 +0200
++++ tdesktop-4.9.4-full/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp	2023-08-31 23:00:28.439773589 +0200
 @@ -10,6 +10,7 @@ https://github.com/telegramdesktop/tdesk
  
  #include "base/options.h"
@@ -482,9 +483,9 @@ diff -up tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/notifications_m
  
  					crl::on_main(weak, [=] {
  						_inhibited = inhibited;
-diff -up tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp.4~ tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp
---- tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp.4~	2023-08-22 16:22:19.000000000 +0200
-+++ tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp	2023-08-22 21:45:10.943980555 +0200
+diff -up tdesktop-4.9.4-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp.4~ tdesktop-4.9.4-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp
+--- tdesktop-4.9.4-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp.4~	2023-08-31 20:43:26.000000000 +0200
++++ tdesktop-4.9.4-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp	2023-08-31 23:09:27.687430878 +0200
 @@ -9,6 +9,7 @@ https://github.com/telegramdesktop/tdesk
  
  #include "base/random.h"
@@ -493,7 +494,7 @@ diff -up tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/specific_linux.
  #include "base/platform/linux/base_linux_dbus_utilities.h"
  #include "base/platform/linux/base_linux_xdp_utilities.h"
  #include "platform/linux/linux_desktop_environment.h"
-@@ -87,13 +88,13 @@ bool PortalAutostart(bool start, bool si
+@@ -75,13 +76,13 @@ bool PortalAutostart(bool start, bool si
  		commandline.push_back("-autostart");
  
  		std::map<Glib::ustring, Glib::VariantBase> options;
@@ -514,7 +515,7 @@ diff -up tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/specific_linux.
  
  		auto uniqueName = connection->get_unique_name();
  		uniqueName.erase(0, 1);
-@@ -114,11 +115,10 @@ bool PortalAutostart(bool start, bool si
+@@ -102,11 +103,10 @@ bool PortalAutostart(bool start, bool si
  				const Glib::ustring &object_path,
  				const Glib::ustring &interface_name,
  				const Glib::ustring &signal_name,
@@ -529,7 +530,7 @@ diff -up tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/specific_linux.
  
  					if (response) {
  						if (!silent) {
-@@ -137,7 +137,7 @@ bool PortalAutostart(bool start, bool si
+@@ -125,7 +125,7 @@ bool PortalAutostart(bool start, bool si
  				loop->quit();
  			},
  			base::Platform::XDP::kService,
@@ -538,16 +539,16 @@ diff -up tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/specific_linux.
  			"Response",
  			requestPath);
  
-@@ -151,7 +151,7 @@ bool PortalAutostart(bool start, bool si
+@@ -139,7 +139,7 @@ bool PortalAutostart(bool start, bool si
  			base::Platform::XDP::kObjectPath,
  			"org.freedesktop.portal.Background",
  			"RequestBackground",
 -			Glib::create_variant(std::tuple{
 +			base::Platform::MakeGlibVariant(std::tuple{
- 				parentWindowId,
+ 				base::Platform::XDP::ParentWindowID(),
  				options,
  			}),
-@@ -454,7 +454,8 @@ std::optional<bool> IsDarkMode() {
+@@ -442,7 +442,8 @@ std::optional<bool> IsDarkMode() {
  			"color-scheme");
  
  		if (result.has_value()) {
@@ -557,9 +558,9 @@ diff -up tdesktop-4.9.3-full/Telegram/SourceFiles/platform/linux/specific_linux.
  		}
  	} catch (...) {
  	}
-diff -up tdesktop-4.9.3-full/Telegram/build/docker/centos_env/Dockerfile.4~ tdesktop-4.9.3-full/Telegram/build/docker/centos_env/Dockerfile
---- tdesktop-4.9.3-full/Telegram/build/docker/centos_env/Dockerfile.4~	2023-08-22 16:22:19.000000000 +0200
-+++ tdesktop-4.9.3-full/Telegram/build/docker/centos_env/Dockerfile	2023-08-22 21:45:10.943980555 +0200
+diff -up tdesktop-4.9.4-full/Telegram/build/docker/centos_env/Dockerfile.4~ tdesktop-4.9.4-full/Telegram/build/docker/centos_env/Dockerfile
+--- tdesktop-4.9.4-full/Telegram/build/docker/centos_env/Dockerfile.4~	2023-08-31 20:43:26.000000000 +0200
++++ tdesktop-4.9.4-full/Telegram/build/docker/centos_env/Dockerfile	2023-08-31 23:00:28.440773600 +0200
 @@ -703,7 +703,7 @@ RUN git clone -b xkbcommon-1.3.1 --depth
  FROM patches AS glibmm
  COPY --link --from=libffi {{ LibrariesPath }}/libffi-cache /
@@ -569,9 +570,9 @@ diff -up tdesktop-4.9.3-full/Telegram/build/docker/centos_env/Dockerfile.4~ tdes
  	&& cd glibmm \
  	&& git apply ../patches/glibmm.patch \
  	&& CFLAGS="$CFLAGS {{ CFLAGS_LTO }}" CXXFLAGS="$CXXFLAGS {{ CFLAGS_LTO }}" meson build \
-diff -up tdesktop-4.9.3-full/Telegram/lib_base/CMakeLists.txt.4~ tdesktop-4.9.3-full/Telegram/lib_base/CMakeLists.txt
---- tdesktop-4.9.3-full/Telegram/lib_base/CMakeLists.txt.4~	2023-08-17 16:33:23.000000000 +0200
-+++ tdesktop-4.9.3-full/Telegram/lib_base/CMakeLists.txt	2023-08-22 21:45:10.943980555 +0200
+diff -up tdesktop-4.9.4-full/Telegram/lib_base/CMakeLists.txt.4~ tdesktop-4.9.4-full/Telegram/lib_base/CMakeLists.txt
+--- tdesktop-4.9.4-full/Telegram/lib_base/CMakeLists.txt.4~	2023-08-29 07:48:43.000000000 +0200
++++ tdesktop-4.9.4-full/Telegram/lib_base/CMakeLists.txt	2023-08-31 23:00:28.440773600 +0200
 @@ -35,6 +35,7 @@ PRIVATE
      base/platform/linux/base_linux_app_launch_context.h
      base/platform/linux/base_linux_dbus_utilities.cpp
@@ -580,9 +581,9 @@ diff -up tdesktop-4.9.3-full/Telegram/lib_base/CMakeLists.txt.4~ tdesktop-4.9.3-
      base/platform/linux/base_linux_library.cpp
      base/platform/linux/base_linux_library.h
      base/platform/linux/base_linux_wayland_integration.cpp
-diff -up tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp.4~ tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp
---- tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp.4~	2023-08-17 16:33:23.000000000 +0200
-+++ tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp	2023-08-22 21:45:10.943980555 +0200
+diff -up tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp.4~ tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp
+--- tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp.4~	2023-08-29 07:48:43.000000000 +0200
++++ tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp	2023-08-31 23:13:17.658535421 +0200
 @@ -7,7 +7,6 @@
  #include "base/platform/linux/base_file_utilities_linux.h"
  
@@ -591,7 +592,7 @@ diff -up tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_file_uti
  #include "base/platform/linux/base_linux_app_launch_context.h"
  #include "base/platform/linux/base_linux_wayland_integration.h"
  #include "base/algorithm.h"
-@@ -58,22 +57,25 @@ bool PortalShowInFolder(const QString &f
+@@ -55,22 +54,25 @@ bool PortalShowInFolder(const QString &f
  		auto outFdList = Glib::RefPtr<Gio::UnixFDList>();
  
  		connection->call_sync(
@@ -600,7 +601,7 @@ diff -up tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_file_uti
  			"org.freedesktop.portal.OpenURI",
  			"OpenDirectory",
 -			Glib::create_variant(std::tuple{
--				Glib::ustring(),
+-				XDP::ParentWindowID(),
 -				Glib::DBusHandle(),
 -				std::map<Glib::ustring, Glib::VariantBase>{
 +			Glib::VariantContainerBase::create_tuple({
@@ -625,7 +626,7 @@ diff -up tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_file_uti
  
  		return true;
  	} catch (...) {
-@@ -98,11 +100,11 @@ bool DBusShowInFolder(const QString &fil
+@@ -95,11 +97,11 @@ bool DBusShowInFolder(const QString &fil
  			"/org/freedesktop/FileManager1",
  			"org.freedesktop.FileManager1",
  			"ShowItems",
@@ -641,9 +642,9 @@ diff -up tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_file_uti
  			}),
  			"org.freedesktop.FileManager1");
  
-diff -up tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp.4~ tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp
---- tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp.4~	2023-08-17 16:33:23.000000000 +0200
-+++ tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp	2023-08-22 21:45:10.944980565 +0200
+diff -up tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp.4~ tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp
+--- tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp.4~	2023-08-29 07:48:43.000000000 +0200
++++ tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp	2023-08-31 23:00:28.440773600 +0200
 @@ -7,6 +7,7 @@
  #include "base/platform/linux/base_last_input_linux.h"
  
@@ -688,9 +689,9 @@ diff -up tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_last_inp
  		return (crl::now() - static_cast<crl::time>(value));
  	} catch (const Glib::Error &e) {
  		static const auto NotSupportedErrors = {
-diff -up tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.cpp.4~ tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.cpp
---- tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.cpp.4~	2023-08-17 16:33:23.000000000 +0200
-+++ tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.cpp	2023-08-22 21:45:10.944980565 +0200
+diff -up tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.cpp.4~ tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.cpp
+--- tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.cpp.4~	2023-08-29 07:48:43.000000000 +0200
++++ tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.cpp	2023-08-31 23:00:28.440773600 +0200
 @@ -6,43 +6,47 @@
  //
  #include "base/platform/linux/base_linux_dbus_utilities.h"
@@ -804,9 +805,9 @@ diff -up tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_linux_db
  
  				if (name != service) {
  					return;
-diff -up tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h.4~ tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h
---- tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h.4~	2023-08-17 16:33:23.000000000 +0200
-+++ tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h	2023-08-22 21:45:10.944980565 +0200
+diff -up tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h.4~ tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h
+--- tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h.4~	2023-08-29 07:48:43.000000000 +0200
++++ tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h	2023-08-31 23:00:28.440773600 +0200
 @@ -7,6 +7,7 @@
  #pragma once
  
@@ -826,9 +827,9 @@ diff -up tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_linux_db
  enum class StartReply {
  	Success,
  	AlreadyRunning,
-diff -up tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_linux_glibmm_helper.h.4~ tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_linux_glibmm_helper.h
---- tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_linux_glibmm_helper.h.4~	2023-08-22 21:45:10.944980565 +0200
-+++ tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_linux_glibmm_helper.h	2023-08-22 21:45:10.944980565 +0200
+diff -up tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_linux_glibmm_helper.h.4~ tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_linux_glibmm_helper.h
+--- tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_linux_glibmm_helper.h.4~	2023-08-31 23:00:28.440773600 +0200
++++ tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_linux_glibmm_helper.h	2023-08-31 23:00:28.440773600 +0200
 @@ -0,0 +1,130 @@
 +// This file is part of Desktop App Toolkit,
 +// a set of libraries for developing nice desktop applications.
@@ -960,9 +961,9 @@ diff -up tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_linux_gl
 +
 +} // namespace Platform
 +} // namespace base
-diff -up tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp.4~ tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp
---- tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp.4~	2023-08-17 16:33:23.000000000 +0200
-+++ tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp	2023-08-22 21:45:10.944980565 +0200
+diff -up tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp.4~ tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp
+--- tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp.4~	2023-08-29 07:48:43.000000000 +0200
++++ tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp	2023-08-31 23:00:28.441773613 +0200
 @@ -6,6 +6,7 @@
  //
  #include "base/platform/linux/base_linux_xdp_utilities.h"
@@ -971,7 +972,7 @@ diff -up tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_linux_xd
  #include "base/platform/linux/base_linux_wayland_integration.h"
  #include "base/platform/base_platform_info.h"
  
-@@ -38,21 +39,21 @@ std::optional<Glib::VariantBase> ReadSet
+@@ -43,21 +44,21 @@ std::optional<Glib::VariantBase> ReadSet
  		const Glib::ustring &group,
  		const Glib::ustring &key) {
  	try {
@@ -1002,7 +1003,7 @@ diff -up tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_linux_xd
  	} catch (...) {
  	}
  
-@@ -85,19 +86,16 @@ SettingWatcher::SettingWatcher(
+@@ -90,19 +91,16 @@ SettingWatcher::SettingWatcher(
  				const Glib::ustring &object_path,
  				const Glib::ustring &interface_name,
  				const Glib::ustring &signal_name,
@@ -1031,9 +1032,9 @@ diff -up tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_linux_xd
  
  					callback(group, key, value);
  				} catch (...) {
-diff -up tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp.4~ tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp
---- tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp.4~	2023-08-17 16:33:23.000000000 +0200
-+++ tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp	2023-08-22 21:45:10.944980565 +0200
+diff -up tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp.4~ tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp
+--- tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp.4~	2023-08-29 07:48:43.000000000 +0200
++++ tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp	2023-08-31 23:00:28.441773613 +0200
 @@ -89,20 +89,24 @@ void PortalPreventAppSuspension(
  			XDP::kObjectPath,
  			"org.freedesktop.portal.Inhibit",
@@ -1067,9 +1068,9 @@ diff -up tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_power_sa
  			}),
  			{},
  			XDP::kService);
-diff -up tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_url_scheme_linux.cpp.4~ tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_url_scheme_linux.cpp
---- tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_url_scheme_linux.cpp.4~	2023-08-17 16:33:23.000000000 +0200
-+++ tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_url_scheme_linux.cpp	2023-08-22 21:45:10.945980576 +0200
+diff -up tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_url_scheme_linux.cpp.4~ tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_url_scheme_linux.cpp
+--- tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_url_scheme_linux.cpp.4~	2023-08-29 07:48:43.000000000 +0200
++++ tdesktop-4.9.4-full/Telegram/lib_base/base/platform/linux/base_url_scheme_linux.cpp	2023-08-31 23:00:28.441773613 +0200
 @@ -8,6 +8,8 @@
  
  #include "base/debug_log.h"
@@ -1111,9 +1112,9 @@ diff -up tdesktop-4.9.3-full/Telegram/lib_base/base/platform/linux/base_url_sche
  				Glib::ustring("default-url-scheme-handler"),
  				Glib::ustring(protocol.toStdString()),
  				Glib::ustring(expectedHandler.toStdString()),
-diff -up tdesktop-4.9.3-full/Telegram/lib_ui/ui/platform/linux/ui_window_title_linux.cpp.4~ tdesktop-4.9.3-full/Telegram/lib_ui/ui/platform/linux/ui_window_title_linux.cpp
---- tdesktop-4.9.3-full/Telegram/lib_ui/ui/platform/linux/ui_window_title_linux.cpp.4~	2023-08-22 11:32:52.000000000 +0200
-+++ tdesktop-4.9.3-full/Telegram/lib_ui/ui/platform/linux/ui_window_title_linux.cpp	2023-08-22 21:45:10.945980576 +0200
+diff -up tdesktop-4.9.4-full/Telegram/lib_ui/ui/platform/linux/ui_window_title_linux.cpp.4~ tdesktop-4.9.4-full/Telegram/lib_ui/ui/platform/linux/ui_window_title_linux.cpp
+--- tdesktop-4.9.4-full/Telegram/lib_ui/ui/platform/linux/ui_window_title_linux.cpp.4~	2023-08-29 07:47:50.000000000 +0200
++++ tdesktop-4.9.4-full/Telegram/lib_ui/ui/platform/linux/ui_window_title_linux.cpp	2023-08-31 23:00:28.441773613 +0200
 @@ -6,14 +6,13 @@
  //
  #include "ui/platform/linux/ui_window_title_linux.h"
@@ -1139,9 +1140,9 @@ diff -up tdesktop-4.9.3-full/Telegram/lib_ui/ui/platform/linux/ui_window_title_l
  		} catch (...) {
  		}
  
-diff -up tdesktop-4.9.3-full/cmake/external/glibmm/CMakeLists.txt.4~ tdesktop-4.9.3-full/cmake/external/glibmm/CMakeLists.txt
---- tdesktop-4.9.3-full/cmake/external/glibmm/CMakeLists.txt.4~	2023-08-18 15:19:51.000000000 +0200
-+++ tdesktop-4.9.3-full/cmake/external/glibmm/CMakeLists.txt	2023-08-22 21:45:10.945980576 +0200
+diff -up tdesktop-4.9.4-full/cmake/external/glibmm/CMakeLists.txt.4~ tdesktop-4.9.4-full/cmake/external/glibmm/CMakeLists.txt
+--- tdesktop-4.9.4-full/cmake/external/glibmm/CMakeLists.txt.4~	2023-08-30 05:01:43.000000000 +0200
++++ tdesktop-4.9.4-full/cmake/external/glibmm/CMakeLists.txt	2023-08-31 23:00:28.441773613 +0200
 @@ -8,8 +8,8 @@ add_library(external_glibmm INTERFACE IM
  add_library(desktop-app::external_glibmm ALIAS external_glibmm)
  
@@ -1153,9 +1154,9 @@ diff -up tdesktop-4.9.3-full/cmake/external/glibmm/CMakeLists.txt.4~ tdesktop-4.
  
  if (DESKTOP_APP_USE_PACKAGED)
      target_link_libraries(external_glibmm
-diff -up tdesktop-4.9.3-full/snap/snapcraft.yaml.4~ tdesktop-4.9.3-full/snap/snapcraft.yaml
---- tdesktop-4.9.3-full/snap/snapcraft.yaml.4~	2023-08-22 16:22:19.000000000 +0200
-+++ tdesktop-4.9.3-full/snap/snapcraft.yaml	2023-08-22 21:45:10.945980576 +0200
+diff -up tdesktop-4.9.4-full/snap/snapcraft.yaml.4~ tdesktop-4.9.4-full/snap/snapcraft.yaml
+--- tdesktop-4.9.4-full/snap/snapcraft.yaml.4~	2023-08-31 20:43:26.000000000 +0200
++++ tdesktop-4.9.4-full/snap/snapcraft.yaml	2023-08-31 23:00:28.441773613 +0200
 @@ -247,7 +247,7 @@ parts:
    glibmm:
      source: https://github.com/GNOME/glibmm.git
