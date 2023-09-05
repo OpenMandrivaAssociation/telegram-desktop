@@ -1,0 +1,19 @@
+diff -up tdesktop-4.9.5-full/cmake/external/gsl/CMakeLists.txt.omv~ tdesktop-4.9.5-full/cmake/external/gsl/CMakeLists.txt
+--- tdesktop-4.9.5-full/cmake/external/gsl/CMakeLists.txt.omv~	2023-09-05 22:31:15.009130386 +0200
++++ tdesktop-4.9.5-full/cmake/external/gsl/CMakeLists.txt	2023-09-05 22:31:35.099337660 +0200
+@@ -7,7 +7,6 @@
+ add_library(external_gsl INTERFACE IMPORTED GLOBAL)
+ add_library(desktop-app::external_gsl ALIAS external_gsl)
+ 
+-#[[
+ if (DESKTOP_APP_USE_PACKAGED)
+     if (DESKTOP_APP_USE_PACKAGED_LAZY)
+         find_package(Microsoft.GSL 4.0.0 QUIET)
+@@ -20,7 +19,6 @@ if (DESKTOP_APP_USE_PACKAGED)
+         return()
+     endif()
+ endif()
+-]]
+ 
+ # https://gitlab.kitware.com/cmake/cmake/-/issues/25222
+ if (NOT EXISTS ${third_party_loc}/GSL/include)
