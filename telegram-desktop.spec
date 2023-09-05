@@ -39,7 +39,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	4.9.4
+Version:	4.9.5
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -64,6 +64,10 @@ Patch5: tdesktop-2.3.2-no-underlinking.patch
 Patch6: tdesktop-2.7.9-compile.patch
 Patch7: tdesktop-3.3.2-system-minizip.patch
 Patch8: tdesktop-4.9.3-compile.patch
+# Allow using the system GSL library. This is forbidden upstream because
+# Telegram needs an unreleased fix, but the OM package of GSL has it, so
+# we're safe.
+Patch9: tdesktop-allow-system-gsl.patch
 
 Requires: hicolor-icon-theme
 
