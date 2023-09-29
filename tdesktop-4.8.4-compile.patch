@@ -1,18 +1,7 @@
-diff -up tdesktop-4.8.4-full/Telegram/lib_base/base/algorithm.h.omv~ tdesktop-4.8.4-full/Telegram/lib_base/base/algorithm.h
---- tdesktop-4.8.4-full/Telegram/lib_base/base/algorithm.h.omv~	2023-07-13 23:32:07.626963330 +0200
-+++ tdesktop-4.8.4-full/Telegram/lib_base/base/algorithm.h	2023-07-13 23:32:13.722022417 +0200
-@@ -6,6 +6,7 @@
- //
- #pragma once
- 
-+#include <QtCore/QString>
- #include <QtCore/QLatin1String>
- #include <memory>
- 
-diff -up tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/passcode_box.cpp.omv~ tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/passcode_box.cpp
---- tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/passcode_box.cpp.omv~	2023-07-14 00:22:01.793389059 +0200
-+++ tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/passcode_box.cpp	2023-07-14 00:22:50.050893997 +0200
-@@ -685,12 +685,12 @@ void PasscodeBox::save(bool force) {
+diff -up tdesktop-4.10.2-full/Telegram/SourceFiles/boxes/passcode_box.cpp.3~ tdesktop-4.10.2-full/Telegram/SourceFiles/boxes/passcode_box.cpp
+--- tdesktop-4.10.2-full/Telegram/SourceFiles/boxes/passcode_box.cpp.3~	2023-09-29 17:29:53.000000000 +0200
++++ tdesktop-4.10.2-full/Telegram/SourceFiles/boxes/passcode_box.cpp	2023-09-29 21:01:22.707023184 +0200
+@@ -695,12 +695,12 @@ void PasscodeBox::save(bool force) {
  		}
  		if (!onlyCheck && !_recoverEmail->isHidden() && email.isEmpty() && !force) {
  			_skipEmailWarning = true;
@@ -27,7 +16,7 @@ diff -up tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/passcode_box.cpp.omv~ td
  		} else if (onlyCheck) {
  			submitOnlyCheckCloudPassword(old);
  		} else if (_oldPasscode->isHidden()) {
-@@ -1118,7 +1118,7 @@ void PasscodeBox::recover() {
+@@ -1121,7 +1121,7 @@ void PasscodeBox::recover() {
  		recoverExpired();
  	}, lifetime());
  
@@ -36,10 +25,10 @@ diff -up tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/passcode_box.cpp.omv~ td
  }
  
  void PasscodeBox::recoverStarted(const MTPauth_PasswordRecovery &result) {
-diff -up tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/peers/edit_participant_box.cpp.omv~ tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/peers/edit_participant_box.cpp
---- tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/peers/edit_participant_box.cpp.omv~	2023-07-13 23:57:20.386482811 +0200
-+++ tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/peers/edit_participant_box.cpp	2023-07-14 00:09:32.316028710 +0200
-@@ -391,14 +391,14 @@ void EditAdminBox::prepare() {
+diff -up tdesktop-4.10.2-full/Telegram/SourceFiles/boxes/peers/edit_participant_box.cpp.3~ tdesktop-4.10.2-full/Telegram/SourceFiles/boxes/peers/edit_participant_box.cpp
+--- tdesktop-4.10.2-full/Telegram/SourceFiles/boxes/peers/edit_participant_box.cpp.3~	2023-09-29 17:29:53.000000000 +0200
++++ tdesktop-4.10.2-full/Telegram/SourceFiles/boxes/peers/edit_participant_box.cpp	2023-09-29 21:01:22.707023184 +0200
+@@ -394,14 +394,14 @@ void EditAdminBox::prepare() {
  				const auto phrase = peer()->isBroadcast()
  					? tr::lng_bot_sure_add_text_channel
  					: tr::lng_bot_sure_add_text_group;
@@ -56,11 +45,9 @@ diff -up tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/peers/edit_participant_b
  			} else {
  				_finishSave();
  			}
-diff -up tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/peers/edit_participant_box.h.omv~ tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/peers/edit_participant_box.h
-diff -up tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/phone_banned_box..c.omv~ tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/phone_banned_box..c
-diff -up tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/phone_banned_box.cpp.omv~ tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/phone_banned_box.cpp
---- tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/phone_banned_box.cpp.omv~	2023-07-14 00:25:32.714021795 +0200
-+++ tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/phone_banned_box.cpp	2023-07-14 00:25:47.274205226 +0200
+diff -up tdesktop-4.10.2-full/Telegram/SourceFiles/boxes/phone_banned_box.cpp.3~ tdesktop-4.10.2-full/Telegram/SourceFiles/boxes/phone_banned_box.cpp
+--- tdesktop-4.10.2-full/Telegram/SourceFiles/boxes/phone_banned_box.cpp.3~	2023-09-29 17:29:53.000000000 +0200
++++ tdesktop-4.10.2-full/Telegram/SourceFiles/boxes/phone_banned_box.cpp	2023-09-29 21:01:22.707023184 +0200
 @@ -55,7 +55,7 @@ void ShowPhoneBannedError(
  			(*box)->closeBox();
  		}
@@ -79,10 +66,10 @@ diff -up tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/phone_banned_box.cpp.omv
  }
  
  } // namespace Ui
-diff -up tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/sessions_box.cpp.omv~ tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/sessions_box.cpp
---- tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/sessions_box.cpp.omv~	2023-07-14 00:26:36.769821344 +0200
-+++ tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/sessions_box.cpp	2023-07-14 00:26:45.905933874 +0200
-@@ -845,7 +845,7 @@ void SessionsContent::terminate(Fn<void(
+diff -up tdesktop-4.10.2-full/Telegram/SourceFiles/boxes/sessions_box.cpp.3~ tdesktop-4.10.2-full/Telegram/SourceFiles/boxes/sessions_box.cpp
+--- tdesktop-4.10.2-full/Telegram/SourceFiles/boxes/sessions_box.cpp.3~	2023-09-29 17:29:53.000000000 +0200
++++ tdesktop-4.10.2-full/Telegram/SourceFiles/boxes/sessions_box.cpp	2023-09-29 21:01:22.707023184 +0200
+@@ -842,7 +842,7 @@ void SessionsContent::terminate(Fn<void(
  		.confirmText = tr::lng_settings_reset_button(),
  		.confirmStyle = &st::attentionBoxButton,
  	});
@@ -91,9 +78,9 @@ diff -up tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/sessions_box.cpp.omv~ td
  	_controller->show(std::move(box));
  }
  
-diff -up tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/url_auth_box.cpp.omv~ tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/url_auth_box.cpp
---- tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/url_auth_box.cpp.omv~	2023-07-14 00:28:11.317969446 +0200
-+++ tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/url_auth_box.cpp	2023-07-14 00:30:19.927480175 +0200
+diff -up tdesktop-4.10.2-full/Telegram/SourceFiles/boxes/url_auth_box.cpp.3~ tdesktop-4.10.2-full/Telegram/SourceFiles/boxes/url_auth_box.cpp
+--- tdesktop-4.10.2-full/Telegram/SourceFiles/boxes/url_auth_box.cpp.3~	2023-09-29 17:29:53.000000000 +0200
++++ tdesktop-4.10.2-full/Telegram/SourceFiles/boxes/url_auth_box.cpp	2023-09-29 21:01:22.707023184 +0200
 @@ -171,9 +171,9 @@ void UrlAuthBox::Request(
  			}).send();
  		}
@@ -118,9 +105,9 @@ diff -up tdesktop-4.8.4-full/Telegram/SourceFiles/boxes/url_auth_box.cpp.omv~ td
  }
  
  UrlAuthBox::UrlAuthBox(
-diff -up tdesktop-4.8.4-full/Telegram/SourceFiles/calls/group/calls_group_rtmp.cpp.omv~ tdesktop-4.8.4-full/Telegram/SourceFiles/calls/group/calls_group_rtmp.cpp
---- tdesktop-4.8.4-full/Telegram/SourceFiles/calls/group/calls_group_rtmp.cpp.omv~	2023-07-14 00:32:13.905779583 +0200
-+++ tdesktop-4.8.4-full/Telegram/SourceFiles/calls/group/calls_group_rtmp.cpp	2023-07-14 00:32:24.781901939 +0200
+diff -up tdesktop-4.10.2-full/Telegram/SourceFiles/calls/group/calls_group_rtmp.cpp.3~ tdesktop-4.10.2-full/Telegram/SourceFiles/calls/group/calls_group_rtmp.cpp
+--- tdesktop-4.10.2-full/Telegram/SourceFiles/calls/group/calls_group_rtmp.cpp.3~	2023-09-29 17:29:53.000000000 +0200
++++ tdesktop-4.10.2-full/Telegram/SourceFiles/calls/group/calls_group_rtmp.cpp	2023-09-29 21:01:22.707023184 +0200
 @@ -193,7 +193,7 @@ void StartRtmpProcess::createBox() {
  	) | rpl::start_with_next([=] {
  		_request = nullptr;
@@ -130,11 +117,10 @@ diff -up tdesktop-4.8.4-full/Telegram/SourceFiles/calls/group/calls_group_rtmp.c
  	_request->show->showBox(std::move(object));
  }
  
-diff -up tdesktop-4.8.4-full/Telegram/SourceFiles/core/application.cpp:7.omv~ tdesktop-4.8.4-full/Telegram/SourceFiles/core/application.cpp:7
-diff -up tdesktop-4.8.4-full/Telegram/SourceFiles/core/application.cpp.omv~ tdesktop-4.8.4-full/Telegram/SourceFiles/core/application.cpp
---- tdesktop-4.8.4-full/Telegram/SourceFiles/core/application.cpp.omv~	2023-07-14 00:43:13.766877991 +0200
-+++ tdesktop-4.8.4-full/Telegram/SourceFiles/core/application.cpp	2023-07-14 00:43:29.532042305 +0200
-@@ -771,8 +771,8 @@ void Application::badMtprotoConfiguratio
+diff -up tdesktop-4.10.2-full/Telegram/SourceFiles/core/application.cpp.3~ tdesktop-4.10.2-full/Telegram/SourceFiles/core/application.cpp
+--- tdesktop-4.10.2-full/Telegram/SourceFiles/core/application.cpp.3~	2023-09-29 17:29:53.000000000 +0200
++++ tdesktop-4.10.2-full/Telegram/SourceFiles/core/application.cpp	2023-09-29 21:01:22.707023184 +0200
+@@ -772,8 +772,8 @@ void Application::badMtprotoConfiguratio
  				settings().proxy().selected(),
  				MTP::ProxyData::Settings::System);
  		};
@@ -145,10 +131,9 @@ diff -up tdesktop-4.8.4-full/Telegram/SourceFiles/core/application.cpp.omv~ tdes
  		_badProxyDisableBox->boxClosing(
  		) | rpl::start_with_next(
  			disableCallback,
-diff -up tdesktop-4.8.4-full/Telegram/SourceFiles/core/application.cpp:.omv~ tdesktop-4.8.4-full/Telegram/SourceFiles/core/application.cpp:
-diff -up tdesktop-4.8.4-full/Telegram/SourceFiles/passport/passport_panel_controller.cpp.omv~ tdesktop-4.8.4-full/Telegram/SourceFiles/passport/passport_panel_controller.cpp
---- tdesktop-4.8.4-full/Telegram/SourceFiles/passport/passport_panel_controller.cpp.omv~	2023-07-14 00:47:03.818262643 +0200
-+++ tdesktop-4.8.4-full/Telegram/SourceFiles/passport/passport_panel_controller.cpp	2023-07-14 00:47:20.616435821 +0200
+diff -up tdesktop-4.10.2-full/Telegram/SourceFiles/passport/passport_panel_controller.cpp.3~ tdesktop-4.10.2-full/Telegram/SourceFiles/passport/passport_panel_controller.cpp
+--- tdesktop-4.10.2-full/Telegram/SourceFiles/passport/passport_panel_controller.cpp.3~	2023-09-29 17:29:53.000000000 +0200
++++ tdesktop-4.10.2-full/Telegram/SourceFiles/passport/passport_panel_controller.cpp	2023-09-29 21:01:22.708023193 +0200
 @@ -1431,11 +1431,11 @@ void PanelController::cancelEditScope()
  
  	if (_panelHasUnsavedChanges && _panelHasUnsavedChanges()) {
@@ -163,10 +148,9 @@ diff -up tdesktop-4.8.4-full/Telegram/SourceFiles/passport/passport_panel_contro
  			_editScopeBoxes.emplace_back(_confirmForgetChangesBox);
  		}
  	} else {
-diff -up tdesktop-4.8.4-full/Telegram/SourceFiles/window/window_controller.cpp:27.omv~ tdesktop-4.8.4-full/Telegram/SourceFiles/window/window_controller.cpp:27
-diff -up tdesktop-4.8.4-full/Telegram/SourceFiles/window/window_controller.cpp.omv~ tdesktop-4.8.4-full/Telegram/SourceFiles/window/window_controller.cpp
---- tdesktop-4.8.4-full/Telegram/SourceFiles/window/window_controller.cpp.omv~	2023-07-14 00:59:37.828718961 +0200
-+++ tdesktop-4.8.4-full/Telegram/SourceFiles/window/window_controller.cpp	2023-07-14 00:59:52.001916911 +0200
+diff -up tdesktop-4.10.2-full/Telegram/SourceFiles/window/window_controller.cpp.3~ tdesktop-4.10.2-full/Telegram/SourceFiles/window/window_controller.cpp
+--- tdesktop-4.10.2-full/Telegram/SourceFiles/window/window_controller.cpp.3~	2023-09-29 17:29:53.000000000 +0200
++++ tdesktop-4.10.2-full/Telegram/SourceFiles/window/window_controller.cpp	2023-09-29 21:01:22.708023193 +0200
 @@ -272,7 +272,7 @@ void Controller::checkLockByTerms() {
  		crl::on_main(widget(), [=] { checkLockByTerms(); });
  	});
@@ -176,3 +160,4 @@ diff -up tdesktop-4.8.4-full/Telegram/SourceFiles/window/window_controller.cpp.o
  }
  
  void Controller::showTermsDecline() {
+diff -up tdesktop-4.10.2-full/Telegram/lib_base/base/algorithm.h.3~ tdesktop-4.10.2-full/Telegram/lib_base/base/algorithm.h
