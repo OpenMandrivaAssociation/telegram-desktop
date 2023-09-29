@@ -1,0 +1,12 @@
+diff -up tdesktop-4.10.1-full/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h.omv~ tdesktop-4.10.1-full/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h
+--- tdesktop-4.10.1-full/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h.omv~	2023-09-29 01:44:51.313143224 +0200
++++ tdesktop-4.10.1-full/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h	2023-09-29 01:45:08.712327117 +0200
+@@ -101,7 +101,7 @@ public:
+ 		const Glib::ustring &group,
+ 		const Glib::ustring &key,
+ 		Callback callback)
+-	: SettingWatcher(group, key, Fn(callback)) {
++	: SettingWatcher(group, key, Fn<void()>(callback)) {
+ 	}
+ 
+ 	~SettingWatcher();
