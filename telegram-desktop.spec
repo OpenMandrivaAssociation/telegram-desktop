@@ -57,7 +57,6 @@ Source0: https://github.com/telegramdesktop/tdesktop/releases/download/v%{versio
 Patch1: telegram-2.8.6-compile.patch
 Patch2: tdesktop-4.6.5-workaround-assert-on-startup.patch
 Patch3: tdesktop-4.8.4-compile.patch
-Patch4: telegram-4.10.1-compile.patch
 Patch5: tdesktop-2.3.2-no-underlinking.patch
 Patch6: tdesktop-2.7.9-compile.patch
 Patch7: tdesktop-3.3.2-system-minizip.patch
