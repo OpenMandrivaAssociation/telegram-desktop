@@ -1,0 +1,12 @@
+diff -up tdesktop-4.10.3-full/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp.omv~ tdesktop-4.10.3-full/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp
+--- tdesktop-4.10.3-full/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp.omv~	2023-10-03 01:39:41.688793439 +0200
++++ tdesktop-4.10.3-full/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp	2023-10-03 01:42:33.534208364 +0200
+@@ -814,7 +814,7 @@ bool ByDefault() {
+ 
+ 	// A list of capabilities that offer feature parity
+ 	// with custom notifications
+-	return ranges::all_of(std::initializer_list{
++	return ranges::all_of(std::initializer_list<char*>{
+ 		// To show message content
+ 		"body",
+ 		// To have buttons on notifications

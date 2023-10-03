@@ -6,7 +6,7 @@
 # if built with clang.
 # It works fine when built with gcc - but we need to figure
 # out why at some point.
-%bcond_with clang
+%bcond_without clang
 %bcond_without spellcheck
 %bcond_without fonts
 %bcond_without ipo
@@ -39,7 +39,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	4.10.2
+Version:	4.10.3
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -57,6 +57,7 @@ Source0: https://github.com/telegramdesktop/tdesktop/releases/download/v%{versio
 Patch1: telegram-2.8.6-compile.patch
 Patch2: tdesktop-4.6.5-workaround-assert-on-startup.patch
 Patch3: tdesktop-4.8.4-compile.patch
+Patch4:	tdesktop-4.10.3-compile.patch
 Patch5: tdesktop-2.3.2-no-underlinking.patch
 Patch6: tdesktop-2.7.9-compile.patch
 Patch7: tdesktop-3.3.2-system-minizip.patch
