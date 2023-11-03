@@ -39,7 +39,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	4.11.2
+Version:	4.11.3
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -54,14 +54,12 @@ Summary: Telegram Desktop official messaging app
 # Upstream frequently forgets to make the -full release. When that happens,
 # use the package-source.sh script in this repository.
 Source0: https://github.com/telegramdesktop/tdesktop/releases/download/v%{version}/%{appname}-%{version}%{tarsuffix}.tar.gz
-Patch1: telegram-2.8.6-compile.patch
+Patch1: tdesktop-4.11.3-system-libyuv.patch
 Patch2: tdesktop-4.6.5-workaround-assert-on-startup.patch
-Patch3: tdesktop-4.8.4-compile.patch
 Patch4: tdesktop-4.11.1-workaround-build-failure.patch
 Patch5: tdesktop-2.3.2-no-underlinking.patch
-Patch6: tdesktop-2.7.9-compile.patch
+Patch6: tdesktop-4.11.3-zlib-ng.patch
 Patch7: tdesktop-3.3.2-system-minizip.patch
-Patch8: tdesktop-4.9.3-compile.patch
 # Allow using the system GSL library. This is forbidden upstream because
 # Telegram needs an unreleased fix, but the OM package of GSL has it, so
 # we're safe.
