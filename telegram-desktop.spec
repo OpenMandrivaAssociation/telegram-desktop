@@ -39,7 +39,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	4.11.5
+Version:	4.11.6
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -56,7 +56,7 @@ Summary: Telegram Desktop official messaging app
 Source0: https://github.com/telegramdesktop/tdesktop/releases/download/v%{version}/%{appname}-%{version}%{tarsuffix}.tar.gz
 Patch1: tdesktop-4.11.3-system-libyuv.patch
 Patch2: tdesktop-4.6.5-workaround-assert-on-startup.patch
-Patch4: tdesktop-4.11.1-workaround-build-failure.patch
+#Patch4: tdesktop-4.11.1-workaround-build-failure.patch
 Patch5: tdesktop-2.3.2-no-underlinking.patch
 Patch6: tdesktop-4.11.3-zlib-ng.patch
 Patch7: tdesktop-3.3.2-system-minizip.patch
