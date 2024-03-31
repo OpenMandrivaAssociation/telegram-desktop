@@ -1,6 +1,32 @@
-diff -up tdesktop-2.7.9-full/Telegram/lib_base/base/zlib_help.h.omv~ tdesktop-2.7.9-full/Telegram/lib_base/base/zlib_help.h
---- tdesktop-2.7.9-full/Telegram/lib_base/base/zlib_help.h.omv~	2021-06-21 18:29:30.294225688 +0200
-+++ tdesktop-2.7.9-full/Telegram/lib_base/base/zlib_help.h	2021-06-21 18:51:37.905984716 +0200
+diff -up tdesktop-4.15.6-full/Telegram/SourceFiles/core/crash_report_window.cpp.5~ tdesktop-4.15.6-full/Telegram/SourceFiles/core/crash_report_window.cpp
+diff -up tdesktop-4.15.6-full/Telegram/SourceFiles/payments/ui/payments_panel.cpp.5~ tdesktop-4.15.6-full/Telegram/SourceFiles/payments/ui/payments_panel.cpp
+--- tdesktop-4.15.6-full/Telegram/SourceFiles/payments/ui/payments_panel.cpp.5~	2024-03-25 14:47:53.000000000 +0100
++++ tdesktop-4.15.6-full/Telegram/SourceFiles/payments/ui/payments_panel.cpp	2024-03-31 00:43:45.915381497 +0100
+@@ -25,6 +25,7 @@ https://github.com/telegramdesktop/tdesk
+ #include "webview/webview_interface.h"
+ #include "styles/style_payments.h"
+ #include "styles/style_layers.h"
++#include <QJsonDocument>
+ 
+ namespace Payments::Ui {
+ namespace {
+diff -up tdesktop-4.15.6-full/Telegram/SourceFiles/window/themes/window_theme_editor_box.cpp.5~ tdesktop-4.15.6-full/Telegram/SourceFiles/window/themes/window_theme_editor_box.cpp
+--- tdesktop-4.15.6-full/Telegram/SourceFiles/window/themes/window_theme_editor_box.cpp.5~	2024-03-25 14:47:53.000000000 +0100
++++ tdesktop-4.15.6-full/Telegram/SourceFiles/window/themes/window_theme_editor_box.cpp	2024-03-31 00:43:45.915381497 +0100
+@@ -49,6 +49,10 @@ https://github.com/telegramdesktop/tdesk
+ 
+ #include <QtCore/QBuffer>
+ 
++#ifndef Z_DEFAULT_COMPRESSION
++#define Z_DEFAULT_COMPRESSION (-1)
++#endif
++
+ namespace Window {
+ namespace Theme {
+ namespace {
+diff -up tdesktop-4.15.6-full/Telegram/lib_base/base/zlib_help.h.5~ tdesktop-4.15.6-full/Telegram/lib_base/base/zlib_help.h
+--- tdesktop-4.15.6-full/Telegram/lib_base/base/zlib_help.h.5~	2024-03-24 14:05:37.000000000 +0100
++++ tdesktop-4.15.6-full/Telegram/lib_base/base/zlib_help.h	2024-03-31 00:43:45.915381497 +0100
 @@ -14,6 +14,11 @@
  #undef small
  #endif // small
@@ -13,76 +39,15 @@ diff -up tdesktop-2.7.9-full/Telegram/lib_base/base/zlib_help.h.omv~ tdesktop-2.
  namespace zlib {
  namespace internal {
  
-@@ -150,6 +155,13 @@ private:
- constexpr int kCaseSensitive = 1;
- constexpr int kCaseInsensitive = 2;
+diff -up tdesktop-4.15.6-full/Telegram/SourceFiles/core/crash_report_window.cpp.omv~ tdesktop-4.15.6-full/Telegram/SourceFiles/core/crash_report_window.cpp
+--- tdesktop-4.15.6-full/Telegram/SourceFiles/core/crash_report_window.cpp.omv~	2024-03-31 01:26:39.209532819 +0100
++++ tdesktop-4.15.6-full/Telegram/SourceFiles/core/crash_report_window.cpp	2024-03-31 01:26:48.785630918 +0100
+@@ -23,6 +23,8 @@ https://github.com/telegramdesktop/tdesk
+ #include <QtCore/QStandardPaths>
+ #include <QtCore/QTimer>
  
-+static inline int CaseSensitiveCompare(unzFile file, const char *filename1, const char *filename2) {
-+	return strcmp(filename1, filename2);
-+}
-+static inline int CaseInsensitiveCompare(unzFile file, const char *filename1, const char *filename2) {
-+	return strcasecmp(filename1, filename2);
-+}
-+
- class FileToRead {
- public:
- 	FileToRead(const QByteArray &content) : _data(content) {
-@@ -168,7 +180,7 @@ public:
- 
- 	int locateFile(const char *szFileName, int iCaseSensitivity) {
- 		if (error() == UNZ_OK) {
--			_error = _handle ? unzLocateFile(_handle, szFileName, iCaseSensitivity) : -1;
-+			_error = _handle ? unzLocateFile(_handle, szFileName, iCaseSensitivity ? CaseSensitiveCompare : CaseInsensitiveCompare) : -1;
- 		}
- 		return error();
- 	}
-diff -up tdesktop-2.7.9-full/Telegram/SourceFiles/core/crash_report_window.cpp.omv~ tdesktop-2.7.9-full/Telegram/SourceFiles/core/crash_report_window.cpp
---- tdesktop-2.7.9-full/Telegram/SourceFiles/core/crash_report_window.cpp.omv~	2021-06-21 18:42:04.572475092 +0200
-+++ tdesktop-2.7.9-full/Telegram/SourceFiles/core/crash_report_window.cpp	2021-06-21 18:43:55.438118196 +0200
-@@ -592,8 +592,11 @@ void LastCrashedWindow::checkingFinished
- 
- 			zlib::FileToWrite minidumpZip;
- 
--			zip_fileinfo zfi = { { 0, 0, 0, 0, 0, 0 }, 0, 0, 0 };
-+			zip_fileinfo zfi = { 0, { 0, 0 }, 0, 0 }; //{ { 0, 0, 0, 0, 0, 0 }, 0, 0, 0 };
- 			QByteArray dmpNameUtf = dmpName.toUtf8();
-+#ifndef Z_DEFAULT_COMPRESSION
-+#define Z_DEFAULT_COMPRESSION -1
-+#endif
- 			minidumpZip.openNewFile(dmpNameUtf.constData(), &zfi, nullptr, 0, nullptr, 0, nullptr, Z_DEFLATED, Z_DEFAULT_COMPRESSION);
- 			minidumpZip.writeInFile(minidump.constData(), minidump.size());
- 			minidumpZip.closeFile();
-diff -up tdesktop-2.7.9-full/Telegram/SourceFiles/payments/ui/payments_panel.cpp.omv~ tdesktop-2.7.9-full/Telegram/SourceFiles/payments/ui/payments_panel.cpp
---- tdesktop-2.7.9-full/Telegram/SourceFiles/payments/ui/payments_panel.cpp.omv~	2021-06-21 18:24:56.130730407 +0200
-+++ tdesktop-2.7.9-full/Telegram/SourceFiles/payments/ui/payments_panel.cpp	2021-06-21 18:34:48.709265497 +0200
-@@ -24,6 +24,7 @@ https://github.com/telegramdesktop/tdesk
- #include "webview/webview_interface.h"
- #include "styles/style_payments.h"
- #include "styles/style_layers.h"
-+#include <QJsonDocument>
- 
- namespace Payments::Ui {
- namespace {
-diff -up tdesktop-2.7.9-full/Telegram/SourceFiles/window/themes/window_theme_editor_box.cpp.omv~ tdesktop-2.7.9-full/Telegram/SourceFiles/window/themes/window_theme_editor_box.cpp
---- tdesktop-2.7.9-full/Telegram/SourceFiles/window/themes/window_theme_editor_box.cpp.omv~	2021-06-21 18:49:23.014125822 +0200
-+++ tdesktop-2.7.9-full/Telegram/SourceFiles/window/themes/window_theme_editor_box.cpp	2021-06-21 18:50:41.235622147 +0200
-@@ -48,6 +48,10 @@ https://github.com/telegramdesktop/tdesk
- 
- #include <QtCore/QBuffer>
- 
-+#ifndef Z_DEFAULT_COMPRESSION
 +#define Z_DEFAULT_COMPRESSION (-1)
-+#endif
 +
- namespace Window {
- namespace Theme {
  namespace {
-@@ -357,7 +361,7 @@ bool CopyColorsToPalette(
- [[nodiscard]] QByteArray PackTheme(const ParsedTheme &parsed) {
- 	zlib::FileToWrite zip;
  
--	zip_fileinfo zfi = { { 0, 0, 0, 0, 0, 0 }, 0, 0, 0 };
-+	zip_fileinfo zfi = { 0, { 0, 0 }, 0, 0 }; //{ { 0, 0, 0, 0, 0, 0 }, 0, 0, 0 };
- 	const auto back = std::string(parsed.tiled ? "tiled" : "background")
- 		+ (parsed.isPng ? ".png" : ".jpg");
- 	zip.openNewFile(
+ constexpr auto kDefaultProxyPort = 80;

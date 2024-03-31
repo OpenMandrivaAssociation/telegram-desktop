@@ -181,3 +181,15 @@ diff -up tdesktop-2.7.4-full/Telegram/SourceFiles/window/themes/window_theme_edi
  	const auto back = std::string(parsed.tiled ? "tiled" : "background")
  		+ (parsed.isPng ? ".png" : ".jpg");
  	zip.openNewFile(
+diff -up tdesktop-4.15.6-full/Telegram/SourceFiles/core/crash_report_window.cpp.omv~ tdesktop-4.15.6-full/Telegram/SourceFiles/core/crash_report_window.cpp
+--- tdesktop-4.15.6-full/Telegram/SourceFiles/core/crash_report_window.cpp.omv~	2024-03-31 01:26:39.209532819 +0100
++++ tdesktop-4.15.6-full/Telegram/SourceFiles/core/crash_report_window.cpp	2024-03-31 01:26:48.785630918 +0100
+@@ -23,6 +23,8 @@ https://github.com/telegramdesktop/tdesk
+ #include <QtCore/QStandardPaths>
+ #include <QtCore/QTimer>
+ 
++#define Z_DEFAULT_COMPRESSION -1
++
+ namespace {
+ 
+ constexpr auto kDefaultProxyPort = 80;

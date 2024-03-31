@@ -1,0 +1,51 @@
+diff -up tdesktop-4.15.6-full/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp.omv~ tdesktop-4.15.6-full/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp
+--- tdesktop-4.15.6-full/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp.omv~	2024-03-31 00:18:08.993763591 +0100
++++ tdesktop-4.15.6-full/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp	2024-03-31 00:18:15.825833322 +0100
+@@ -86,7 +86,7 @@ SettingWatcher::SettingWatcher(
+ 		Gio::DBusProxyFlags::NONE_,
+ 		kService,
+ 		kObjectPath,
+-		crl::guard(this, [=](GObject::Object, Gio::AsyncResult res) {
++		crl::guard(this, [=](gi::repository::GObject::Object, Gio::AsyncResult res) {
+ 			_private->interface = XdpSettings::Settings(
+ 				XdpSettings::SettingsProxy::new_for_bus_finish(res, nullptr));
+ 
+diff -up tdesktop-4.15.6-full/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp.omv~ tdesktop-4.15.6-full/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp
+--- tdesktop-4.15.6-full/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp.omv~	2024-03-31 01:41:12.865895293 +0100
++++ tdesktop-4.15.6-full/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp	2024-03-31 01:42:21.238777613 +0100
+@@ -447,7 +447,7 @@ void NotificationData::show() {
+ 
+ 		const auto callbackWrap = gi::unwrap(
+ 			Gio::AsyncReadyCallback(
+-				crl::guard(weak, [=](GObject::Object, Gio::AsyncResult res) {
++				crl::guard(weak, [=](gi::repository::GObject::Object, Gio::AsyncResult res) {
+ 					Core::Sandbox::Instance().customEnterFromEventLoop([&] {
+ 						const auto result = _interface.call_notify_finish(
+ 							res);
+@@ -657,7 +657,7 @@ void Create(Window::Notifications::Syste
+ 		Gio::DBusProxyFlags::NONE_,
+ 		kService,
+ 		kObjectPath,
+-		[=](GObject::Object, Gio::AsyncResult res) {
++		[=](gi::repository::GObject::Object, Gio::AsyncResult res) {
+ 			auto proxy =
+ 				XdgNotifications::NotificationsProxy::new_for_bus_finish(
+ 					res,
+@@ -682,7 +682,7 @@ void Create(Window::Notifications::Syste
+ 			auto interface = XdgNotifications::Notifications(proxy);
+ 
+ 			interface.call_get_server_information([=](
+-					GObject::Object,
++					gi::repository::GObject::Object,
+ 					Gio::AsyncResult res) mutable {
+ 				const auto result =
+ 					interface.call_get_server_information_finish(res);
+@@ -707,7 +707,7 @@ void Create(Window::Notifications::Syste
+ 			});
+ 
+ 			interface.call_get_capabilities([=](
+-					GObject::Object,
++					gi::repository::GObject::Object,
+ 					Gio::AsyncResult res) mutable {
+ 				const auto result = interface.call_get_capabilities_finish(
+ 					res);

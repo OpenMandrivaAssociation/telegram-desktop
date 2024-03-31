@@ -39,8 +39,8 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	4.15.0
-Release:	3
+Version:	4.15.6
+Release:	1
 
 # Application and 3rd-party modules licensing:
 # * Telegram Desktop - GPLv3+ with OpenSSL exception -- main tarball;
@@ -61,6 +61,7 @@ Patch3: tdesktop-4.12.2-clang17.patch
 Patch5: tdesktop-2.3.2-no-underlinking.patch
 Patch6: tdesktop-4.11.3-zlib-ng.patch
 Patch7: tdesktop-3.3.2-system-minizip.patch
+Patch8:	tdesktop-4.15.6-compile.patch
 # Allow using the system GSL library. This is forbidden upstream because
 # Telegram needs an unreleased fix, but the OM package of GSL has it, so
 # we're safe.

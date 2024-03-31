@@ -1,18 +1,7 @@
-diff -up tdesktop-4.2.1-full/cmake/external/CMakeLists.txt.5~ tdesktop-4.2.1-full/cmake/external/CMakeLists.txt
---- tdesktop-4.2.1-full/cmake/external/CMakeLists.txt.5~	2022-09-23 12:29:45.804644195 +0200
-+++ tdesktop-4.2.1-full/cmake/external/CMakeLists.txt	2022-09-23 12:30:05.318077595 +0200
-@@ -44,7 +44,6 @@ add_checked_subdirectory(jpeg)
- add_checked_subdirectory(kcoreaddons)
- add_checked_subdirectory(kimageformats)
- add_checked_subdirectory(lz4)
--add_checked_subdirectory(minizip)
- if (LINUX)
-     add_checked_subdirectory(nimf_qt5)
- endif()
-diff -up tdesktop-4.2.1-full/Telegram/CMakeLists.txt.5~ tdesktop-4.2.1-full/Telegram/CMakeLists.txt
---- tdesktop-4.2.1-full/Telegram/CMakeLists.txt.5~	2022-09-23 12:29:45.784644092 +0200
-+++ tdesktop-4.2.1-full/Telegram/CMakeLists.txt	2022-09-23 12:29:45.804644195 +0200
-@@ -61,7 +61,7 @@ PRIVATE
+diff -up tdesktop-4.15.4-full/Telegram/CMakeLists.txt.6~ tdesktop-4.15.4-full/Telegram/CMakeLists.txt
+--- tdesktop-4.15.4-full/Telegram/CMakeLists.txt.6~	2024-03-15 20:26:46.255099614 +0100
++++ tdesktop-4.15.4-full/Telegram/CMakeLists.txt	2024-03-15 20:29:30.089297980 +0100
+@@ -60,7 +60,7 @@ PRIVATE
      # include paths (usually ${PREFIX}/include/minizip) before any depend that
      # would add ${PREFIX}/include. This path may have a different <zip.h>,
      # for example installed by libzip (https://libzip.org).
@@ -20,4 +9,15 @@ diff -up tdesktop-4.2.1-full/Telegram/CMakeLists.txt.5~ tdesktop-4.2.1-full/Tele
 +    minizip
  
      tdesktop::td_export
-     tdesktop::td_mtproto
+     tdesktop::td_iv
+diff -up tdesktop-4.15.4-full/cmake/external/CMakeLists.txt.6~ tdesktop-4.15.4-full/cmake/external/CMakeLists.txt
+--- tdesktop-4.15.4-full/cmake/external/CMakeLists.txt.6~	2024-03-14 06:16:20.000000000 +0100
++++ tdesktop-4.15.4-full/cmake/external/CMakeLists.txt	2024-03-15 20:26:46.255099614 +0100
+@@ -42,7 +42,6 @@ add_checked_subdirectory(jpeg)
+ add_checked_subdirectory(kcoreaddons)
+ add_checked_subdirectory(kimageformats)
+ add_checked_subdirectory(lz4)
+-add_checked_subdirectory(minizip)
+ if (LINUX)
+     add_checked_subdirectory(nimf_qt5)
+ endif()
