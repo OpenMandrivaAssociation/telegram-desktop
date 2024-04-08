@@ -1,6 +1,6 @@
-diff -up tdesktop-4.16.2-full/Telegram/SourceFiles/ffmpeg/ffmpeg_frame_generator.cpp.omv~ tdesktop-4.16.2-full/Telegram/SourceFiles/ffmpeg/ffmpeg_frame_generator.cpp
---- tdesktop-4.16.2-full/Telegram/SourceFiles/ffmpeg/ffmpeg_frame_generator.cpp.omv~	2024-04-06 23:01:13.794742850 +0200
-+++ tdesktop-4.16.2-full/Telegram/SourceFiles/ffmpeg/ffmpeg_frame_generator.cpp	2024-04-06 23:01:17.722774803 +0200
+diff -up tdesktop-4.16.4-full/Telegram/SourceFiles/ffmpeg/ffmpeg_frame_generator.cpp.10~ tdesktop-4.16.4-full/Telegram/SourceFiles/ffmpeg/ffmpeg_frame_generator.cpp
+--- tdesktop-4.16.4-full/Telegram/SourceFiles/ffmpeg/ffmpeg_frame_generator.cpp.10~	2024-04-06 20:59:03.000000000 +0200
++++ tdesktop-4.16.4-full/Telegram/SourceFiles/ffmpeg/ffmpeg_frame_generator.cpp	2024-04-08 21:38:53.531270077 +0200
 @@ -291,7 +291,7 @@ void FrameGenerator::Impl::jumpToStart()
  
  void FrameGenerator::Impl::resolveNextFrameTiming() {
@@ -10,9 +10,9 @@ diff -up tdesktop-4.16.2-full/Telegram/SourceFiles/ffmpeg/ffmpeg_frame_generator
  	const auto framePts = _next.frame->pts;
  	auto framePosition = (framePts * 1000LL * base.num) / base.den;
  	_currentFrameDelay = _nextFrameDelay;
-diff -up tdesktop-4.16.2-full/Telegram/SourceFiles/ffmpeg/ffmpeg_utility.cpp.omv~ tdesktop-4.16.2-full/Telegram/SourceFiles/ffmpeg/ffmpeg_utility.cpp
---- tdesktop-4.16.2-full/Telegram/SourceFiles/ffmpeg/ffmpeg_utility.cpp.omv~	2024-04-06 22:59:43.698022475 +0200
-+++ tdesktop-4.16.2-full/Telegram/SourceFiles/ffmpeg/ffmpeg_utility.cpp	2024-04-06 23:00:45.206511614 +0200
+diff -up tdesktop-4.16.4-full/Telegram/SourceFiles/ffmpeg/ffmpeg_utility.cpp.10~ tdesktop-4.16.4-full/Telegram/SourceFiles/ffmpeg/ffmpeg_utility.cpp
+--- tdesktop-4.16.4-full/Telegram/SourceFiles/ffmpeg/ffmpeg_utility.cpp.10~	2024-04-06 20:59:03.000000000 +0200
++++ tdesktop-4.16.4-full/Telegram/SourceFiles/ffmpeg/ffmpeg_utility.cpp	2024-04-08 21:40:09.276073636 +0200
 @@ -229,7 +229,7 @@ enum AVPixelFormat GetFormatImplementati
  IOPointer MakeIOPointer(
  		void *opaque,
@@ -22,21 +22,18 @@ diff -up tdesktop-4.16.2-full/Telegram/SourceFiles/ffmpeg/ffmpeg_utility.cpp.omv
  		int64_t(*seek)(void *opaque, int64_t offset, int whence)) {
  	auto buffer = reinterpret_cast<uchar*>(av_malloc(kAvioBlockSize));
  	if (!buffer) {
-diff -up tdesktop-4.16.2-full/Telegram/SourceFiles/media/clip/media_clip_ffmpeg.cpp.omv~ tdesktop-4.16.2-full/Telegram/SourceFiles/media/clip/media_clip_ffmpeg.cpp
---- tdesktop-4.16.2-full/Telegram/SourceFiles/media/clip/media_clip_ffmpeg.cpp.omv~	2024-04-06 23:03:35.943924189 +0200
-+++ tdesktop-4.16.2-full/Telegram/SourceFiles/media/clip/media_clip_ffmpeg.cpp	2024-04-06 23:03:40.463962521 +0200
-@@ -144,7 +144,7 @@ ReaderImplementation::ReadResult FFMpegR
- }
- 
- void FFMpegReaderImplementation::processReadFrame() {
--	int64 duration = _frame->pkt_duration;
-+	int64 duration = _frame->duration;
- 	int64 framePts = _frame->pts;
- 	crl::time frameMs = (framePts * 1000LL * _fmtContext->streams[_streamId]->time_base.num) / _fmtContext->streams[_streamId]->time_base.den;
- 	_currentFrameDelay = _nextFrameDelay;
-diff -up tdesktop-4.16.2-full/Telegram/SourceFiles/media/audio/media_audio_capture.cpp.omv~ tdesktop-4.16.2-full/Telegram/SourceFiles/media/audio/media_audio_capture.cpp
---- tdesktop-4.16.2-full/Telegram/SourceFiles/media/audio/media_audio_capture.cpp.omv~	2024-04-07 00:26:52.030255257 +0200
-+++ tdesktop-4.16.2-full/Telegram/SourceFiles/media/audio/media_audio_capture.cpp	2024-04-07 00:27:08.586409243 +0200
+@@ -262,7 +262,7 @@ void IODeleter::operator()(AVIOContext *
+ FormatPointer MakeFormatPointer(
+ 		void *opaque,
+ 		int(*read)(void *opaque, uint8_t *buffer, int bufferSize),
+-		int(*write)(void *opaque, uint8_t *buffer, int bufferSize),
++		int(*write)(void *opaque, const uint8_t *buffer, int bufferSize),
+ 		int64_t(*seek)(void *opaque, int64_t offset, int whence)) {
+ 	auto io = MakeIOPointer(opaque, read, write, seek);
+ 	if (!io) {
+diff -up tdesktop-4.16.4-full/Telegram/SourceFiles/media/audio/media_audio_capture.cpp.10~ tdesktop-4.16.4-full/Telegram/SourceFiles/media/audio/media_audio_capture.cpp
+--- tdesktop-4.16.4-full/Telegram/SourceFiles/media/audio/media_audio_capture.cpp.10~	2024-04-06 20:59:03.000000000 +0200
++++ tdesktop-4.16.4-full/Telegram/SourceFiles/media/audio/media_audio_capture.cpp	2024-04-08 21:38:53.531270077 +0200
 @@ -249,7 +249,7 @@ struct Instance::Inner::Private {
  		return nbytes;
  	}
@@ -46,3 +43,15 @@ diff -up tdesktop-4.16.2-full/Telegram/SourceFiles/media/audio/media_audio_captu
  		auto l = reinterpret_cast<Private*>(opaque);
  
  		if (buf_size <= 0) return 0;
+diff -up tdesktop-4.16.4-full/Telegram/SourceFiles/media/clip/media_clip_ffmpeg.cpp.10~ tdesktop-4.16.4-full/Telegram/SourceFiles/media/clip/media_clip_ffmpeg.cpp
+--- tdesktop-4.16.4-full/Telegram/SourceFiles/media/clip/media_clip_ffmpeg.cpp.10~	2024-04-06 20:59:03.000000000 +0200
++++ tdesktop-4.16.4-full/Telegram/SourceFiles/media/clip/media_clip_ffmpeg.cpp	2024-04-08 21:38:53.531270077 +0200
+@@ -144,7 +144,7 @@ ReaderImplementation::ReadResult FFMpegR
+ }
+ 
+ void FFMpegReaderImplementation::processReadFrame() {
+-	int64 duration = _frame->pkt_duration;
++	int64 duration = _frame->duration;
+ 	int64 framePts = _frame->pts;
+ 	crl::time frameMs = (framePts * 1000LL * _fmtContext->streams[_streamId]->time_base.num) / _fmtContext->streams[_streamId]->time_base.den;
+ 	_currentFrameDelay = _nextFrameDelay;
