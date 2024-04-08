@@ -39,7 +39,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	4.15.6
+Version:	4.16.2
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -66,6 +66,7 @@ Patch8:	tdesktop-4.15.6-compile.patch
 # Telegram needs an unreleased fix, but the OM package of GSL has it, so
 # we're safe.
 Patch9: tdesktop-allow-system-gsl.patch
+Patch10: tdesktop-4.16.2-ffmpeg-7.0.patch
 
 Requires: hicolor-icon-theme
 
