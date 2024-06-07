@@ -1,0 +1,782 @@
+diff --git a/Telegram/lib_base/base/base_file_utilities.cpp b/Telegram/lib_base/base/base_file_utilities.cpp
+index 640c731..9ef1e3e 100644
+--- a/Telegram/lib_base/base/base_file_utilities.cpp
++++ b/Telegram/lib_base/base/base_file_utilities.cpp
+@@ -6,10 +6,14 @@
+ //
+ #include "base/base_file_utilities.h"
+ 
++#include "base/assertion.h"
++
+ #include "base/platform/base_platform_file_utilities.h"
+ 
+ #include <QtCore/QResource>
+ 
++#include <range/v3/all.hpp>
++
+ namespace base {
+ 
+ QString FileNameFromUserString(QString name) {
+@@ -27,7 +31,7 @@ QString FileNameFromUserString(QString name) {
+ 		0x2067, // RTL Isolate
+ 		'/', '\\', '<', '>', ':', '"', '|', '?', '*' };
+ 	for (auto &ch : name) {
+-		if (ch < 32 || ranges::find(kBad, ch.unicode()) != end(kBad)) {
++		if (ch < 32 || ranges::find(kBad, ch.unicode()) != std::end(kBad)) {
+ 			ch = '_';
+ 		}
+ 	}
+diff --git a/Telegram/lib_base/base/base_file_utilities.h b/Telegram/lib_base/base/base_file_utilities.h
+index 867947d..8477ce2 100644
+--- a/Telegram/lib_base/base/base_file_utilities.h
++++ b/Telegram/lib_base/base/base_file_utilities.h
+@@ -6,6 +6,8 @@
+ //
+ #pragma once
+ 
++#include <QtCore/QString>
++
+ namespace base {
+ 
+ [[nodiscard]] QString FileNameFromUserString(QString name);
+diff --git a/Telegram/lib_base/base/battery_saving.h b/Telegram/lib_base/base/battery_saving.h
+index e42d13b..dca1450 100644
+--- a/Telegram/lib_base/base/battery_saving.h
++++ b/Telegram/lib_base/base/battery_saving.h
+@@ -6,6 +6,13 @@
+ //
+ #pragma once
+ 
++#include "base/basic_types.h"
++
++#include <memory>
++#include <optional>
++
++#include <rpl/rpl.h>
++
+ namespace base::Platform {
+ 
+ class AbstractBatterySaving {
+diff --git a/Telegram/lib_base/base/call_delayed.cpp b/Telegram/lib_base/base/call_delayed.cpp
+index 93d975d..44d0a43 100644
+--- a/Telegram/lib_base/base/call_delayed.cpp
++++ b/Telegram/lib_base/base/call_delayed.cpp
+@@ -6,6 +6,7 @@
+ //
+ #include "base/call_delayed.h"
+ 
++#include "base/assertion.h"
+ #include "base/timer.h"
+ 
+ #include <QtCore/QCoreApplication>
+diff --git a/Telegram/lib_base/base/call_delayed.h b/Telegram/lib_base/base/call_delayed.h
+index 25b34c8..e940740 100644
+--- a/Telegram/lib_base/base/call_delayed.h
++++ b/Telegram/lib_base/base/call_delayed.h
+@@ -6,6 +6,13 @@
+ //
+ #pragma once
+ 
++#include "base/basic_types.h"
++
++#include <type_traits>
++#include <utility>
++
++#include <crl/crl.h>
++
+ namespace base {
+ 
+ void call_delayed(crl::time delay, FnMut<void()> &&callable);
+diff --git a/Telegram/lib_base/base/concurrent_timer.cpp b/Telegram/lib_base/base/concurrent_timer.cpp
+index ed48b36..29baf36 100644
+--- a/Telegram/lib_base/base/concurrent_timer.cpp
++++ b/Telegram/lib_base/base/concurrent_timer.cpp
+@@ -8,6 +8,7 @@
+ 
+ #include <QtCore/QThread>
+ #include <QtCore/QCoreApplication>
++#include <QtCore/QMutex>
+ 
+ using namespace base::details;
+ 
+diff --git a/Telegram/lib_base/base/concurrent_timer.h b/Telegram/lib_base/base/concurrent_timer.h
+index 9a991e5..b2dbd8e 100644
+--- a/Telegram/lib_base/base/concurrent_timer.h
++++ b/Telegram/lib_base/base/concurrent_timer.h
+@@ -6,7 +6,9 @@
+ //
+ #pragma once
+ 
++#include "base/basic_types.h"
+ #include "base/binary_guard.h"
++
+ #include <crl/crl_time.h>
+ #include <crl/crl_object_on_queue.h>
+ #include <QtCore/QThread>
+diff --git a/Telegram/lib_base/base/crash_report_header.cpp b/Telegram/lib_base/base/crash_report_header.cpp
+index f1718f7..98f387f 100644
+--- a/Telegram/lib_base/base/crash_report_header.cpp
++++ b/Telegram/lib_base/base/crash_report_header.cpp
+@@ -6,6 +6,12 @@
+ //
+ #include "base/crash_report_header.h"
+ 
++#include "base/basic_types.h"
++
++#include <array>
++#include <cmath>
++#include <cwchar>
++
+ namespace base::details {
+ namespace {
+ 
+diff --git a/Telegram/lib_base/base/debug_log.cpp b/Telegram/lib_base/base/debug_log.cpp
+index 661ae1b..60c68a3 100644
+--- a/Telegram/lib_base/base/debug_log.cpp
++++ b/Telegram/lib_base/base/debug_log.cpp
+@@ -8,6 +8,8 @@
+ 
+ #include "base/integration.h"
+ 
++#include <crl/crl.h>
++
+ namespace base {
+ 
+ void LogWriteMain(const QString &message) {
+diff --git a/Telegram/lib_base/base/global_shortcuts.h b/Telegram/lib_base/base/global_shortcuts.h
+index d52009e..45879d6 100644
+--- a/Telegram/lib_base/base/global_shortcuts.h
++++ b/Telegram/lib_base/base/global_shortcuts.h
+@@ -6,6 +6,13 @@
+ //
+ #pragma once
+ 
++#include "base/basic_types.h"
++
++#include <memory>
++
++#include <QtCore/QByteArray>
++#include <QtCore/QString>
++
+ namespace base {
+ 
+ class GlobalShortcutValue {
+diff --git a/Telegram/lib_base/base/global_shortcuts_generic.cpp b/Telegram/lib_base/base/global_shortcuts_generic.cpp
+index b8ffaef..9c390af 100644
+--- a/Telegram/lib_base/base/global_shortcuts_generic.cpp
++++ b/Telegram/lib_base/base/global_shortcuts_generic.cpp
+@@ -7,8 +7,15 @@
+ #include "base/global_shortcuts_generic.h"
+ 
+ #include "base/platform/base_platform_global_shortcuts.h"
++
++#include "base/assertion.h"
+ #include "base/invoke_queued.h"
+ 
++#include <memory>
++#include <mutex>
++
++#include <range/v3/all.hpp>
++
+ namespace base {
+ namespace {
+ 
+diff --git a/Telegram/lib_base/base/global_shortcuts_generic.h b/Telegram/lib_base/base/global_shortcuts_generic.h
+index 79bd6ea..e36501d 100644
+--- a/Telegram/lib_base/base/global_shortcuts_generic.h
++++ b/Telegram/lib_base/base/global_shortcuts_generic.h
+@@ -6,8 +6,15 @@
+ //
+ #pragma once
+ 
++#include "base/basic_types.h"
+ #include "base/global_shortcuts.h"
+ 
++#include "base/flat_set.h"
++
++#include <vector>
++
++#include <QtCore/QObject>
++
+ namespace base {
+ 
+ using GlobalShortcutKeyGeneric = uint64;
+diff --git a/Telegram/lib_base/base/last_user_input.h b/Telegram/lib_base/base/last_user_input.h
+index 279cc9e..dfecc95 100644
+--- a/Telegram/lib_base/base/last_user_input.h
++++ b/Telegram/lib_base/base/last_user_input.h
+@@ -6,6 +6,8 @@
+ //
+ #pragma once
+ 
++#include <crl/crl.h>
++
+ namespace base {
+ 
+ [[nodiscard]] crl::time LastUserInputTime();
+diff --git a/Telegram/lib_base/base/network_reachability.h b/Telegram/lib_base/base/network_reachability.h
+index 4c9f0ac..43f5ad2 100644
+--- a/Telegram/lib_base/base/network_reachability.h
++++ b/Telegram/lib_base/base/network_reachability.h
+@@ -6,6 +6,10 @@
+ //
+ #pragma once
+ 
++#include <memory>
++
++#include <rpl/rpl.h>
++
+ namespace base {
+ 
+ class NetworkReachability final {
+diff --git a/Telegram/lib_base/base/object_ptr.h b/Telegram/lib_base/base/object_ptr.h
+index 84a47ba..26baece 100644
+--- a/Telegram/lib_base/base/object_ptr.h
++++ b/Telegram/lib_base/base/object_ptr.h
+@@ -6,8 +6,13 @@
+ //
+ #pragma once
+ 
++#include "base/algorithm.h"
++
++#include <QtCore/QObject>
+ #include <QtCore/QPointer>
+ 
++class QWidget;
++
+ // Smart pointer for QObject*, has move semantics, destroys object if it doesn't have a parent.
+ template <typename Object>
+ class object_ptr {
+diff --git a/Telegram/lib_base/base/options.cpp b/Telegram/lib_base/base/options.cpp
+index 7e57652..b65366d 100644
+--- a/Telegram/lib_base/base/options.cpp
++++ b/Telegram/lib_base/base/options.cpp
+@@ -9,6 +9,7 @@
+ #include "base/call_delayed.h"
+ #include "base/variant.h"
+ #include "base/debug_log.h"
++#include "base/flat_map.h"
+ 
+ #include <QtCore/QJsonDocument>
+ #include <QtCore/QJsonObject>
+diff --git a/Telegram/lib_base/base/options.h b/Telegram/lib_base/base/options.h
+index 05d9fa1..ab9c450 100644
+--- a/Telegram/lib_base/base/options.h
++++ b/Telegram/lib_base/base/options.h
+@@ -6,10 +6,13 @@
+ //
+ #pragma once
+ 
++#include "base/basic_types.h"
+ #include "base/flags.h"
+ #include "base/variant.h"
+ #include "base/required.h"
+ 
++#include <QtCore/QString>
++
+ #ifdef linux // GCC, cmon..
+ #undef linux
+ #endif // linux
+diff --git a/Telegram/lib_base/base/parse_helper.h b/Telegram/lib_base/base/parse_helper.h
+index 46c30b1..772f181 100644
+--- a/Telegram/lib_base/base/parse_helper.h
++++ b/Telegram/lib_base/base/parse_helper.h
+@@ -6,6 +6,11 @@
+ //
+ #pragma once
+ 
++#include "base/assertion.h"
++
++#include <QtCore/QByteArray>
++#include <QtCore/QLatin1String>
++
+ namespace base {
+ namespace parse {
+ 
+diff --git a/Telegram/lib_base/base/platform/base_platform_info.cpp b/Telegram/lib_base/base/platform/base_platform_info.cpp
+index da0f4d0..8765fca 100644
+--- a/Telegram/lib_base/base/platform/base_platform_info.cpp
++++ b/Telegram/lib_base/base/platform/base_platform_info.cpp
+@@ -7,6 +7,12 @@
+ #include "base/platform/base_platform_info.h"
+ 
+ #include "base/algorithm.h"
++#include "base/basic_types.h"
++
++#include <QtCore/QList>
++#include <QtCore/QString>
++
++#include <range/v3/all.hpp>
+ 
+ namespace base::Platform {
+ namespace {
+diff --git a/Telegram/lib_base/base/platform/base_platform_network_reachability.h b/Telegram/lib_base/base/platform/base_platform_network_reachability.h
+index d2852b1..8938cfd 100644
+--- a/Telegram/lib_base/base/platform/base_platform_network_reachability.h
++++ b/Telegram/lib_base/base/platform/base_platform_network_reachability.h
+@@ -6,6 +6,10 @@
+ //
+ #pragma once
+ 
++#include <memory>
++
++#include <rpl/rpl.h>
++
+ namespace base::Platform {
+ 
+ class NetworkReachability {
+diff --git a/Telegram/lib_base/base/platform/base_platform_power_save_blocker.h b/Telegram/lib_base/base/platform/base_platform_power_save_blocker.h
+index 9f1d53a..8dd0ecc 100644
+--- a/Telegram/lib_base/base/platform/base_platform_power_save_blocker.h
++++ b/Telegram/lib_base/base/platform/base_platform_power_save_blocker.h
+@@ -6,6 +6,7 @@
+ //
+ #pragma once
+ 
++#include "base/assertion.h"
+ #include "base/power_save_blocker.h"
+ 
+ namespace base::Platform {
+diff --git a/Telegram/lib_base/base/platform/base_platform_system_media_controls.h b/Telegram/lib_base/base/platform/base_platform_system_media_controls.h
+index 6dd8af8..50e119c 100644
+--- a/Telegram/lib_base/base/platform/base_platform_system_media_controls.h
++++ b/Telegram/lib_base/base/platform/base_platform_system_media_controls.h
+@@ -6,6 +6,15 @@
+ //
+ #pragma once
+ 
++#include "base/basic_types.h"
++
++#include <memory>
++
++#include <rpl/rpl.h>
++
++class QImage;
++class QString;
++
+ namespace base::Platform {
+ 
+ class SystemMediaControls {
+diff --git a/Telegram/lib_base/base/platform/base_platform_url_scheme.h b/Telegram/lib_base/base/platform/base_platform_url_scheme.h
+index 98ba49c..4f4fc25 100644
+--- a/Telegram/lib_base/base/platform/base_platform_url_scheme.h
++++ b/Telegram/lib_base/base/platform/base_platform_url_scheme.h
+@@ -6,6 +6,8 @@
+ //
+ #pragma once
+ 
++#include <QtCore/QString>
++
+ namespace base::Platform {
+ 
+ struct UrlSchemeDescriptor {
+diff --git a/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp b/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp
+index ff70a1c..f67b082 100644
+--- a/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp
++++ b/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp
+@@ -10,10 +10,12 @@
+ #include "base/platform/linux/base_linux_xdp_utilities.h"
+ #include "base/platform/linux/base_linux_xdg_activation_token.h"
+ #include "base/algorithm.h"
++#include "base/assertion.h"
+ 
+ #include <QtCore/QFile>
+ #include <QtCore/QFileInfo>
+ #include <QtCore/QStandardPaths>
++#include <QtCore/QUrl>
+ #include <QtGui/QDesktopServices>
+ 
+ #include <xdpopenuri/xdpopenuri.hpp>
+diff --git a/Telegram/lib_base/base/platform/linux/base_global_shortcuts_linux.cpp b/Telegram/lib_base/base/platform/linux/base_global_shortcuts_linux.cpp
+index 1891ff1..9575c21 100644
+--- a/Telegram/lib_base/base/platform/linux/base_global_shortcuts_linux.cpp
++++ b/Telegram/lib_base/base/platform/linux/base_global_shortcuts_linux.cpp
+@@ -7,6 +7,7 @@
+ #include "base/platform/linux/base_global_shortcuts_linux.h"
+ 
+ #include "base/const_string.h"
++#include "base/flat_map.h"
+ #include "base/global_shortcuts_generic.h"
+ #include "base/platform/base_platform_info.h" // IsX11
+ #include "base/debug_log.h"
+diff --git a/Telegram/lib_base/base/platform/linux/base_info_linux.cpp b/Telegram/lib_base/base/platform/linux/base_info_linux.cpp
+index a40477a..a11fa2c 100644
+--- a/Telegram/lib_base/base/platform/linux/base_info_linux.cpp
++++ b/Telegram/lib_base/base/platform/linux/base_info_linux.cpp
+@@ -7,6 +7,7 @@
+ #include "base/platform/linux/base_info_linux.h"
+ 
+ #include "base/algorithm.h"
++#include "base/basic_types.h"
+ #include "base/platform/linux/base_linux_library.h"
+ 
+ #ifndef DESKTOP_APP_DISABLE_X11_INTEGRATION
+diff --git a/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp b/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp
+index b2db356..116cdd5 100644
+--- a/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp
++++ b/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp
+@@ -18,6 +18,8 @@
+ #include <xdgscreensaver/xdgscreensaver.hpp>
+ #include <mutteridlemonitor/mutteridlemonitor.hpp>
+ 
++#include <crl/crl.h>
++
+ namespace base::Platform {
+ namespace {
+ 
+diff --git a/Telegram/lib_base/base/platform/linux/base_linux_allocation_tracer.h b/Telegram/lib_base/base/platform/linux/base_linux_allocation_tracer.h
+index 1cb3536..f25c6f5 100644
+--- a/Telegram/lib_base/base/platform/linux/base_linux_allocation_tracer.h
++++ b/Telegram/lib_base/base/platform/linux/base_linux_allocation_tracer.h
+@@ -6,6 +6,8 @@
+ //
+ #pragma once
+ 
++class QString;
++
+ namespace base::Platform {
+ 
+ void SetAllocationTracerPath(const QString &path);
+diff --git a/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.cpp b/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.cpp
+index 86316e9..c1f8797 100644
+--- a/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.cpp
++++ b/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.cpp
+@@ -6,8 +6,12 @@
+ //
+ #include "base/platform/linux/base_linux_dbus_utilities.h"
+ 
++#include <range/v3/all.hpp>
++
+ #include <xdgdbus/xdgdbus.hpp>
+ 
++#include <crl/crl.h>
++
+ namespace base::Platform::DBus {
+ namespace {
+ 
+diff --git a/Telegram/lib_base/base/platform/linux/base_linux_xcb_utilities.cpp b/Telegram/lib_base/base/platform/linux/base_linux_xcb_utilities.cpp
+index e960dca..bb8d4f6 100644
+--- a/Telegram/lib_base/base/platform/linux/base_linux_xcb_utilities.cpp
++++ b/Telegram/lib_base/base/platform/linux/base_linux_xcb_utilities.cpp
+@@ -15,6 +15,10 @@
+ #include <qpa/qplatformnativeinterface.h>
+ #endif // Qt < 6.2.0
+ 
++#include <gsl/gsl_util>
++
++#include <range/v3/all.hpp>
++
+ namespace base::Platform::XCB {
+ namespace {
+ 
+diff --git a/Telegram/lib_base/base/platform/linux/base_linux_xcb_utilities.h b/Telegram/lib_base/base/platform/linux/base_linux_xcb_utilities.h
+index e868870..7475d84 100644
+--- a/Telegram/lib_base/base/platform/linux/base_linux_xcb_utilities.h
++++ b/Telegram/lib_base/base/platform/linux/base_linux_xcb_utilities.h
+@@ -8,8 +8,14 @@
+ 
+ #include "base/custom_delete.h"
+ 
++#include <memory>
++#include <optional>
++#include <vector>
++
+ #include <xcb/xcb.h>
+ 
++class QString;
++
+ namespace base::Platform::XCB {
+ 
+ using ConnectionPointer = std::unique_ptr<
+diff --git a/Telegram/lib_base/base/platform/linux/base_linux_xdg_activation_token.h b/Telegram/lib_base/base/platform/linux/base_linux_xdg_activation_token.h
+index 04c5eaf..549b8dd 100644
+--- a/Telegram/lib_base/base/platform/linux/base_linux_xdg_activation_token.h
++++ b/Telegram/lib_base/base/platform/linux/base_linux_xdg_activation_token.h
+@@ -6,6 +6,10 @@
+ //
+ #pragma once
+ 
++#include "base/basic_types.h"
++
++#include <QtCore/QString>
++
+ namespace base::Platform {
+ 
+ void RunWithXdgActivationToken(Fn<void(QString)> callback);
+diff --git a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp
+index af97691..b667706 100644
+--- a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp
++++ b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp
+@@ -21,6 +21,8 @@
+ 
+ #include <sstream>
+ 
++#include <crl/crl.h>
++
+ namespace base::Platform::XDP {
+ namespace {
+ 
+diff --git a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h
+index 8d3fdb0..ac6e319 100644
+--- a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h
++++ b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h
+@@ -9,12 +9,16 @@
+ #include "base/expected.h"
+ #include "base/weak_ptr.h"
+ 
++#include <memory>
++#include <optional>
++
+ #include <glib/glib.hpp>
+ 
+ #if __has_include(<glibmm.h>)
+ #include <glibmm.h>
+ #endif // __has_include(<glibmm.h>)
+ 
++class QString;
+ class QWindow;
+ 
+ namespace base::Platform::XDP {
+diff --git a/Telegram/lib_base/base/platform/linux/base_linux_xsettings.cpp b/Telegram/lib_base/base/platform/linux/base_linux_xsettings.cpp
+index f9f2c16..fb940c3 100644
+--- a/Telegram/lib_base/base/platform/linux/base_linux_xsettings.cpp
++++ b/Telegram/lib_base/base/platform/linux/base_linux_xsettings.cpp
+@@ -6,6 +6,8 @@
+ //
+ #include "base/platform/linux/base_linux_xsettings.h"
+ 
++#include "base/basic_types.h"
++
+ #include "base/platform/base_platform_info.h"
+ 
+ #include <QtCore/QByteArray>
+diff --git a/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp b/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp
+index cb992b0..3236860 100644
+--- a/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp
++++ b/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp
+@@ -16,11 +16,16 @@
+ #include "base/platform/linux/base_linux_xcb_utilities.h"
+ #endif // !DESKTOP_APP_DISABLE_X11_INTEGRATION
+ 
++#include <memory>
++
+ #include <QtGui/QWindow>
+ 
+ #include <xdpinhibit/xdpinhibit.hpp>
+ #include <xdprequest/xdprequest.hpp>
+ 
++#include <crl/crl.h>
++#include <rpl/rpl.h>
++
+ namespace base::Platform {
+ namespace {
+ 
+diff --git a/Telegram/lib_base/base/platform/linux/base_system_media_controls_linux.cpp b/Telegram/lib_base/base/platform/linux/base_system_media_controls_linux.cpp
+index b3f0bbd..6ea177b 100644
+--- a/Telegram/lib_base/base/platform/linux/base_system_media_controls_linux.cpp
++++ b/Telegram/lib_base/base/platform/linux/base_system_media_controls_linux.cpp
+@@ -6,6 +6,7 @@
+ //
+ #include "base/platform/base_platform_system_media_controls.h"
+ 
++#include "base/assertion.h"
+ #include "base/integration.h"
+ #include "base/platform/base_platform_info.h" // IsWayland
+ 
+diff --git a/Telegram/lib_base/base/power_save_blocker.cpp b/Telegram/lib_base/base/power_save_blocker.cpp
+index 93decb2..669c0e5 100644
+--- a/Telegram/lib_base/base/power_save_blocker.cpp
++++ b/Telegram/lib_base/base/power_save_blocker.cpp
+@@ -6,11 +6,17 @@
+ //
+ #include "base/power_save_blocker.h"
+ 
++#include "base/basic_types.h"
++#include "base/flat_map.h"
++#include "base/flat_set.h"
++
+ #include "base/platform/base_platform_power_save_blocker.h"
+ 
+ #include <QtCore/QMutex>
+ #include <QtGui/QWindow>
+ 
++#include <range/v3/all.hpp>
++
+ namespace base {
+ namespace {
+ 
+diff --git a/Telegram/lib_base/base/qt/qt_common_adapters.h b/Telegram/lib_base/base/qt/qt_common_adapters.h
+index 92dac51..983dd86 100644
+--- a/Telegram/lib_base/base/qt/qt_common_adapters.h
++++ b/Telegram/lib_base/base/qt/qt_common_adapters.h
+@@ -6,6 +6,8 @@
+ //
+ #pragma once
+ 
++#include <QtGlobal>
++
+ #if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
+ #include <QtGui/QInputDevice>
+ #else // Qt >= 6.0.0
+diff --git a/Telegram/lib_base/base/qt/qt_compare.h b/Telegram/lib_base/base/qt/qt_compare.h
+index 00eeec8..57df5f4 100644
+--- a/Telegram/lib_base/base/qt/qt_compare.h
++++ b/Telegram/lib_base/base/qt/qt_compare.h
+@@ -6,6 +6,8 @@
+ //
+ #pragma once
+ 
++#include "base/assertion.h"
++
+ #include <compare>
+ #include <variant>
+ #include <gsl/pointers>
+diff --git a/Telegram/lib_base/base/qt/qt_tab_key.h b/Telegram/lib_base/base/qt/qt_tab_key.h
+index 36f3dea..02edf09 100644
+--- a/Telegram/lib_base/base/qt/qt_tab_key.h
++++ b/Telegram/lib_base/base/qt/qt_tab_key.h
+@@ -6,6 +6,8 @@
+ //
+ #pragma once
+ 
++#include "base/basic_types.h"
++
+ class QWidget;
+ 
+ namespace base {
+diff --git a/Telegram/lib_base/base/qthelp_url.cpp b/Telegram/lib_base/base/qthelp_url.cpp
+index 2eb3930..93aad1f 100644
+--- a/Telegram/lib_base/base/qthelp_url.cpp
++++ b/Telegram/lib_base/base/qthelp_url.cpp
+@@ -6,6 +6,9 @@
+ //
+ #include "base/qthelp_url.h"
+ 
++#include "base/algorithm.h"
++#include "base/assertion.h"
++
+ namespace qthelp {
+ namespace {
+ 
+diff --git a/Telegram/lib_base/base/runtime_composer.h b/Telegram/lib_base/base/runtime_composer.h
+index 7e6fc1a..8bce777 100644
+--- a/Telegram/lib_base/base/runtime_composer.h
++++ b/Telegram/lib_base/base/runtime_composer.h
+@@ -6,6 +6,16 @@
+ //
+ #pragma once
+ 
++#include "base/algorithm.h"
++#include "base/assertion.h"
++#include "base/basic_types.h"
++
++#include <utility>
++
++#include <QtCore/QAtomicInt>
++#include <QtCore/QMutex>
++#include <QtCore/QMutexLocker>
++
+ template <typename Base>
+ class RuntimeComposer;
+ 
+diff --git a/Telegram/lib_base/base/single_instance.cpp b/Telegram/lib_base/base/single_instance.cpp
+index b8af943..1e38bb5 100644
+--- a/Telegram/lib_base/base/single_instance.cpp
++++ b/Telegram/lib_base/base/single_instance.cpp
+@@ -9,6 +9,8 @@
+ #include "base/crc32hash.h"
+ #include "base/platform/base_platform_process.h"
+ 
++#include <QtCore/QCoreApplication>
++#include <QtCore/QRegularExpression>
+ #include <QtCore/QStandardPaths>
+ #include <QtWidgets/QWidget>
+ #include <QtGui/QWindow>
+diff --git a/Telegram/lib_base/base/single_instance.h b/Telegram/lib_base/base/single_instance.h
+index 78ce214..bcaf90b 100644
+--- a/Telegram/lib_base/base/single_instance.h
++++ b/Telegram/lib_base/base/single_instance.h
+@@ -7,10 +7,13 @@
+ #pragma once
+ 
+ #include "base/file_lock.h"
++#include "base/flat_map.h"
+ 
+ #include <QtNetwork/QLocalServer>
+ #include <QtNetwork/QLocalSocket>
+ 
++#include <rpl/rpl.h>
++
+ namespace base {
+ 
+ class SingleInstance final {
+diff --git a/Telegram/lib_base/base/timer.h b/Telegram/lib_base/base/timer.h
+index 3c604d0..b0f0f73 100644
+--- a/Telegram/lib_base/base/timer.h
++++ b/Telegram/lib_base/base/timer.h
+@@ -6,6 +6,8 @@
+ //
+ #pragma once
+ 
++#include "base/basic_types.h"
++
+ #include <QtCore/QObject>
+ #include <QtCore/QThread>
+ #include "base/flat_map.h"
+diff --git a/Telegram/lib_base/base/timer_rpl.h b/Telegram/lib_base/base/timer_rpl.h
+index 9cea4be..ce6da25 100644
+--- a/Telegram/lib_base/base/timer_rpl.h
++++ b/Telegram/lib_base/base/timer_rpl.h
+@@ -8,6 +8,8 @@
+ 
+ #include "base/timer.h"
+ 
++#include <rpl/rpl.h>
++
+ namespace base {
+ 
+ [[nodiscard]] inline auto timer_once(crl::time delay) {
+diff --git a/Telegram/lib_base/base/unique_function.h b/Telegram/lib_base/base/unique_function.h
+index c101679..983965a 100644
+--- a/Telegram/lib_base/base/unique_function.h
++++ b/Telegram/lib_base/base/unique_function.h
+@@ -6,6 +6,8 @@
+ //
+ #pragma once
+ 
++#include "base/assertion.h"
++
+ #include <functional>
+ 
+ #ifndef Unexpected
+diff --git a/Telegram/lib_base/base/unixtime.cpp b/Telegram/lib_base/base/unixtime.cpp
+index b39b788..894ffbf 100644
+--- a/Telegram/lib_base/base/unixtime.cpp
++++ b/Telegram/lib_base/base/unixtime.cpp
+@@ -6,9 +6,13 @@
+ //
+ #include "base/unixtime.h"
+ 
++#include <random>
++
+ #include <QDateTime>
+ #include <QReadWriteLock>
+ 
++#include <crl/crl.h>
++
+ #ifdef Q_OS_WIN
+ #include <windows.h>
+ #elif defined Q_OS_MAC
+diff --git a/Telegram/lib_base/base/unixtime.h b/Telegram/lib_base/base/unixtime.h
+index 8953d49..f33b2d8 100644
+--- a/Telegram/lib_base/base/unixtime.h
++++ b/Telegram/lib_base/base/unixtime.h
+@@ -8,6 +8,8 @@
+ 
+ #include "base/basic_types.h"
+ 
++#include <rpl/rpl.h>
++
+ class QDateTime;
+ 
+ namespace base {

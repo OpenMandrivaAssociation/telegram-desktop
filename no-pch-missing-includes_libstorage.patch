@@ -1,0 +1,113 @@
+diff --git a/Telegram/lib_storage/storage/cache/storage_cache_binlog_reader.h b/Telegram/lib_storage/storage/cache/storage_cache_binlog_reader.h
+index f286ff2..db8f509 100644
+--- a/Telegram/lib_storage/storage/cache/storage_cache_binlog_reader.h
++++ b/Telegram/lib_storage/storage/cache/storage_cache_binlog_reader.h
+@@ -8,6 +8,8 @@
+ 
+ #include "storage/cache/storage_cache_types.h"
+ #include "storage/storage_encrypted_file.h"
++
++#include "base/assertion.h"
+ #include "base/bytes.h"
+ #include "base/match_method.h"
+ 
+diff --git a/Telegram/lib_storage/storage/cache/storage_cache_cleaner.h b/Telegram/lib_storage/storage/cache/storage_cache_cleaner.h
+index 6f65670..6fc2bc1 100644
+--- a/Telegram/lib_storage/storage/cache/storage_cache_cleaner.h
++++ b/Telegram/lib_storage/storage/cache/storage_cache_cleaner.h
+@@ -9,6 +9,10 @@
+ #include "storage/cache/storage_cache_types.h"
+ #include "base/binary_guard.h"
+ 
++#include <range/v3/all.hpp>
++
++#include <crl/crl.h>
++
+ namespace Storage {
+ namespace Cache {
+ namespace details {
+diff --git a/Telegram/lib_storage/storage/cache/storage_cache_compactor.cpp b/Telegram/lib_storage/storage/cache/storage_cache_compactor.cpp
+index 57b2c23..7d5c413 100644
+--- a/Telegram/lib_storage/storage/cache/storage_cache_compactor.cpp
++++ b/Telegram/lib_storage/storage/cache/storage_cache_compactor.cpp
+@@ -8,6 +8,9 @@
+ 
+ #include "storage/cache/storage_cache_database_object.h"
+ #include "storage/cache/storage_cache_binlog_reader.h"
++
++#include "base/variant.h"
++
+ #include <unordered_set>
+ 
+ namespace Storage {
+diff --git a/Telegram/lib_storage/storage/cache/storage_cache_types.cpp b/Telegram/lib_storage/storage/cache/storage_cache_types.cpp
+index 4fe47ad..1f572ea 100644
+--- a/Telegram/lib_storage/storage/cache/storage_cache_types.cpp
++++ b/Telegram/lib_storage/storage/cache/storage_cache_types.cpp
+@@ -8,6 +8,8 @@
+ 
+ #include <QtCore/QDir>
+ 
++#include <range/v3/all.hpp>
++
+ namespace Storage {
+ namespace Cache {
+ namespace details {
+diff --git a/Telegram/lib_storage/storage/storage_clear_legacy.h b/Telegram/lib_storage/storage/storage_clear_legacy.h
+index 3723729..f3575c1 100644
+--- a/Telegram/lib_storage/storage/storage_clear_legacy.h
++++ b/Telegram/lib_storage/storage/storage_clear_legacy.h
+@@ -6,6 +6,13 @@
+ //
+ #pragma once
+ 
++#include "base/basic_types.h"
++#include "base/flat_set.h"
++
++#include <vector>
++
++#include <QtCore/QString>
++
+ namespace Storage {
+ 
+ using CollectGoodFiles = Fn<void(FnMut<void(base::flat_set<QString>&&)>)>;
+diff --git a/Telegram/lib_storage/storage/storage_clear_legacy_posix.cpp b/Telegram/lib_storage/storage/storage_clear_legacy_posix.cpp
+index 6b4b1d1..49be9a3 100644
+--- a/Telegram/lib_storage/storage/storage_clear_legacy_posix.cpp
++++ b/Telegram/lib_storage/storage/storage_clear_legacy_posix.cpp
+@@ -10,6 +10,8 @@
+ #include <dirent.h>
+ #include <unistd.h>
+ 
++#include <QtCore/QFile>
++
+ namespace Storage {
+ namespace details {
+ 
+diff --git a/Telegram/lib_storage/storage/storage_databases.cpp b/Telegram/lib_storage/storage/storage_databases.cpp
+index 6fd0809..1373ed9 100644
+--- a/Telegram/lib_storage/storage/storage_databases.cpp
++++ b/Telegram/lib_storage/storage/storage_databases.cpp
+@@ -6,6 +6,8 @@
+ //
+ #include "storage/storage_databases.h"
+ 
++#include "base/assertion.h"
++
+ #include "storage/cache/storage_cache_database.h"
+ 
+ namespace Storage {
+diff --git a/Telegram/lib_storage/storage/storage_encrypted_file.cpp b/Telegram/lib_storage/storage/storage_encrypted_file.cpp
+index ca62baa..d8797d7 100644
+--- a/Telegram/lib_storage/storage/storage_encrypted_file.cpp
++++ b/Telegram/lib_storage/storage/storage_encrypted_file.cpp
+@@ -8,6 +8,9 @@
+ 
+ #include "base/openssl_help.h"
+ 
++#include <QtCore/QDir>
++#include <QtCore/QFileInfo>
++
+ namespace Storage {
+ namespace {
+ 

@@ -1,0 +1,1082 @@
+diff --git a/Telegram/lib_ui/emoji_suggestions/emoji_suggestions.h b/Telegram/lib_ui/emoji_suggestions/emoji_suggestions.h
+index 1725a2a..406dbfc 100644
+--- a/Telegram/lib_ui/emoji_suggestions/emoji_suggestions.h
++++ b/Telegram/lib_ui/emoji_suggestions/emoji_suggestions.h
+@@ -6,6 +6,7 @@
+ //
+ #pragma once
+ 
++#include <cstring>
+ #include <vector>
+ 
+ namespace Ui {
+diff --git a/Telegram/lib_ui/ui/cached_special_layer_shadow_corners.cpp b/Telegram/lib_ui/ui/cached_special_layer_shadow_corners.cpp
+index 0d98360..1620a87 100644
+--- a/Telegram/lib_ui/ui/cached_special_layer_shadow_corners.cpp
++++ b/Telegram/lib_ui/ui/cached_special_layer_shadow_corners.cpp
+@@ -9,6 +9,8 @@
+ #include "ui/effects/ripple_animation.h"
+ #include "styles/style_layers.h"
+ 
++#include <QtGui/QPainter>
++
+ namespace Ui {
+ namespace {
+ 
+diff --git a/Telegram/lib_ui/ui/cached_special_layer_shadow_corners.h b/Telegram/lib_ui/ui/cached_special_layer_shadow_corners.h
+index 10955d4..60a2ac1 100644
+--- a/Telegram/lib_ui/ui/cached_special_layer_shadow_corners.h
++++ b/Telegram/lib_ui/ui/cached_special_layer_shadow_corners.h
+@@ -6,6 +6,10 @@
+ //
+ #pragma once
+ 
++#include <array>
++
++#include <QtGui/QImage>
++
+ namespace Ui {
+ 
+ [[nodiscard]] const std::array<QImage, 4> &SpecialLayerShadowCorners();
+diff --git a/Telegram/lib_ui/ui/click_handler.cpp b/Telegram/lib_ui/ui/click_handler.cpp
+index 4cb8ae2..dd5f02a 100644
+--- a/Telegram/lib_ui/ui/click_handler.cpp
++++ b/Telegram/lib_ui/ui/click_handler.cpp
+@@ -12,6 +12,8 @@
+ 
+ #include <QtCore/QPointer>
+ 
++#include <crl/crl.h>
++
+ namespace {
+ 
+ ClickHandlerPtr &ClickHandlerActive() {
+diff --git a/Telegram/lib_ui/ui/delayed_activation.h b/Telegram/lib_ui/ui/delayed_activation.h
+index ed6b4cc..d7aa0c1 100644
+--- a/Telegram/lib_ui/ui/delayed_activation.h
++++ b/Telegram/lib_ui/ui/delayed_activation.h
+@@ -6,6 +6,8 @@
+ //
+ #pragma once
+ 
++class QWidget;
++
+ namespace Ui {
+ 
+ void ActivateWindow(not_null<QWidget*> widget);
+diff --git a/Telegram/lib_ui/ui/dragging_scroll_manager.cpp b/Telegram/lib_ui/ui/dragging_scroll_manager.cpp
+index 011b291..0fc3d6f 100644
+--- a/Telegram/lib_ui/ui/dragging_scroll_manager.cpp
++++ b/Telegram/lib_ui/ui/dragging_scroll_manager.cpp
+@@ -8,6 +8,8 @@
+ 
+ #include "base/timer.h"
+ 
++#include <QtCore/QPoint>
++
+ namespace Ui {
+ namespace {
+ 
+diff --git a/Telegram/lib_ui/ui/dragging_scroll_manager.h b/Telegram/lib_ui/ui/dragging_scroll_manager.h
+index 8503c2c..2eec7af 100644
+--- a/Telegram/lib_ui/ui/dragging_scroll_manager.h
++++ b/Telegram/lib_ui/ui/dragging_scroll_manager.h
+@@ -6,6 +6,8 @@
+ //
+ #pragma once
+ 
++#include <rpl/rpl.h>
++
+ namespace base {
+ class Timer;
+ } // namespace base
+diff --git a/Telegram/lib_ui/ui/effects/animation_value.cpp b/Telegram/lib_ui/ui/effects/animation_value.cpp
+index c83c418..698fb7f 100644
+--- a/Telegram/lib_ui/ui/effects/animation_value.cpp
++++ b/Telegram/lib_ui/ui/effects/animation_value.cpp
+@@ -10,6 +10,8 @@
+ 
+ #include <QtCore/QtMath> // M_PI
+ 
++#include <rpl/rpl.h>
++
+ namespace anim {
+ namespace {
+ 
+diff --git a/Telegram/lib_ui/ui/effects/gradient.h b/Telegram/lib_ui/ui/effects/gradient.h
+index 732492c..859e902 100644
+--- a/Telegram/lib_ui/ui/effects/gradient.h
++++ b/Telegram/lib_ui/ui/effects/gradient.h
+@@ -12,6 +12,8 @@
+ #include <QtGui/QLinearGradient>
+ #include <QtGui/QRadialGradient>
+ 
++#include <range/v3/all.hpp>
++
+ namespace anim {
+ 
+ [[nodiscard]] QColor gradient_color_at(
+diff --git a/Telegram/lib_ui/ui/effects/path_shift_gradient.cpp b/Telegram/lib_ui/ui/effects/path_shift_gradient.cpp
+index b8037b1..cc4cb8b 100644
+--- a/Telegram/lib_ui/ui/effects/path_shift_gradient.cpp
++++ b/Telegram/lib_ui/ui/effects/path_shift_gradient.cpp
+@@ -7,6 +7,8 @@
+ #include "ui/effects/path_shift_gradient.h"
+ 
+ #include "base/call_delayed.h"
++#include "base/flat_set.h"
++
+ #include "ui/effects/animations.h"
+ 
+ namespace Ui {
+diff --git a/Telegram/lib_ui/ui/effects/path_shift_gradient.h b/Telegram/lib_ui/ui/effects/path_shift_gradient.h
+index f92aa13..688ce0a 100644
+--- a/Telegram/lib_ui/ui/effects/path_shift_gradient.h
++++ b/Telegram/lib_ui/ui/effects/path_shift_gradient.h
+@@ -10,6 +10,8 @@
+ 
+ #include <QtGui/QLinearGradient>
+ 
++#include <rpl/rpl.h>
++
+ namespace Ui {
+ 
+ class PathShiftGradient final {
+diff --git a/Telegram/lib_ui/ui/effects/radial_animation.cpp b/Telegram/lib_ui/ui/effects/radial_animation.cpp
+index 8de21b6..c7cc1db 100644
+--- a/Telegram/lib_ui/ui/effects/radial_animation.cpp
++++ b/Telegram/lib_ui/ui/effects/radial_animation.cpp
+@@ -10,6 +10,8 @@
+ #include "ui/painter.h"
+ #include "styles/style_widgets.h"
+ 
++#include <rpl/rpl.h>
++
+ namespace Ui {
+ namespace {
+ 
+diff --git a/Telegram/lib_ui/ui/effects/ripple_animation.h b/Telegram/lib_ui/ui/effects/ripple_animation.h
+index 47ceb0f..d2692be 100644
+--- a/Telegram/lib_ui/ui/effects/ripple_animation.h
++++ b/Telegram/lib_ui/ui/effects/ripple_animation.h
+@@ -6,8 +6,18 @@
+ //
+ #pragma once
+ 
++#include "base/basic_types.h"
++
+ #include <deque>
+ 
++#include <QtCore/QPoint>
++#include <QtCore/QSize>
++#include <QtGui/QImage>
++#include <QtGui/QPixmap>
++
++class QColor;
++class QPainter;
++
+ namespace Images {
+ struct CornersMaskRef;
+ } // namespace Images
+diff --git a/Telegram/lib_ui/ui/effects/round_area_with_shadow.cpp b/Telegram/lib_ui/ui/effects/round_area_with_shadow.cpp
+index f1bf71a..298702d 100644
+--- a/Telegram/lib_ui/ui/effects/round_area_with_shadow.cpp
++++ b/Telegram/lib_ui/ui/effects/round_area_with_shadow.cpp
+@@ -10,6 +10,8 @@
+ #include "ui/image/image_prepare.h"
+ #include "ui/painter.h"
+ 
++#include <range/v3/all.hpp>
++
+ namespace Ui {
+ namespace {
+ 
+diff --git a/Telegram/lib_ui/ui/effects/round_area_with_shadow.h b/Telegram/lib_ui/ui/effects/round_area_with_shadow.h
+index 0edd5be..02f224d 100644
+--- a/Telegram/lib_ui/ui/effects/round_area_with_shadow.h
++++ b/Telegram/lib_ui/ui/effects/round_area_with_shadow.h
+@@ -6,6 +6,16 @@
+ //
+ #pragma once
+ 
++#include "base/basic_types.h"
++
++#include <QtCore/QMargins>
++#include <QtCore/QRect>
++#include <QtCore/QSize>
++#include <QtGui/QColor>
++#include <QtGui/QImage>
++
++class QPainter;
++
+ namespace Ui {
+ 
+ struct ImageSubrect {
+diff --git a/Telegram/lib_ui/ui/effects/show_animation.cpp b/Telegram/lib_ui/ui/effects/show_animation.cpp
+index 2e7a362..c2d4646 100644
+--- a/Telegram/lib_ui/ui/effects/show_animation.cpp
++++ b/Telegram/lib_ui/ui/effects/show_animation.cpp
+@@ -10,6 +10,10 @@
+ #include "ui/rp_widget.h"
+ #include "styles/style_widgets.h"
+ 
++#include <QtGui/QPainter>
++
++#include <rpl/rpl.h>
++
+ namespace Ui::Animations {
+ namespace {
+ 
+diff --git a/Telegram/lib_ui/ui/effects/show_animation.h b/Telegram/lib_ui/ui/effects/show_animation.h
+index d75735d..99e29bd 100644
+--- a/Telegram/lib_ui/ui/effects/show_animation.h
++++ b/Telegram/lib_ui/ui/effects/show_animation.h
+@@ -6,6 +6,10 @@
+ //
+ #pragma once
+ 
++#include "base/basic_types.h"
++
++#include <vector>
++
+ namespace Ui {
+ class RpWidget;
+ } // namespace Ui
+diff --git a/Telegram/lib_ui/ui/effects/spoiler_mess.cpp b/Telegram/lib_ui/ui/effects/spoiler_mess.cpp
+index d4413de..2d8470c 100644
+--- a/Telegram/lib_ui/ui/effects/spoiler_mess.cpp
++++ b/Telegram/lib_ui/ui/effects/spoiler_mess.cpp
+@@ -10,8 +10,10 @@
+ #include "ui/image/image_prepare.h"
+ #include "ui/painter.h"
+ #include "ui/integration.h"
++
+ #include "base/random.h"
+ #include "base/flags.h"
++#include "base/flat_set.h"
+ 
+ #include <QtCore/QBuffer>
+ #include <QtCore/QFile>
+diff --git a/Telegram/lib_ui/ui/effects/spoiler_mess.h b/Telegram/lib_ui/ui/effects/spoiler_mess.h
+index 759f3fe..2694619 100644
+--- a/Telegram/lib_ui/ui/effects/spoiler_mess.h
++++ b/Telegram/lib_ui/ui/effects/spoiler_mess.h
+@@ -6,8 +6,20 @@
+ //
+ #pragma once
+ 
++#include "base/basic_types.h"
++
++#include <QtCore/QByteArray>
++#include <QtCore/QPoint>
++#include <QtCore/QRect>
++#include <QtGui/QImage>
++
++#include <optional>
++
+ #include <crl/crl_time.h>
+ 
++class QColor;
++class QPainter;
++
+ namespace Images {
+ struct CornersMaskRef;
+ } // namespace Images
+diff --git a/Telegram/lib_ui/ui/gl/gl_detection.h b/Telegram/lib_ui/ui/gl/gl_detection.h
+index 5b23fa7..ea63835 100644
+--- a/Telegram/lib_ui/ui/gl/gl_detection.h
++++ b/Telegram/lib_ui/ui/gl/gl_detection.h
+@@ -6,9 +6,13 @@
+ //
+ #pragma once
+ 
++#include "base/basic_types.h"
+ #include "base/flags.h"
+ 
++#include <QtCore/QByteArray>
++
+ class QOpenGLContext;
++class QWidget;
+ 
+ namespace Ui::GL {
+ 
+diff --git a/Telegram/lib_ui/ui/gl/gl_image.cpp b/Telegram/lib_ui/ui/gl/gl_image.cpp
+index cb04fdd..2cf6b99 100644
+--- a/Telegram/lib_ui/ui/gl/gl_image.cpp
++++ b/Telegram/lib_ui/ui/gl/gl_image.cpp
+@@ -6,8 +6,12 @@
+ //
+ #include "ui/gl/gl_image.h"
+ 
++#include "base/algorithm.h"
++
+ #include <QtGui/QOpenGLFunctions>
+ 
++#include <range/v3/all.hpp>
++
+ namespace Ui::GL {
+ namespace details {
+ 
+diff --git a/Telegram/lib_ui/ui/gl/gl_image.h b/Telegram/lib_ui/ui/gl/gl_image.h
+index 736aa4d..75fecba 100644
+--- a/Telegram/lib_ui/ui/gl/gl_image.h
++++ b/Telegram/lib_ui/ui/gl/gl_image.h
+@@ -6,8 +6,13 @@
+ //
+ #pragma once
+ 
++#include "base/assertion.h"
++
+ #include "ui/gl/gl_math.h"
+ 
++#include <gsl/span>
++
++#include <QtGui/QImage>
+ #include <QtGui/QOpenGLFunctions>
+ 
+ namespace Ui::GL {
+diff --git a/Telegram/lib_ui/ui/gl/gl_shader.cpp b/Telegram/lib_ui/ui/gl/gl_shader.cpp
+index f306bbe..52cb44f 100644
+--- a/Telegram/lib_ui/ui/gl/gl_shader.cpp
++++ b/Telegram/lib_ui/ui/gl/gl_shader.cpp
+@@ -7,10 +7,14 @@
+ #include "ui/gl/gl_shader.h"
+ 
+ #include "ui/gl/gl_image.h"
++
+ #include "base/debug_log.h"
++#include "base/variant.h"
+ 
+ #include <QtGui/QOpenGLContext>
+ 
++#include <range/v3/all.hpp>
++
+ namespace Ui::GL {
+ 
+ [[nodiscard]] bool IsOpenGLES() {
+diff --git a/Telegram/lib_ui/ui/gl/gl_shader.h b/Telegram/lib_ui/ui/gl/gl_shader.h
+index 521b311..ff196ac 100644
+--- a/Telegram/lib_ui/ui/gl/gl_shader.h
++++ b/Telegram/lib_ui/ui/gl/gl_shader.h
+@@ -6,7 +6,11 @@
+ //
+ #pragma once
+ 
++#include "base/basic_types.h"
++
+ #include <QtCore/QString>
++#include <QtGui/QImage>
++
+ #include <QOpenGLShader>
+ 
+ class OpenGLShaderProgram;
+diff --git a/Telegram/lib_ui/ui/gl/gl_surface.h b/Telegram/lib_ui/ui/gl/gl_surface.h
+index 2877816..8ca9916 100644
+--- a/Telegram/lib_ui/ui/gl/gl_surface.h
++++ b/Telegram/lib_ui/ui/gl/gl_surface.h
+@@ -8,6 +8,7 @@
+ 
+ #include "ui/gl/gl_detection.h"
+ 
++#include <QtGui/QColor>
+ #include <QtGui/QOpenGLFunctions>
+ 
+ class Painter;
+diff --git a/Telegram/lib_ui/ui/gl/gl_window.h b/Telegram/lib_ui/ui/gl/gl_window.h
+index 2e92448..2a4019e 100644
+--- a/Telegram/lib_ui/ui/gl/gl_window.h
++++ b/Telegram/lib_ui/ui/gl/gl_window.h
+@@ -6,6 +6,10 @@
+ //
+ #pragma once
+ 
++#include "base/basic_types.h"
++
++#include <memory>
++
+ namespace Ui {
+ class RpWindow;
+ class RpWidget;
+diff --git a/Telegram/lib_ui/ui/image/image_prepare.cpp b/Telegram/lib_ui/ui/image/image_prepare.cpp
+index 12a80ef..d409b50 100644
+--- a/Telegram/lib_ui/ui/image/image_prepare.cpp
++++ b/Telegram/lib_ui/ui/image/image_prepare.cpp
+@@ -22,6 +22,8 @@
+ #include <QtGui/QImageReader>
+ #include <QtSvg/QSvgRenderer>
+ 
++#include <range/v3/all.hpp>
++
+ #include <jpeglib.h>
+ 
+ namespace Images {
+diff --git a/Telegram/lib_ui/ui/layers/layer_manager.h b/Telegram/lib_ui/ui/layers/layer_manager.h
+index b8ce72b..05be963 100644
+--- a/Telegram/lib_ui/ui/layers/layer_manager.h
++++ b/Telegram/lib_ui/ui/layers/layer_manager.h
+@@ -11,6 +11,8 @@
+ 
+ #include <QtCore/QMargins>
+ 
++#include <rpl/rpl.h>
++
+ namespace style {
+ struct Box;
+ } // namespace style
+diff --git a/Telegram/lib_ui/ui/layers/layer_widget.cpp b/Telegram/lib_ui/ui/layers/layer_widget.cpp
+index b91c2f5..d4417f9 100644
+--- a/Telegram/lib_ui/ui/layers/layer_widget.cpp
++++ b/Telegram/lib_ui/ui/layers/layer_widget.cpp
+@@ -21,6 +21,8 @@
+ 
+ #include <QtGui/QtEvents>
+ 
++#include <range/v3/all.hpp>
++
+ namespace Ui {
+ 
+ class LayerStackWidget::BackgroundWidget : public TWidget {
+diff --git a/Telegram/lib_ui/ui/layers/show.h b/Telegram/lib_ui/ui/layers/show.h
+index 37413fd..3734114 100644
+--- a/Telegram/lib_ui/ui/layers/show.h
++++ b/Telegram/lib_ui/ui/layers/show.h
+@@ -6,7 +6,9 @@
+ //
+ #pragma once
+ 
++#include "base/variant.h"
+ #include "base/weak_ptr.h"
++
+ #include "ui/layers/layer_widget.h"
+ 
+ struct TextWithEntities;
+diff --git a/Telegram/lib_ui/ui/paint/arcs.cpp b/Telegram/lib_ui/ui/paint/arcs.cpp
+index 2f346e4..5273d15 100644
+--- a/Telegram/lib_ui/ui/paint/arcs.cpp
++++ b/Telegram/lib_ui/ui/paint/arcs.cpp
+@@ -10,6 +10,8 @@
+ #include "ui/effects/animation_value_f.h"
+ #include "ui/painter.h"
+ 
++#include <range/v3/all.hpp>
++
+ namespace Ui::Paint {
+ 
+ ArcsAnimation::ArcsAnimation(
+diff --git a/Telegram/lib_ui/ui/paint/arcs.h b/Telegram/lib_ui/ui/paint/arcs.h
+index 27d98bd..f0e5c77 100644
+--- a/Telegram/lib_ui/ui/paint/arcs.h
++++ b/Telegram/lib_ui/ui/paint/arcs.h
+@@ -8,6 +8,9 @@
+ 
+ #include "styles/style_widgets.h"
+ 
++#include <crl/crl.h>
++#include <rpl/rpl.h>
++
+ class Painter;
+ 
+ namespace Ui::Paint {
+diff --git a/Telegram/lib_ui/ui/paint/blob.h b/Telegram/lib_ui/ui/paint/blob.h
+index 4006d25..52fda75 100644
+--- a/Telegram/lib_ui/ui/paint/blob.h
++++ b/Telegram/lib_ui/ui/paint/blob.h
+@@ -6,8 +6,15 @@
+ //
+ #pragma once
+ 
++#include "base/basic_types.h"
++
++#include <QtGui/QPen>
++
+ class Painter;
+ 
++class QBrush;
++class QPainter;
++
+ namespace Ui::Paint {
+ 
+ class Blob {
+diff --git a/Telegram/lib_ui/ui/paint/blobs.cpp b/Telegram/lib_ui/ui/paint/blobs.cpp
+index 00e2cb8..74fdf81 100644
+--- a/Telegram/lib_ui/ui/paint/blobs.cpp
++++ b/Telegram/lib_ui/ui/paint/blobs.cpp
+@@ -8,6 +8,8 @@
+ 
+ #include "ui/painter.h"
+ 
++#include <range/v3/all.hpp>
++
+ namespace Ui::Paint {
+ 
+ namespace {
+diff --git a/Telegram/lib_ui/ui/paint/blobs_linear.cpp b/Telegram/lib_ui/ui/paint/blobs_linear.cpp
+index 4d274f2..35d3519 100644
+--- a/Telegram/lib_ui/ui/paint/blobs_linear.cpp
++++ b/Telegram/lib_ui/ui/paint/blobs_linear.cpp
+@@ -8,6 +8,8 @@
+ 
+ #include "ui/painter.h"
+ 
++#include <range/v3/all.hpp>
++
+ namespace Ui::Paint {
+ 
+ namespace {
+diff --git a/Telegram/lib_ui/ui/platform/linux/ui_utility_linux.cpp b/Telegram/lib_ui/ui/platform/linux/ui_utility_linux.cpp
+index eda2916..0ffbf4c 100644
+--- a/Telegram/lib_ui/ui/platform/linux/ui_utility_linux.cpp
++++ b/Telegram/lib_ui/ui/platform/linux/ui_utility_linux.cpp
+@@ -16,9 +16,12 @@
+ #include <QtCore/QPoint>
+ #include <QtGui/QWindow>
+ #include <QtWidgets/QApplication>
++#include <QtWidgets/QWidget>
+ #include <qpa/qplatformwindow.h>
+ #include <qpa/qplatformwindow_p.h>
+ 
++#include <range/v3/all.hpp>
++
+ extern "C" {
+ 
+ typedef int32_t wl_fixed_t;
+diff --git a/Telegram/lib_ui/ui/platform/ui_platform_utility.h b/Telegram/lib_ui/ui/platform/ui_platform_utility.h
+index c2d304e..1f7877c 100644
+--- a/Telegram/lib_ui/ui/platform/ui_platform_utility.h
++++ b/Telegram/lib_ui/ui/platform/ui_platform_utility.h
+@@ -6,9 +6,17 @@
+ //
+ #pragma once
+ 
++#include "base/basic_types.h"
++
++#include <optional>
++
++#include <QtCore/QRect>
++#include <QtCore/QSize>
++
+ class QPoint;
+ class QPainter;
+ class QPaintEvent;
++class QWidget;
+ 
+ namespace Ui {
+ class PopupMenu;
+diff --git a/Telegram/lib_ui/ui/platform/ui_platform_window.h b/Telegram/lib_ui/ui/platform/ui_platform_window.h
+index 6926fa0..f3a3093 100644
+--- a/Telegram/lib_ui/ui/platform/ui_platform_window.h
++++ b/Telegram/lib_ui/ui/platform/ui_platform_window.h
+@@ -10,6 +10,11 @@
+ #include "base/object_ptr.h"
+ #include "ui/round_rect.h"
+ 
++#include <QtCore/QEvent>
++#include <QtCore/QObject>
++
++#include <rpl/rpl.h>
++
+ namespace style {
+ struct WindowTitle;
+ struct TextStyle;
+diff --git a/Telegram/lib_ui/ui/platform/ui_platform_window_title.h b/Telegram/lib_ui/ui/platform/ui_platform_window_title.h
+index cb4bc13..0ff19b6 100644
+--- a/Telegram/lib_ui/ui/platform/ui_platform_window_title.h
++++ b/Telegram/lib_ui/ui/platform/ui_platform_window_title.h
+@@ -12,6 +12,8 @@
+ #include <QtCore/QRect>
+ #include <QtCore/QPoint>
+ 
++#include <range/v3/all.hpp>
++
+ namespace style {
+ struct WindowTitle;
+ } // namespace style
+diff --git a/Telegram/lib_ui/ui/style/style_core_color.h b/Telegram/lib_ui/ui/style/style_core_color.h
+index 1d7a592..c47ba52 100644
+--- a/Telegram/lib_ui/ui/style/style_core_color.h
++++ b/Telegram/lib_ui/ui/style/style_core_color.h
+@@ -6,6 +6,10 @@
+ //
+ #pragma once
+ 
++#include "base/basic_types.h"
++
++#include <utility>
++
+ #include <QtGui/QColor>
+ #include <QtGui/QPen>
+ #include <QtGui/QBrush>
+diff --git a/Telegram/lib_ui/ui/style/style_core_font.cpp b/Telegram/lib_ui/ui/style/style_core_font.cpp
+index 626ba05..eab895d 100644
+--- a/Telegram/lib_ui/ui/style/style_core_font.cpp
++++ b/Telegram/lib_ui/ui/style/style_core_font.cpp
+@@ -10,13 +10,18 @@
+ #include "base/debug_log.h"
+ #include "base/variant.h"
+ #include "base/base_file_utilities.h"
++#include "base/flat_map.h"
++
+ #include "ui/integration.h"
+ 
+ #include <QtCore/QMap>
++#include <QtCore/QString>
+ #include <QtCore/QVector>
+ #include <QtGui/QFontInfo>
+ #include <QtGui/QFontDatabase>
+ 
++#include <range/v3/all.hpp>
++
+ void style_InitFontsResource() {
+ #ifdef Q_OS_MAC // Use resources from the .app bundle on macOS.
+ 
+diff --git a/Telegram/lib_ui/ui/style/style_core_icon.cpp b/Telegram/lib_ui/ui/style/style_core_icon.cpp
+index 3f00b90..afc8ceb 100644
+--- a/Telegram/lib_ui/ui/style/style_core_icon.cpp
++++ b/Telegram/lib_ui/ui/style/style_core_icon.cpp
+@@ -8,7 +8,10 @@
+ 
+ #include "ui/style/style_core_palette.h"
+ #include "ui/style/style_core.h"
++
+ #include "base/basic_types.h"
++#include "base/flat_map.h"
++#include "base/flat_set.h"
+ 
+ #include <QtCore/QMutex>
+ #include <QtGui/QPainter>
+diff --git a/Telegram/lib_ui/ui/style/style_palette_colorizer.cpp b/Telegram/lib_ui/ui/style/style_palette_colorizer.cpp
+index 491d8cd..0b6e975 100644
+--- a/Telegram/lib_ui/ui/style/style_palette_colorizer.cpp
++++ b/Telegram/lib_ui/ui/style/style_palette_colorizer.cpp
+@@ -6,6 +6,8 @@
+ //
+ #include "ui/style/style_palette_colorizer.h"
+ 
++#include <QtGui/QImage>
++
+ namespace style {
+ namespace {
+ 
+diff --git a/Telegram/lib_ui/ui/style/style_palette_colorizer.h b/Telegram/lib_ui/ui/style/style_palette_colorizer.h
+index 1d78c00..a78dbc3 100644
+--- a/Telegram/lib_ui/ui/style/style_palette_colorizer.h
++++ b/Telegram/lib_ui/ui/style/style_palette_colorizer.h
+@@ -6,6 +6,20 @@
+ //
+ #pragma once
+ 
++#include "base/basic_types.h"
++#include "base/flat_map.h"
++#include "base/flat_set.h"
++
++#include <optional>
++#include <string_view>
++#include <utility>
++
++#include <QtCore/QByteArray>
++#include <QtCore/QLatin1String>
++#include <QtGui/QColor>
++
++class QImage;
++
+ namespace style {
+ 
+ struct colorizer {
+diff --git a/Telegram/lib_ui/ui/text/custom_emoji_instance.h b/Telegram/lib_ui/ui/text/custom_emoji_instance.h
+index 337e8b6..164f964 100644
+--- a/Telegram/lib_ui/ui/text/custom_emoji_instance.h
++++ b/Telegram/lib_ui/ui/text/custom_emoji_instance.h
+@@ -7,9 +7,12 @@
+ #pragma once
+ 
+ #include "ui/text/text_custom_emoji.h"
++
+ #include "base/weak_ptr.h"
+ #include "base/bytes.h"
++#include "base/flat_set.h"
+ #include "base/timer.h"
++#include "base/variant.h"
+ 
+ #include <QtGui/QPainterPath>
+ 
+diff --git a/Telegram/lib_ui/ui/text/text.cpp b/Telegram/lib_ui/ui/text/text.cpp
+index 2cb6dcb..252664c 100644
+--- a/Telegram/lib_ui/ui/text/text.cpp
++++ b/Telegram/lib_ui/ui/text/text.cpp
+@@ -17,6 +17,8 @@
+ #include "base/platform/base_platform_info.h"
+ #include "styles/style_basic.h"
+ 
++#include <range/v3/all.hpp>
++
+ namespace Ui {
+ 
+ const QString kQEllipsis = u"..."_q;
+diff --git a/Telegram/lib_ui/ui/text/text_custom_emoji.h b/Telegram/lib_ui/ui/text/text_custom_emoji.h
+index 59b77a6..e3ce0dc 100644
+--- a/Telegram/lib_ui/ui/text/text_custom_emoji.h
++++ b/Telegram/lib_ui/ui/text/text_custom_emoji.h
+@@ -6,6 +6,10 @@
+ //
+ #pragma once
+ 
++#include "base/algorithm.h"
++#include "base/basic_types.h"
++#include "base/required.h"
++
+ #include <QtGui/QColor>
+ #include <QtGui/QImage>
+ #include <QtCore/QSize>
+diff --git a/Telegram/lib_ui/ui/text/text_entity.cpp b/Telegram/lib_ui/ui/text/text_entity.cpp
+index 21a31af..7d5972b 100644
+--- a/Telegram/lib_ui/ui/text/text_entity.cpp
++++ b/Telegram/lib_ui/ui/text/text_entity.cpp
+@@ -20,6 +20,8 @@
+ #include <QtGui/QGuiApplication>
+ #include <QtGui/QClipboard>
+ 
++#include <range/v3/all.hpp>
++
+ namespace TextUtilities {
+ namespace {
+ 
+diff --git a/Telegram/lib_ui/ui/text/text_parser.cpp b/Telegram/lib_ui/ui/text/text_parser.cpp
+index 7d41541..287c50a 100644
+--- a/Telegram/lib_ui/ui/text/text_parser.cpp
++++ b/Telegram/lib_ui/ui/text/text_parser.cpp
+@@ -15,6 +15,8 @@
+ #include <QtCore/QUrl>
+ #include <private/qfixed_p.h>
+ 
++#include <range/v3/all.hpp>
++
+ namespace Ui::Text {
+ namespace {
+ 
+diff --git a/Telegram/lib_ui/ui/text/text_utilities.cpp b/Telegram/lib_ui/ui/text/text_utilities.cpp
+index 35d4f35..13e59dd 100644
+--- a/Telegram/lib_ui/ui/text/text_utilities.cpp
++++ b/Telegram/lib_ui/ui/text/text_utilities.cpp
+@@ -11,6 +11,8 @@
+ 
+ #include <QtCore/QRegularExpression>
+ 
++#include <range/v3/all.hpp>
++
+ namespace Ui {
+ namespace Text {
+ namespace {
+diff --git a/Telegram/lib_ui/ui/text/text_utilities.h b/Telegram/lib_ui/ui/text/text_utilities.h
+index 68d549b..00e4eb7 100644
+--- a/Telegram/lib_ui/ui/text/text_utilities.h
++++ b/Telegram/lib_ui/ui/text/text_utilities.h
+@@ -8,6 +8,8 @@
+ 
+ #include "ui/text/text_entity.h"
+ 
++#include <rpl/rpl.h>
++
+ namespace Ui {
+ namespace Text {
+ namespace details {
+diff --git a/Telegram/lib_ui/ui/text/text_variant.h b/Telegram/lib_ui/ui/text/text_variant.h
+index e0ed379..69b9f40 100644
+--- a/Telegram/lib_ui/ui/text/text_variant.h
++++ b/Telegram/lib_ui/ui/text/text_variant.h
+@@ -6,8 +6,14 @@
+ //
+ #pragma once
+ 
++#include "base/variant.h"
++
+ #include "ui/text/text_entity.h"
+ 
++#include <rpl/rpl.h>
++
++#include <QtCore/QString>
++
+ namespace v::text {
+ 
+ using data = std::variant<
+diff --git a/Telegram/lib_ui/ui/toast/toast_manager.cpp b/Telegram/lib_ui/ui/toast/toast_manager.cpp
+index 165af03..1b05057 100644
+--- a/Telegram/lib_ui/ui/toast/toast_manager.cpp
++++ b/Telegram/lib_ui/ui/toast/toast_manager.cpp
+@@ -8,6 +8,8 @@
+ 
+ #include "ui/toast/toast_widget.h"
+ 
++#include <range/v3/all.hpp>
++
+ namespace Ui {
+ namespace Toast {
+ namespace internal {
+diff --git a/Telegram/lib_ui/ui/widgets/buttons.h b/Telegram/lib_ui/ui/widgets/buttons.h
+index 9f57206..b74f1d0 100644
+--- a/Telegram/lib_ui/ui/widgets/buttons.h
++++ b/Telegram/lib_ui/ui/widgets/buttons.h
+@@ -14,6 +14,8 @@
+ 
+ #include <memory>
+ 
++#include <rpl/rpl.h>
++
+ class Painter;
+ 
+ namespace Ui {
+diff --git a/Telegram/lib_ui/ui/widgets/checkbox.cpp b/Telegram/lib_ui/ui/widgets/checkbox.cpp
+index ff7615f..350aba9 100644
+--- a/Telegram/lib_ui/ui/widgets/checkbox.cpp
++++ b/Telegram/lib_ui/ui/widgets/checkbox.cpp
+@@ -15,6 +15,8 @@
+ #include <QtGui/QtEvents>
+ #include <QtCore/QtMath>
+ 
++#include <range/v3/all.hpp>
++
+ namespace Ui {
+ namespace {
+ 
+diff --git a/Telegram/lib_ui/ui/widgets/elastic_scroll.h b/Telegram/lib_ui/ui/widgets/elastic_scroll.h
+index e905341..2015ab4 100644
+--- a/Telegram/lib_ui/ui/widgets/elastic_scroll.h
++++ b/Telegram/lib_ui/ui/widgets/elastic_scroll.h
+@@ -12,6 +12,8 @@
+ #include "base/object_ptr.h"
+ #include "base/timer.h"
+ 
++#include <rpl/rpl.h>
++
+ namespace style {
+ struct ScrollArea;
+ } // namespace style
+diff --git a/Telegram/lib_ui/ui/widgets/fields/masked_input_field.h b/Telegram/lib_ui/ui/widgets/fields/masked_input_field.h
+index 1b09430..554e752 100644
+--- a/Telegram/lib_ui/ui/widgets/fields/masked_input_field.h
++++ b/Telegram/lib_ui/ui/widgets/fields/masked_input_field.h
+@@ -12,6 +12,8 @@
+ #include <QtWidgets/QLineEdit>
+ #include <QtCore/QTimer>
+ 
++#include <rpl/rpl.h>
++
+ namespace style {
+ struct InputField;
+ } // namespace style
+diff --git a/Telegram/lib_ui/ui/widgets/icon_button_with_text.cpp b/Telegram/lib_ui/ui/widgets/icon_button_with_text.cpp
+index 0ff2159..966b6d4 100644
+--- a/Telegram/lib_ui/ui/widgets/icon_button_with_text.cpp
++++ b/Telegram/lib_ui/ui/widgets/icon_button_with_text.cpp
+@@ -6,6 +6,8 @@
+ //
+ #include "ui/widgets/icon_button_with_text.h"
+ 
++#include <QtGui/QPainter>
++
+ namespace Ui {
+ 
+ IconButtonWithText::IconButtonWithText(
+diff --git a/Telegram/lib_ui/ui/widgets/inner_dropdown.cpp b/Telegram/lib_ui/ui/widgets/inner_dropdown.cpp
+index c9e2cee..7b9e284 100644
+--- a/Telegram/lib_ui/ui/widgets/inner_dropdown.cpp
++++ b/Telegram/lib_ui/ui/widgets/inner_dropdown.cpp
+@@ -12,6 +12,10 @@
+ #include "ui/image/image_prepare.h"
+ #include "ui/ui_utility.h"
+ 
++#include <QtGui/QPainter>
++
++#include <rpl/rpl.h>
++
+ namespace Ui {
+ 
+ InnerDropdown::InnerDropdown(
+diff --git a/Telegram/lib_ui/ui/widgets/menu/menu.cpp b/Telegram/lib_ui/ui/widgets/menu/menu.cpp
+index 925abfa..9c72e6c 100644
+--- a/Telegram/lib_ui/ui/widgets/menu/menu.cpp
++++ b/Telegram/lib_ui/ui/widgets/menu/menu.cpp
+@@ -13,6 +13,9 @@
+ #include "styles/style_widgets.h"
+ 
+ #include <QtGui/QtEvents>
++#include <QtGui/QPainter>
++
++#include <range/v3/all.hpp>
+ 
+ namespace Ui::Menu {
+ 
+diff --git a/Telegram/lib_ui/ui/widgets/menu/menu_add_action_callback.h b/Telegram/lib_ui/ui/widgets/menu/menu_add_action_callback.h
+index 227b2b6..6dbd3cc 100644
+--- a/Telegram/lib_ui/ui/widgets/menu/menu_add_action_callback.h
++++ b/Telegram/lib_ui/ui/widgets/menu/menu_add_action_callback.h
+@@ -8,6 +8,8 @@
+ 
+ #include "ui/style/style_core.h"
+ 
++class QAction;
++
+ namespace anim {
+ enum class type : uchar;
+ } // namespace anim
+diff --git a/Telegram/lib_ui/ui/widgets/menu/menu_add_action_callback_factory.h b/Telegram/lib_ui/ui/widgets/menu/menu_add_action_callback_factory.h
+index b0b3ee1..bb3a891 100644
+--- a/Telegram/lib_ui/ui/widgets/menu/menu_add_action_callback_factory.h
++++ b/Telegram/lib_ui/ui/widgets/menu/menu_add_action_callback_factory.h
+@@ -6,6 +6,7 @@
+ //
+ #pragma once
+ 
++#include "base/basic_types.h"
+ #include "base/unique_qptr.h"
+ 
+ namespace Ui {
+diff --git a/Telegram/lib_ui/ui/widgets/menu/menu_common.cpp b/Telegram/lib_ui/ui/widgets/menu/menu_common.cpp
+index badc14c..2110ee1 100644
+--- a/Telegram/lib_ui/ui/widgets/menu/menu_common.cpp
++++ b/Telegram/lib_ui/ui/widgets/menu/menu_common.cpp
+@@ -7,6 +7,7 @@
+ #include "ui/widgets/menu/menu_common.h"
+ 
+ #include <QAction>
++#include <QWidget>
+ 
+ namespace Ui::Menu {
+ 
+diff --git a/Telegram/lib_ui/ui/widgets/menu/menu_common.h b/Telegram/lib_ui/ui/widgets/menu/menu_common.h
+index 6d3de70..d944070 100644
+--- a/Telegram/lib_ui/ui/widgets/menu/menu_common.h
++++ b/Telegram/lib_ui/ui/widgets/menu/menu_common.h
+@@ -6,6 +6,12 @@
+ //
+ #pragma once
+ 
++#include "base/basic_types.h"
++
++class QAction;
++class QString;
++class QWidget;
++
+ namespace Ui::Menu {
+ 
+ enum class TriggeredSource {
+diff --git a/Telegram/lib_ui/ui/widgets/menu/menu_multiline_action.cpp b/Telegram/lib_ui/ui/widgets/menu/menu_multiline_action.cpp
+index c1bddfc..f345f11 100644
+--- a/Telegram/lib_ui/ui/widgets/menu/menu_multiline_action.cpp
++++ b/Telegram/lib_ui/ui/widgets/menu/menu_multiline_action.cpp
+@@ -8,6 +8,8 @@
+ 
+ #include "ui/widgets/labels.h"
+ 
++#include <QtGui/QPainter>
++
+ namespace Ui::Menu {
+ 
+ MultilineAction::MultilineAction(
+diff --git a/Telegram/lib_ui/ui/widgets/menu/menu_toggle.cpp b/Telegram/lib_ui/ui/widgets/menu/menu_toggle.cpp
+index 93071ea..c324ae7 100644
+--- a/Telegram/lib_ui/ui/widgets/menu/menu_toggle.cpp
++++ b/Telegram/lib_ui/ui/widgets/menu/menu_toggle.cpp
+@@ -8,6 +8,8 @@
+ 
+ #include "ui/widgets/checkbox.h"
+ 
++#include <QtGui/QPainter>
++
+ namespace Ui::Menu {
+ 
+ Toggle::Toggle(
+diff --git a/Telegram/lib_ui/ui/widgets/popup_menu.cpp b/Telegram/lib_ui/ui/widgets/popup_menu.cpp
+index 62531a7..c157bc6 100644
+--- a/Telegram/lib_ui/ui/widgets/popup_menu.cpp
++++ b/Telegram/lib_ui/ui/widgets/popup_menu.cpp
+@@ -25,6 +25,8 @@
+ #include <QtWidgets/QApplication>
+ #include <private/qapplication_p.h>
+ 
++#include <range/v3/all.hpp>
++
+ namespace Ui {
+ namespace {
+ 
+diff --git a/Telegram/lib_ui/ui/widgets/popup_menu.h b/Telegram/lib_ui/ui/widgets/popup_menu.h
+index d92650d..a5c6754 100644
+--- a/Telegram/lib_ui/ui/widgets/popup_menu.h
++++ b/Telegram/lib_ui/ui/widgets/popup_menu.h
+@@ -12,9 +12,13 @@
+ #include "ui/effects/panel_animation.h"
+ #include "ui/round_rect.h"
+ #include "ui/rp_widget.h"
++
++#include "base/flat_map.h"
+ #include "base/object_ptr.h"
+ #include "base/unique_qptr.h"
+ 
++#include <rpl/rpl.h>
++
+ namespace style {
+ struct MenuSeparator;
+ } // namespace style
+diff --git a/Telegram/lib_ui/ui/widgets/time_input.cpp b/Telegram/lib_ui/ui/widgets/time_input.cpp
+index b21f54e..e2f4654 100644
+--- a/Telegram/lib_ui/ui/widgets/time_input.cpp
++++ b/Telegram/lib_ui/ui/widgets/time_input.cpp
+@@ -11,6 +11,7 @@
+ #include "base/invoke_queued.h"
+ 
+ #include <QtCore/QRegularExpression>
++#include <QPainter>
+ #include <QTime>
+ 
+ namespace Ui {
+diff --git a/Telegram/lib_ui/ui/widgets/time_input.h b/Telegram/lib_ui/ui/widgets/time_input.h
+index 3bd9aec..4ce63eb 100644
+--- a/Telegram/lib_ui/ui/widgets/time_input.h
++++ b/Telegram/lib_ui/ui/widgets/time_input.h
+@@ -11,6 +11,8 @@
+ #include "ui/effects/animations.h"
+ #include "ui/widgets/labels.h"
+ 
++#include <rpl/rpl.h>
++
+ namespace Ui {
+ 
+ class TimePart;
+diff --git a/Telegram/lib_ui/ui/wrap/table_layout.cpp b/Telegram/lib_ui/ui/wrap/table_layout.cpp
+index efd032c..c6f7133 100644
+--- a/Telegram/lib_ui/ui/wrap/table_layout.cpp
++++ b/Telegram/lib_ui/ui/wrap/table_layout.cpp
+@@ -12,6 +12,8 @@
+ 
+ #include <QtGui/QPainterPath>
+ 
++#include <range/v3/all.hpp>
++
+ namespace Ui {
+ 
+ TableLayout::TableLayout(QWidget *parent, const style::Table &st)
+diff --git a/Telegram/lib_ui/ui/wrap/vertical_layout.cpp b/Telegram/lib_ui/ui/wrap/vertical_layout.cpp
+index 2303637..2d4d4cb 100644
+--- a/Telegram/lib_ui/ui/wrap/vertical_layout.cpp
++++ b/Telegram/lib_ui/ui/wrap/vertical_layout.cpp
+@@ -8,6 +8,8 @@
+ 
+ #include "ui/ui_utility.h"
+ 
++#include <range/v3/all.hpp>
++
+ namespace Ui {
+ 
+ QMargins VerticalLayout::getMargins() const {
+diff --git a/Telegram/lib_ui/ui/wrap/vertical_layout_reorder.cpp b/Telegram/lib_ui/ui/wrap/vertical_layout_reorder.cpp
+index b882ef6..80a2903 100644
+--- a/Telegram/lib_ui/ui/wrap/vertical_layout_reorder.cpp
++++ b/Telegram/lib_ui/ui/wrap/vertical_layout_reorder.cpp
+@@ -12,6 +12,8 @@
+ #include <QtGui/QtEvents>
+ #include <QtWidgets/QApplication>
+ 
++#include <range/v3/all.hpp>
++
+ namespace Ui {
+ 
+ namespace {

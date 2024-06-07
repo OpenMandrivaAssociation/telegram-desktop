@@ -1,0 +1,13 @@
+diff --git a/Telegram/lib_rpl/rpl/lifetime.h b/Telegram/lib_rpl/rpl/lifetime.h
+index e28fd7f..6daf623 100644
+--- a/Telegram/lib_rpl/rpl/lifetime.h
++++ b/Telegram/lib_rpl/rpl/lifetime.h
+@@ -7,6 +7,8 @@
+ #pragma once
+ 
+ #include "base/unique_function.h"
++
++#include <utility>
+ #include <vector>
+ 
+ namespace rpl {

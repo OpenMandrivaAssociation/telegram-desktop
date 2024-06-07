@@ -67,6 +67,11 @@ Patch8:	tdesktop-4.15.6-compile.patch
 # we're safe.
 Patch9: tdesktop-allow-system-gsl.patch
 #Patch10: tdesktop-4.16.2-ffmpeg-7.0.patch
+Patch11: no-pch-missing-includes.patch
+Patch12: no-pch-missing-includes_libbase.patch
+Patch13: no-pch-missing-includes_librpl.patch
+Patch14: no-pch-missing-includes_libstorage.patch
+Patch15: no-pch-missing-includes_libui.patch
 
 Requires: hicolor-icon-theme
 
@@ -204,6 +209,7 @@ rm -rf Telegram/ThirdParty/{Catch,GSL,QR,SPMediaKeyTap,expected,libdbusmenu-qt,l
 export PATH=%{_libdir}/qt6/bin:$PATH
 %cmake -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_DISABLE_PRECOMPILE_HEADERS=ON \
     -DDESKTOP_APP_QT6:BOOL=ON \
     -DQT_VERSION_MAJOR=6 \
     -DDESKTOP_APP_DISABLE_JEMALLOC:BOOL=ON \

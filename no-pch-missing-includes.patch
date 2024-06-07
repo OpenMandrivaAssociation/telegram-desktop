@@ -1,0 +1,654 @@
+diff --git a/Telegram/SourceFiles/data/data_peer_id.h b/Telegram/SourceFiles/data/data_peer_id.h
+index 1f99d955f..8fa672575 100644
+--- a/Telegram/SourceFiles/data/data_peer_id.h
++++ b/Telegram/SourceFiles/data/data_peer_id.h
+@@ -7,6 +7,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ */
+ #pragma once
+ 
++#include "scheme.h"
++
+ using BareId = uint64;
+ 
+ struct PeerIdZeroHelper {
+diff --git a/Telegram/SourceFiles/export/data/export_data_types.cpp b/Telegram/SourceFiles/export/data/export_data_types.cpp
+index 71750a575..82adcd2dc 100644
+--- a/Telegram/SourceFiles/export/data/export_data_types.cpp
++++ b/Telegram/SourceFiles/export/data/export_data_types.cpp
+@@ -13,14 +13,15 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ #include "ui/text/format_values.h"
+ #include "core/mime_type.h"
+ #include "core/utils.h"
++
++#include "logs.h"
++
+ #include <QtCore/QDateTime>
+ #include <QtCore/QTimeZone>
+ #include <QtCore/QRegularExpression>
+ #include <QtGui/QImageReader>
+-#include <range/v3/algorithm/max_element.hpp>
+-#include <range/v3/view/all.hpp>
+-#include <range/v3/view/transform.hpp>
+-#include <range/v3/range/conversion.hpp>
++
++#include <range/v3/all.hpp>
+ 
+ namespace Export {
+ namespace Data {
+diff --git a/Telegram/SourceFiles/export/export_api_wrap.cpp b/Telegram/SourceFiles/export/export_api_wrap.cpp
+index 69861015c..e1aa90461 100644
+--- a/Telegram/SourceFiles/export/export_api_wrap.cpp
++++ b/Telegram/SourceFiles/export/export_api_wrap.cpp
+@@ -15,9 +15,14 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ #include "base/bytes.h"
+ #include "base/options.h"
+ #include "base/random.h"
++
++#include "logs.h"
++
+ #include <set>
+ #include <deque>
+ 
++#include <range/v3/all.hpp>
++
+ namespace Export {
+ namespace {
+ 
+diff --git a/Telegram/SourceFiles/export/export_api_wrap.h b/Telegram/SourceFiles/export/export_api_wrap.h
+index 4723cd882..9c4dcd26a 100644
+--- a/Telegram/SourceFiles/export/export_api_wrap.h
++++ b/Telegram/SourceFiles/export/export_api_wrap.h
+@@ -8,8 +8,13 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ #pragma once
+ 
+ #include "mtproto/mtproto_concurrent_sender.h"
++#include "base/flat_set.h"
+ #include "data/data_peer_id.h"
+ 
++#include "scheme.h"
++
++#include <rpl/rpl.h>
++
+ namespace Export {
+ namespace Data {
+ struct File;
+diff --git a/Telegram/SourceFiles/export/export_controller.cpp b/Telegram/SourceFiles/export/export_controller.cpp
+index b3d543f4c..43f2c2035 100644
+--- a/Telegram/SourceFiles/export/export_controller.cpp
++++ b/Telegram/SourceFiles/export/export_controller.cpp
+@@ -15,6 +15,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ #include "export/output/export_output_stats.h"
+ #include "mtproto/mtp_instance.h"
+ 
++#include "logs.h"
++
++#include <range/v3/all.hpp>
++
+ namespace Export {
+ namespace {
+ 
+diff --git a/Telegram/SourceFiles/export/export_settings.h b/Telegram/SourceFiles/export/export_settings.h
+index be2e1b782..fb889c9a6 100644
+--- a/Telegram/SourceFiles/export/export_settings.h
++++ b/Telegram/SourceFiles/export/export_settings.h
+@@ -7,9 +7,15 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ */
+ #pragma once
+ 
++#include "base/basic_types.h"
+ #include "base/flags.h"
+ #include "base/flat_map.h"
+ 
++#include "scheme.h"
++
++#include <QtCore/QByteArray>
++#include <QtCore/QString>
++
+ namespace Export {
+ namespace Output {
+ enum class Format;
+diff --git a/Telegram/SourceFiles/export/output/export_output_file.h b/Telegram/SourceFiles/export/output/export_output_file.h
+index 339486620..cfe23320f 100644
+--- a/Telegram/SourceFiles/export/output/export_output_file.h
++++ b/Telegram/SourceFiles/export/output/export_output_file.h
+@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ */
+ #pragma once
+ 
++#include "base/basic_types.h"
+ #include "base/optional.h"
+ 
+ #include <QtCore/QFile>
+diff --git a/Telegram/SourceFiles/export/output/export_output_html.cpp b/Telegram/SourceFiles/export/output/export_output_html.cpp
+index 9df6bcbb3..0014d9d27 100644
+--- a/Telegram/SourceFiles/export/output/export_output_html.cpp
++++ b/Telegram/SourceFiles/export/output/export_output_html.cpp
+@@ -16,6 +16,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ #include <QtCore/QFile>
+ #include <QtCore/QDateTime>
+ 
++#include <range/v3/all.hpp>
++
+ namespace Export {
+ namespace Output {
+ namespace {
+diff --git a/Telegram/SourceFiles/export/output/export_output_html_and_json.cpp b/Telegram/SourceFiles/export/output/export_output_html_and_json.cpp
+index 9220147ea..f0f70d82b 100644
+--- a/Telegram/SourceFiles/export/output/export_output_html_and_json.cpp
++++ b/Telegram/SourceFiles/export/output/export_output_html_and_json.cpp
+@@ -7,6 +7,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ */
+ #include "export/output/export_output_html_and_json.h"
+ 
++#include "base/invoke_queued.h"
++
+ #include "export/output/export_output_html.h"
+ #include "export/output/export_output_json.h"
+ #include "export/output/export_output_result.h"
+diff --git a/Telegram/SourceFiles/export/output/export_output_html_and_json.h b/Telegram/SourceFiles/export/output/export_output_html_and_json.h
+index 2a40833a8..42f5f2f8d 100644
+--- a/Telegram/SourceFiles/export/output/export_output_html_and_json.h
++++ b/Telegram/SourceFiles/export/output/export_output_html_and_json.h
+@@ -7,6 +7,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ */
+ #pragma once
+ 
++#include "base/basic_types.h"
++
+ #include "export/output/export_output_abstract.h"
+ 
+ namespace Export::Output {
+diff --git a/Telegram/SourceFiles/export/output/export_output_json.cpp b/Telegram/SourceFiles/export/output/export_output_json.cpp
+index b485e615b..29e0a23a6 100644
+--- a/Telegram/SourceFiles/export/output/export_output_json.cpp
++++ b/Telegram/SourceFiles/export/output/export_output_json.cpp
+@@ -17,6 +17,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ #include <QtCore/QJsonArray>
+ #include <QtCore/QJsonValue>
+ 
++#include <range/v3/all.hpp>
++
+ namespace Export {
+ namespace Output {
+ namespace {
+diff --git a/Telegram/SourceFiles/export/output/export_output_stats.h b/Telegram/SourceFiles/export/output/export_output_stats.h
+index 1787e3818..b5a2ccb81 100644
+--- a/Telegram/SourceFiles/export/output/export_output_stats.h
++++ b/Telegram/SourceFiles/export/output/export_output_stats.h
+@@ -7,6 +7,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ */
+ #pragma once
+ 
++#include "base/basic_types.h"
++
+ #include <atomic>
+ 
+ namespace Export {
+diff --git a/Telegram/SourceFiles/lang/lang_tag.h b/Telegram/SourceFiles/lang/lang_tag.h
+index 297ae1ff2..d60238480 100644
+--- a/Telegram/SourceFiles/lang/lang_tag.h
++++ b/Telegram/SourceFiles/lang/lang_tag.h
+@@ -7,6 +7,12 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ */
+ #pragma once
+ 
++#include "base/basic_types.h"
++
++#include <type_traits>
++
++#include <QtCore/QString>
++
+ enum lngtag_count : int;
+ 
+ namespace Lang {
+diff --git a/Telegram/SourceFiles/lang/lang_values.h b/Telegram/SourceFiles/lang/lang_values.h
+index 46bf7d016..63439a2fc 100644
+--- a/Telegram/SourceFiles/lang/lang_values.h
++++ b/Telegram/SourceFiles/lang/lang_values.h
+@@ -9,6 +9,15 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ 
+ #include "lang/lang_tag.h"
+ 
++#include "base/assertion.h"
++#include "base/basic_types.h"
++
++#include <type_traits>
++
++#include <QtCore/QString>
++
++#include <rpl/rpl.h>
++
+ enum lngtag_count : int;
+ 
+ namespace Lang {
+diff --git a/Telegram/SourceFiles/mtproto/details/mtproto_abstract_socket.cpp b/Telegram/SourceFiles/mtproto/details/mtproto_abstract_socket.cpp
+index 653033365..38dc67653 100644
+--- a/Telegram/SourceFiles/mtproto/details/mtproto_abstract_socket.cpp
++++ b/Telegram/SourceFiles/mtproto/details/mtproto_abstract_socket.cpp
+@@ -10,6 +10,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ #include "mtproto/details/mtproto_tcp_socket.h"
+ #include "mtproto/details/mtproto_tls_socket.h"
+ 
++#include "logs.h"
++
+ namespace MTP::details {
+ 
+ std::unique_ptr<AbstractSocket> AbstractSocket::Create(
+diff --git a/Telegram/SourceFiles/mtproto/details/mtproto_abstract_socket.h b/Telegram/SourceFiles/mtproto/details/mtproto_abstract_socket.h
+index 4283a353d..9bb4caa0a 100644
+--- a/Telegram/SourceFiles/mtproto/details/mtproto_abstract_socket.h
++++ b/Telegram/SourceFiles/mtproto/details/mtproto_abstract_socket.h
+@@ -10,6 +10,13 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ #include "base/bytes.h"
+ #include "base/basic_types.h"
+ 
++#include <QtCore/QThread>
++
++#include <rpl/rpl.h>
++
++class QNetworkProxy;
++class QThread;
++
+ namespace MTP::details {
+ 
+ class AbstractSocket : protected QObject {
+diff --git a/Telegram/SourceFiles/mtproto/details/mtproto_dc_key_creator.cpp b/Telegram/SourceFiles/mtproto/details/mtproto_dc_key_creator.cpp
+index badec9ee5..927535fa9 100644
+--- a/Telegram/SourceFiles/mtproto/details/mtproto_dc_key_creator.cpp
++++ b/Telegram/SourceFiles/mtproto/details/mtproto_dc_key_creator.cpp
+@@ -18,6 +18,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ 
+ #include <cmath>
+ 
++#include <range/v3/all.hpp>
++
+ namespace MTP::details {
+ namespace {
+ 
+diff --git a/Telegram/SourceFiles/mtproto/details/mtproto_dcenter.cpp b/Telegram/SourceFiles/mtproto/details/mtproto_dcenter.cpp
+index a98e24b48..75eb9d026 100644
+--- a/Telegram/SourceFiles/mtproto/details/mtproto_dcenter.cpp
++++ b/Telegram/SourceFiles/mtproto/details/mtproto_dcenter.cpp
+@@ -13,6 +13,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ #include "mtproto/mtp_instance.h"
+ #include "mtproto/special_config_request.h"
+ 
++#include "logs.h"
++
+ namespace MTP {
+ namespace details {
+ namespace {
+diff --git a/Telegram/SourceFiles/mtproto/details/mtproto_dcenter.h b/Telegram/SourceFiles/mtproto/details/mtproto_dcenter.h
+index 651dcf171..f5fccfaca 100644
+--- a/Telegram/SourceFiles/mtproto/details/mtproto_dcenter.h
++++ b/Telegram/SourceFiles/mtproto/details/mtproto_dcenter.h
+@@ -7,6 +7,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ */
+ #pragma once
+ 
++#include "mtproto/core_types.h"
++
++#include <QtCore/QObject>
+ #include <QtCore/QReadWriteLock>
+ 
+ namespace MTP {
+diff --git a/Telegram/SourceFiles/mtproto/details/mtproto_domain_resolver.cpp b/Telegram/SourceFiles/mtproto/details/mtproto_domain_resolver.cpp
+index 93865a587..cc54565c7 100644
+--- a/Telegram/SourceFiles/mtproto/details/mtproto_domain_resolver.cpp
++++ b/Telegram/SourceFiles/mtproto/details/mtproto_domain_resolver.cpp
+@@ -7,13 +7,20 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ */
+ #include "mtproto/details/mtproto_domain_resolver.h"
+ 
++#include "base/algorithm.h"
++#include "base/assertion.h"
+ #include "base/random.h"
+ #include "base/invoke_queued.h"
+ #include "base/call_delayed.h"
+ 
++#include "logs.h"
++
+ #include <QtCore/QJsonDocument>
+ #include <QtCore/QJsonArray>
+ #include <QtCore/QJsonObject>
++#include <QtCore/QString>
++#include <QtNetwork/QNetworkProxy>
++
+ #include <range/v3/algorithm/shuffle.hpp>
+ #include <range/v3/algorithm/reverse.hpp>
+ #include <range/v3/algorithm/remove.hpp>
+diff --git a/Telegram/SourceFiles/mtproto/details/mtproto_domain_resolver.h b/Telegram/SourceFiles/mtproto/details/mtproto_domain_resolver.h
+index cb1979bbb..7c3865ed5 100644
+--- a/Telegram/SourceFiles/mtproto/details/mtproto_domain_resolver.h
++++ b/Telegram/SourceFiles/mtproto/details/mtproto_domain_resolver.h
+@@ -9,6 +9,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ 
+ #include "base/weak_ptr.h"
+ 
++#include <crl/crl.h>
++
+ #include <QtCore/QPointer>
+ #include <QtNetwork/QNetworkReply>
+ #include <optional>
+diff --git a/Telegram/SourceFiles/mtproto/details/mtproto_dump_to_text.cpp b/Telegram/SourceFiles/mtproto/details/mtproto_dump_to_text.cpp
+index a6250bbd4..6b904e43c 100644
+--- a/Telegram/SourceFiles/mtproto/details/mtproto_dump_to_text.cpp
++++ b/Telegram/SourceFiles/mtproto/details/mtproto_dump_to_text.cpp
+@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ */
+ #include "mtproto/details/mtproto_dump_to_text.h"
+ 
++#include "logs.h"
+ #include "scheme-dump_to_text.h"
+ #include "scheme.h"
+ 
+diff --git a/Telegram/SourceFiles/mtproto/details/mtproto_received_ids_manager.cpp b/Telegram/SourceFiles/mtproto/details/mtproto_received_ids_manager.cpp
+index 20bade0c4..19ff51027 100644
+--- a/Telegram/SourceFiles/mtproto/details/mtproto_received_ids_manager.cpp
++++ b/Telegram/SourceFiles/mtproto/details/mtproto_received_ids_manager.cpp
+@@ -7,6 +7,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ */
+ #include "mtproto/details/mtproto_received_ids_manager.h"
+ 
++#include "logs.h"
++
+ namespace MTP::details {
+ 
+ ReceivedIdsManager::Result ReceivedIdsManager::registerMsgId(
+diff --git a/Telegram/SourceFiles/mtproto/details/mtproto_received_ids_manager.h b/Telegram/SourceFiles/mtproto/details/mtproto_received_ids_manager.h
+index 8f7dfbb9d..ad1f8a6ed 100644
+--- a/Telegram/SourceFiles/mtproto/details/mtproto_received_ids_manager.h
++++ b/Telegram/SourceFiles/mtproto/details/mtproto_received_ids_manager.h
+@@ -9,6 +9,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ 
+ #include "base/flat_map.h"
+ 
++#include "scheme.h"
++
+ namespace MTP::details {
+ 
+ // Received msgIds and wereAcked msgIds count stored.
+diff --git a/Telegram/SourceFiles/mtproto/details/mtproto_rsa_public_key.cpp b/Telegram/SourceFiles/mtproto/details/mtproto_rsa_public_key.cpp
+index 312c8b1dd..7754eaf04 100644
+--- a/Telegram/SourceFiles/mtproto/details/mtproto_rsa_public_key.cpp
++++ b/Telegram/SourceFiles/mtproto/details/mtproto_rsa_public_key.cpp
+@@ -9,6 +9,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ 
+ #include "base/openssl_help.h"
+ 
++#include "logs.h"
++#include "scheme.h"
++
+ namespace MTP::details {
+ namespace {
+ 
+diff --git a/Telegram/SourceFiles/mtproto/details/mtproto_serialized_request.cpp b/Telegram/SourceFiles/mtproto/details/mtproto_serialized_request.cpp
+index f4ff13192..affbe4d54 100644
+--- a/Telegram/SourceFiles/mtproto/details/mtproto_serialized_request.cpp
++++ b/Telegram/SourceFiles/mtproto/details/mtproto_serialized_request.cpp
+@@ -9,6 +9,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ 
+ #include "base/random.h"
+ 
++#include "scheme.h"
++
+ namespace MTP::details {
+ namespace {
+ 
+diff --git a/Telegram/SourceFiles/mtproto/details/mtproto_tcp_socket.h b/Telegram/SourceFiles/mtproto/details/mtproto_tcp_socket.h
+index 453e2eaac..b59a3ab64 100644
+--- a/Telegram/SourceFiles/mtproto/details/mtproto_tcp_socket.h
++++ b/Telegram/SourceFiles/mtproto/details/mtproto_tcp_socket.h
+@@ -9,6 +9,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ 
+ #include "mtproto/details/mtproto_abstract_socket.h"
+ 
++#include <QtNetwork/QTcpSocket>
++
+ namespace MTP::details {
+ 
+ class TcpSocket final : public AbstractSocket {
+diff --git a/Telegram/SourceFiles/mtproto/details/mtproto_tls_socket.cpp b/Telegram/SourceFiles/mtproto/details/mtproto_tls_socket.cpp
+index 36aa87598..e7f6e9a32 100644
+--- a/Telegram/SourceFiles/mtproto/details/mtproto_tls_socket.cpp
++++ b/Telegram/SourceFiles/mtproto/details/mtproto_tls_socket.cpp
+@@ -13,8 +13,11 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ #include "base/invoke_queued.h"
+ #include "base/unixtime.h"
+ 
++#include "scheme.h"
++
+ #include <QtCore/QtEndian>
+-#include <range/v3/algorithm/reverse.hpp>
++
++#include <range/v3/all.hpp>
+ 
+ namespace MTP::details {
+ namespace {
+diff --git a/Telegram/SourceFiles/mtproto/details/mtproto_tls_socket.h b/Telegram/SourceFiles/mtproto/details/mtproto_tls_socket.h
+index c97b1d7e8..09001a075 100644
+--- a/Telegram/SourceFiles/mtproto/details/mtproto_tls_socket.h
++++ b/Telegram/SourceFiles/mtproto/details/mtproto_tls_socket.h
+@@ -9,6 +9,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ 
+ #include "mtproto/details/mtproto_abstract_socket.h"
+ 
++#include <QtNetwork/QTcpSocket>
++
+ namespace MTP::details {
+ 
+ class TlsSocket final : public AbstractSocket {
+diff --git a/Telegram/SourceFiles/mtproto/mtp_instance.h b/Telegram/SourceFiles/mtproto/mtp_instance.h
+index 55401065f..3222463f3 100644
+--- a/Telegram/SourceFiles/mtproto/mtp_instance.h
++++ b/Telegram/SourceFiles/mtproto/mtp_instance.h
+@@ -10,6 +10,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ #include "mtproto/details/mtproto_serialized_request.h"
+ #include "mtproto/mtproto_response.h"
+ 
++#include <QtCore/QObject>
++
++#include <rpl/rpl.h>
++
+ namespace MTP {
+ namespace details {
+ 
+diff --git a/Telegram/SourceFiles/mtproto/mtproto_auth_key.h b/Telegram/SourceFiles/mtproto/mtproto_auth_key.h
+index 31d0e3db3..7acabc77a 100644
+--- a/Telegram/SourceFiles/mtproto/mtproto_auth_key.h
++++ b/Telegram/SourceFiles/mtproto/mtproto_auth_key.h
+@@ -8,9 +8,14 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ #pragma once
+ 
+ #include "base/bytes.h"
++
++#include "mtproto/core_types.h"
++
+ #include <array>
+ #include <memory>
+ 
++#include <crl/crl.h>
++
+ namespace MTP {
+ 
+ class AuthKey {
+diff --git a/Telegram/SourceFiles/mtproto/mtproto_concurrent_sender.cpp b/Telegram/SourceFiles/mtproto/mtproto_concurrent_sender.cpp
+index 5bb4d5d20..936225ea3 100644
+--- a/Telegram/SourceFiles/mtproto/mtproto_concurrent_sender.cpp
++++ b/Telegram/SourceFiles/mtproto/mtproto_concurrent_sender.cpp
+@@ -11,6 +11,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ #include "mtproto/mtproto_response.h"
+ #include "mtproto/facade.h"
+ 
++#include <crl/crl.h>
++
+ namespace MTP {
+ 
+ class ConcurrentSender::HandlerMaker final {
+diff --git a/Telegram/SourceFiles/mtproto/mtproto_config.cpp b/Telegram/SourceFiles/mtproto/mtproto_config.cpp
+index 454339f49..39f749df4 100644
+--- a/Telegram/SourceFiles/mtproto/mtproto_config.cpp
++++ b/Telegram/SourceFiles/mtproto/mtproto_config.cpp
+@@ -11,6 +11,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ #include "mtproto/type_utils.h"
+ #include "logs.h"
+ 
++#include <QtCore/QIODevice>
++
+ namespace MTP {
+ namespace {
+ 
+diff --git a/Telegram/SourceFiles/mtproto/mtproto_dc_options.cpp b/Telegram/SourceFiles/mtproto/mtproto_dc_options.cpp
+index 048845a8f..75f6b6ee2 100644
+--- a/Telegram/SourceFiles/mtproto/mtproto_dc_options.cpp
++++ b/Telegram/SourceFiles/mtproto/mtproto_dc_options.cpp
+@@ -12,8 +12,13 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ #include "mtproto/connection_tcp.h"
+ #include "storage/serialize_common.h"
+ 
++#include "logs.h"
++
+ #include <QtCore/QFile>
+ #include <QtCore/QRegularExpression>
++#include <QtCore/QString>
++
++#include <range/v3/all.hpp>
+ 
+ namespace MTP {
+ namespace {
+diff --git a/Telegram/SourceFiles/mtproto/mtproto_dc_options.h b/Telegram/SourceFiles/mtproto/mtproto_dc_options.h
+index 4e0b979c4..db4167d68 100644
+--- a/Telegram/SourceFiles/mtproto/mtproto_dc_options.h
++++ b/Telegram/SourceFiles/mtproto/mtproto_dc_options.h
+@@ -8,6 +8,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ #pragma once
+ 
+ #include "base/bytes.h"
++#include "base/flat_map.h"
++#include "base/flat_set.h"
++
++#include "scheme.h"
+ 
+ #include <QtCore/QReadWriteLock>
+ #include <string>
+@@ -15,6 +19,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ #include <map>
+ #include <set>
+ 
++#include <rpl/rpl.h>
++
+ namespace MTP {
+ namespace details {
+ class RSAPublicKey;
+diff --git a/Telegram/SourceFiles/mtproto/mtproto_dh_utils.cpp b/Telegram/SourceFiles/mtproto/mtproto_dh_utils.cpp
+index db9c0542f..61a300f67 100644
+--- a/Telegram/SourceFiles/mtproto/mtproto_dh_utils.cpp
++++ b/Telegram/SourceFiles/mtproto/mtproto_dh_utils.cpp
+@@ -9,6 +9,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ 
+ #include "base/openssl_help.h"
+ 
++#include "logs.h"
++
+ namespace MTP {
+ namespace {
+ 
+diff --git a/Telegram/SourceFiles/mtproto/mtproto_proxy_data.cpp b/Telegram/SourceFiles/mtproto/mtproto_proxy_data.cpp
+index 8ed267514..62339a55b 100644
+--- a/Telegram/SourceFiles/mtproto/mtproto_proxy_data.cpp
++++ b/Telegram/SourceFiles/mtproto/mtproto_proxy_data.cpp
+@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ */
+ #include "mtproto/mtproto_proxy_data.h"
+ 
++#include "base/assertion.h"
+ #include "base/qthelp_url.h"
+ #include "base/qt/qt_string_view.h"
+ 
+diff --git a/Telegram/SourceFiles/mtproto/mtproto_proxy_data.h b/Telegram/SourceFiles/mtproto/mtproto_proxy_data.h
+index 52acf6661..fbc7f74d1 100644
+--- a/Telegram/SourceFiles/mtproto/mtproto_proxy_data.h
++++ b/Telegram/SourceFiles/mtproto/mtproto_proxy_data.h
+@@ -7,6 +7,13 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ */
+ #pragma once
+ 
++#include "base/basic_types.h"
++#include "base/bytes.h"
++
++#include <QtNetwork/QNetworkProxy>
++
++#include <crl/crl.h>
++
+ namespace MTP {
+ 
+ struct ProxyData {
+diff --git a/Telegram/SourceFiles/mtproto/mtproto_response.h b/Telegram/SourceFiles/mtproto/mtproto_response.h
+index 3a810b200..9520dcb49 100644
+--- a/Telegram/SourceFiles/mtproto/mtproto_response.h
++++ b/Telegram/SourceFiles/mtproto/mtproto_response.h
+@@ -7,8 +7,13 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ */
+ #pragma once
+ 
++#include "base/basic_types.h"
+ #include "base/flat_set.h"
+ 
++#include "scheme.h"
++
++#include <QtCore/QString>
++
+ namespace MTP {
+ 
+ class Error {
+diff --git a/Telegram/SourceFiles/mtproto/type_utils.h b/Telegram/SourceFiles/mtproto/type_utils.h
+index fd6cdd1e5..63605bf3c 100644
+--- a/Telegram/SourceFiles/mtproto/type_utils.h
++++ b/Telegram/SourceFiles/mtproto/type_utils.h
+@@ -7,6 +7,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ */
+ #pragma once
+ 
++#include "scheme.h"
++
+ inline MTPbool MTP_bool(bool v) {
+ 	return v ? MTP_boolTrue() : MTP_boolFalse();
+ }
+diff --git a/Telegram/SourceFiles/payments/smartglocal/smartglocal_card.cpp b/Telegram/SourceFiles/payments/smartglocal/smartglocal_card.cpp
+index a08b0980d..8965818dc 100644
+--- a/Telegram/SourceFiles/payments/smartglocal/smartglocal_card.cpp
++++ b/Telegram/SourceFiles/payments/smartglocal/smartglocal_card.cpp
+@@ -7,6 +7,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ */
+ #include "smartglocal/smartglocal_card.h"
+ 
++#include <QtCore/QJsonObject>
+ #include <QtCore/QRegularExpression>
+ 
+ namespace SmartGlocal {
+diff --git a/Telegram/SourceFiles/payments/smartglocal/smartglocal_error.cpp b/Telegram/SourceFiles/payments/smartglocal/smartglocal_error.cpp
+index cc764a07f..6cdeddd2b 100644
+--- a/Telegram/SourceFiles/payments/smartglocal/smartglocal_error.cpp
++++ b/Telegram/SourceFiles/payments/smartglocal/smartglocal_error.cpp
+@@ -7,6 +7,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ */
+ #include "smartglocal/smartglocal_error.h"
+ 
++#include <QtCore/QJsonObject>
++
+ namespace SmartGlocal {
+ 
+ Error::Code Error::code() const {
+diff --git a/Telegram/SourceFiles/payments/smartglocal/smartglocal_token.cpp b/Telegram/SourceFiles/payments/smartglocal/smartglocal_token.cpp
+index ee8725ca0..9327c33b0 100644
+--- a/Telegram/SourceFiles/payments/smartglocal/smartglocal_token.cpp
++++ b/Telegram/SourceFiles/payments/smartglocal/smartglocal_token.cpp
+@@ -7,6 +7,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+ */
+ #include "smartglocal/smartglocal_token.h"
+ 
++#include <QtCore/QJsonObject>
++
+ namespace SmartGlocal {
+ 
+ QString Token::tokenId() const {
