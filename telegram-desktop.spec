@@ -26,20 +26,20 @@
 %if %{with clang}
 %global optflags %(echo %{optflags} | sed -e 's/-mcet//g' -e 's/-fcf-protection//g' -e 's/-fstack-clash-protection//g' -e 's/$/ -Qunused-arguments -Wno-unknown-warning-option/') -I%{_includedir}/minizip
 %else
-%global optflags %{optflags} -I%{_includedir}/minizip -fno-lto
+%global optflags %{optflags} -fno-lto -I%{_includedir}/minizip
 %endif
 
 %global build_ldflags %(echo %{build_ldflags} -Wl,-z,notext)
 
 # Decrease debuginfo verbosity to reduce memory consumption...
 %if %{with mindbg}
-%global optflags %(echo %{optflags} | sed 's/-g /-g1 /')
+%global optflags %(echo %{optflags} | sed 's/-g3 /-gdwarf-5 -g1 /')
 %endif
 
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	5.1.1
+Version:	5.1.2
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -121,7 +121,6 @@ BuildRequires: pkgconfig(libpulse)
 BuildRequires: pkgconfig(openh264)
 BuildRequires: pkgconfig(vpx)
 BuildRequires: pkgconfig(rnnoise)
-BuildRequires: pkgconfig(minizip)
 BuildRequires: pkgconfig(libzip)
 BuildRequires: pkgconfig(gobject-introspection-1.0)
 # FIXME is this really necessary? It's there because
@@ -199,7 +198,7 @@ export LC_ALL=en_US.utf-8
 # Unpacking Telegram Desktop source archive...
 %autosetup -p1 -n %{appname}-%{version}%{tarsuffix}
 # Unbundling libraries...
-rm -rf Telegram/ThirdParty/{Catch,GSL,QR,SPMediaKeyTap,expected,libdbusmenu-qt,libtgvoip,lz4,minizip,variant,xxHash,mallocng}
+rm -rf Telegram/ThirdParty/{Catch,GSL,QR,SPMediaKeyTap,expected,libdbusmenu-qt,libtgvoip,lz4,variant,xxHash,mallocng,minizip,zlib}
 
 export PATH=%{_libdir}/qt6/bin:$PATH
 %cmake -G Ninja \
