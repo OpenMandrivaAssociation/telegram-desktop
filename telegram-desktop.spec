@@ -39,8 +39,8 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	5.2.6
-Release:	2
+Version:	5.3.2
+Release:	1
 
 # Application and 3rd-party modules licensing:
 # * Telegram Desktop - GPLv3+ with OpenSSL exception -- main tarball;
@@ -128,6 +128,7 @@ BuildRequires: pkgconfig(gobject-introspection-1.0)
 # be needed...
 BuildRequires: stdc++-static-devel
 BuildRequires: cmake(fmt)
+BuildRequires: cmake(ada)
 BuildRequires: cmake(RapidJSON)
 BuildRequires: qmake-qt6
 BuildRequires: qt6-qtbase-tools
