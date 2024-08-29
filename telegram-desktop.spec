@@ -24,9 +24,9 @@
 
 # Applying workaround to RHBZ#1559007...
 %if %{with clang}
-%global optflags %(echo %{optflags} | sed -e 's/-mcet//g' -e 's/-fcf-protection//g' -e 's/-fstack-clash-protection//g' -e 's/$/ -Qunused-arguments -Wno-unknown-warning-option/') -I%{_includedir}/minizip
+%global optflags %(echo %{optflags} | sed -e 's/-mcet//g' -e 's/-fcf-protection//g' -e 's/-fstack-clash-protection//g' -e 's/$/ -Qunused-arguments -Wno-unknown-warning-option/') -I%{_includedir}/minizip -Wno-missing-template-arg-list-after-template-kw
 %else
-%global optflags %{optflags} -fno-lto -I%{_includedir}/minizip
+%global optflags %{optflags} -fno-lto -I%{_includedir}/minizip -Wno-missing-template-arg-list-after-template-kw
 %endif
 
 %global build_ldflags %(echo %{build_ldflags} -Wl,-z,notext)
@@ -39,8 +39,8 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	5.3.2
-Release:	2
+Version:	5.4.4
+Release:	1
 
 # Application and 3rd-party modules licensing:
 # * Telegram Desktop - GPLv3+ with OpenSSL exception -- main tarball;
