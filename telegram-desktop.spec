@@ -80,6 +80,7 @@ Provides: bundled(lxqt-qtplugin) = 0.14.0~git
 # Compilers and tools...
 BuildRequires: desktop-file-utils
 BuildRequires: cmake
+BuildRequires: mold
 
 # Development packages for Telegram Desktop...
 BuildRequires: cmake(Microsoft.GSL)
@@ -198,6 +199,8 @@ export LC_ALL=en_US.utf-8
 rm -rf Telegram/ThirdParty/{Catch,GSL,QR,SPMediaKeyTap,expected,libdbusmenu-qt,libtgvoip,lz4,variant,xxHash,mallocng,minizip,zlib}
 
 export PATH=%{_libdir}/qt6/bin:$PATH
+export LDFLAGS="-fuse-ld=mold"
+export LD=mold
 %cmake -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DDESKTOP_APP_QT6:BOOL=ON \
@@ -253,6 +256,8 @@ export PATH=%{_libdir}/qt6/bin:$PATH
     -DTDESKTOP_LAUNCHER_BASENAME=%{launcher}
 
 %build
+export LDFLAGS="-fuse-ld=mold"
+export LD=mold
 touch build/changelog.txt
 
 PROCESSES="$(getconf _NPROCESSORS_ONLN)"
