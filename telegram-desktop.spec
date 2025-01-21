@@ -6,7 +6,7 @@
 # if built with clang.
 # It works fine when built with gcc - but we need to figure
 # out why at some point.
-%bcond_without clang
+%bcond_with clang
 %bcond_without spellcheck
 %bcond_without fonts
 %bcond_without ipo
@@ -39,7 +39,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	5.10.2
+Version:	5.10.3
 Release:	1
 
 # Application and 3rd-party modules licensing:
