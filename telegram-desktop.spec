@@ -143,6 +143,7 @@ BuildRequires: cmake(Qt6QuickWidgets)
 BuildRequires: cmake(Qt6Widgets)
 BuildRequires: cmake(Qt6WaylandClient)
 BuildRequires: cmake(Qt6WaylandCompositor)
+BuildRequires: cmake(KF6CoreAddons)
 BuildRequires: cmake(tg_owt)
 BuildRequires: wayland-devel
 BuildRequires: qt6-qtwayland
