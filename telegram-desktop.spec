@@ -24,7 +24,7 @@
 
 # Applying workaround to RHBZ#1559007...
 %if %{with clang}
-%global optflags %(echo %{optflags} -fno-lto | sed -e 's/-mcet//g' -e 's/-fcf-protection//g' -e 's/-fstack-clash-protection//g' -e 's/$/ -Qunused-arguments -Wno-unknown-warning-option/') -I%{_includedir}/minizip -Wno-missing-template-arg-list-after-template-kw
+%global optflags %(echo %{optflags} | sed -e 's/-mcet//g' -e 's/-fcf-protection//g' -e 's/-fstack-clash-protection//g' -e 's/$/ -Qunused-arguments -Wno-unknown-warning-option/') -I%{_includedir}/minizip -Wno-missing-template-arg-list-after-template-kw
 %else
 %global optflags %{optflags} -fno-lto -I%{_includedir}/minizip -Wno-missing-template-arg-list-after-template-kw
 %endif
@@ -40,7 +40,7 @@ Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
 Version:	5.10.7
-Release:	1
+Release:	2
 
 # Application and 3rd-party modules licensing:
 # * Telegram Desktop - GPLv3+ with OpenSSL exception -- main tarball;
@@ -255,11 +255,11 @@ export PATH=%{_libdir}/qt6/bin:$PATH
 %build
 touch build/changelog.txt
 
-PROCESSES="$(getconf _NPROCESSORS_ONLN)"
+PROCESSES="$(expr $(echo $(getconf _NPROCESSORS_ONLN)) - 2)"
 # Linking Telegram with LTO enabled is VERY RAM intensive
 # and breaks boxes that have loads of CPU cores but not
 # terabytes of RAM...
-[ "$PROCESSES" -gt 4 ] && PROCESSES=4
+#[ "$PROCESSES" -gt 4 ] && PROCESSES=4
 
 %ninja_build -C build -j${PROCESSES}
 
