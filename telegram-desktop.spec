@@ -61,6 +61,7 @@ Patch5: tdesktop-2.3.2-no-underlinking.patch
 Patch6: tdesktop-4.11.3-zlib-ng.patch
 Patch7: tdesktop-3.3.2-system-minizip.patch
 Patch8:	tdesktop-4.15.6-compile.patch
+Patch9:	tdesktop-5.12.2-compile.patch
 #Patch10: tdesktop-4.16.2-ffmpeg-7.0.patch
 
 Requires: hicolor-icon-theme
