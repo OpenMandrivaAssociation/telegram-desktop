@@ -91,6 +91,8 @@ BuildRequires: pkgconfig(libavcodec)
 BuildRequires: pkgconfig(libavformat)
 BuildRequires: pkgconfig(xkbcommon)
 BuildRequires: pkgconfig(glibmm-2.68)
+# For __printflike
+BuildRequires: pkgconfig(libbsd)
 BuildRequires: cmake(ECM)
 BuildRequires: cmake(tl-expected)
 BuildRequires: pkgconfig(libyuv)
