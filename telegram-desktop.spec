@@ -39,8 +39,8 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	5.12.4
-Release:	2
+Version:	5.12.6
+Release:	1
 
 # Application and 3rd-party modules licensing:
 # * Telegram Desktop - GPLv3+ with OpenSSL exception -- main tarball;
@@ -56,6 +56,7 @@ Summary: Telegram Desktop official messaging app
 Source0: https://github.com/telegramdesktop/tdesktop/releases/download/v%{version}/%{appname}-%{version}%{tarsuffix}.tar.gz
 Patch1: tdesktop-4.11.3-system-libyuv.patch
 Patch2: tdesktop-4.6.5-workaround-assert-on-startup.patch
+Patch3:	tdesktop-5.12.6-qt-6.9.patch
 Patch4: tdesktop-4.16.4-compile.patch
 Patch5: tdesktop-2.3.2-no-underlinking.patch
 Patch6: tdesktop-4.11.3-zlib-ng.patch

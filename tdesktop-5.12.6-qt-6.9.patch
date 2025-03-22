@@ -1,0 +1,29 @@
+diff -up tdesktop-5.12.6-full/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp.omv~ tdesktop-5.12.6-full/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp
+--- tdesktop-5.12.6-full/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp.omv~	2025-03-22 03:54:43.191941876 +0100
++++ tdesktop-5.12.6-full/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp	2025-03-22 04:02:35.190362899 +0100
+@@ -16,7 +16,11 @@
+ #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+ #include <qpa/qplatformintegration.h>
+ #include <private/qguiapplication_p.h>
++#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
++#include <private/qdesktopunixservices_p.h>
++#else
+ #include <private/qgenericunixservices_p.h>
++#endif
+ #endif // Qt >= 6.5.0
+ 
+ #include <sstream>
+@@ -38,7 +42,12 @@ std::string ParentWindowID(QWindow *wind
+ 		return {};
+ 	}
+ 
+-#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
++#if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
++	if (const auto services = dynamic_cast<QDesktopUnixServices*>(
++			QGuiApplicationPrivate::platformIntegration()->services())) {
++		return services->portalWindowIdentifier(window).toStdString();
++	}
++#elif QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+ 	if (const auto services = dynamic_cast<QGenericUnixServices*>(
+ 			QGuiApplicationPrivate::platformIntegration()->services())) {
+ 		return services->portalWindowIdentifier(window).toStdString();
