@@ -39,8 +39,8 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	5.13.1
-Release:	4
+Version:	6.1.3
+Release:	1
 
 # Application and 3rd-party modules licensing:
 # * Telegram Desktop - GPLv3+ with OpenSSL exception -- main tarball;
@@ -54,16 +54,6 @@ Summary: Telegram Desktop official messaging app
 # Upstream frequently forgets to make the -full release. When that happens,
 # use the package-source.sh script in this repository.
 Source0: https://github.com/telegramdesktop/tdesktop/releases/download/v%{version}/%{appname}-%{version}%{tarsuffix}.tar.gz
-Patch1: tdesktop-4.11.3-system-libyuv.patch
-Patch2: tdesktop-4.6.5-workaround-assert-on-startup.patch
-Patch3:	tdesktop-5.12.6-qt-6.9.patch
-Patch4: tdesktop-4.16.4-compile.patch
-Patch5: tdesktop-2.3.2-no-underlinking.patch
-Patch6: tdesktop-4.11.3-zlib-ng.patch
-Patch7: tdesktop-3.3.2-system-minizip.patch
-Patch8:	tdesktop-4.15.6-compile.patch
-Patch9:	tdesktop-5.12.2-compile.patch
-#Patch10: tdesktop-4.16.2-ffmpeg-7.0.patch
 
 Requires: hicolor-icon-theme
 
@@ -181,6 +171,19 @@ BuildRequires: llvm
 Requires: open-sans-fonts
 %endif
 
+%patchlist
+tdesktop-4.11.3-system-libyuv.patch
+tdesktop-4.6.5-workaround-assert-on-startup.patch
+telegram-6.1.3-qt-6.10.patch
+tdesktop-4.16.4-compile.patch
+tdesktop-2.3.2-no-underlinking.patch
+tdesktop-4.11.3-zlib-ng.patch
+tdesktop-3.3.2-system-minizip.patch
+tdesktop-4.15.6-compile.patch
+tdesktop-5.12.2-compile.patch
+#tdesktop-4.16.2-ffmpeg-7.0.patch
+tdesktop-6.1.3-compile.patch
+
 %description
 Telegram is a messaging app with a focus on speed and security, it’s super
 fast, simple and free. You can use Telegram on all your devices at the same
@@ -201,45 +204,48 @@ export LC_ALL=en_US.utf-8
 # Unbundling libraries...
 rm -rf Telegram/ThirdParty/{Catch,GSL,QR,SPMediaKeyTap,expected,libdbusmenu-qt,libtgvoip,lz4,variant,xxHash,mallocng,minizip,zlib}
 
+# FIXME we currently DISABLE_QT_PLUGINS because they break the build
 export PATH=%{_libdir}/qt6/bin:$PATH
 %cmake -G Ninja \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DDESKTOP_APP_QT6:BOOL=ON \
-    -DQT_VERSION_MAJOR=6 \
-    -DDESKTOP_APP_DISABLE_JEMALLOC:BOOL=ON \
+	-DCMAKE_CXX_STANDARD=20 \
+	-DCMAKE_BUILD_TYPE=Release \
+	-DDESKTOP_APP_QT6:BOOL=ON \
+	-DQT_VERSION_MAJOR=6 \
+	-DDESKTOP_APP_DISABLE_JEMALLOC:BOOL=ON \
 %if %{without gtk3}
-    -DDESKTOP_APP_DISABLE_GTK_INTEGRATION:BOOL=ON \
-    -DDESKTOP_APP_DISABLE_WEBKITGTK:BOOL=ON \
+	-DDESKTOP_APP_DISABLE_GTK_INTEGRATION:BOOL=ON \
+	-DDESKTOP_APP_DISABLE_WEBKITGTK:BOOL=ON \
 %endif
 %if %{without spellcheck}
-    -DDESKTOP_APP_DISABLE_SPELLCHECK:BOOL=ON \
+	-DDESKTOP_APP_DISABLE_SPELLCHECK:BOOL=ON \
 %endif
 %if %{without fonts}
-    -DDESKTOP_APP_USE_PACKAGED_FONTS:BOOL=OFF \
+	-DDESKTOP_APP_USE_PACKAGED_FONTS:BOOL=OFF \
 %endif
 %if %{with ipo} && %{with mindbg} && %{without clang}
-    -DDESKTOP_APP_ENABLE_IPO_OPTIMIZATIONS:BOOL=ON \
+    	-DESKTOP_APP_ENABLE_IPO_OPTIMIZATIONS:BOOL=ON \
 %endif
 %if %{with rlottie}
-    -DDESKTOP_APP_USE_PACKAGED_RLOTTIE:BOOL=ON \
-    -DDESKTOP_APP_LOTTIE_USE_CACHE:BOOL=OFF \
+	-DDESKTOP_APP_USE_PACKAGED_RLOTTIE:BOOL=ON \
+	-DDESKTOP_APP_LOTTIE_USE_CACHE:BOOL=OFF \
 %else
-    -DDESKTOP_APP_USE_PACKAGED_RLOTTIE:BOOL=OFF \
-    -Drlottie_DIR=`pwd`/../Telegram/ThirdParty/rlottie \
+	-DDESKTOP_APP_USE_PACKAGED_RLOTTIE:BOOL=OFF \
+	-Drlottie_DIR=`pwd`/../Telegram/ThirdParty/rlottie \
 %endif
-    -DTDESKTOP_API_ID=%{apiid} \
-    -DTDESKTOP_API_HASH=%{apihash} \
-    -DDESKTOP_APP_USE_PACKAGED:BOOL=ON \
-    -DDESKTOP_APP_USE_PACKAGED_GSL:BOOL=OFF \
-    -DDESKTOP_APP_USE_PACKAGED_EXPECTED:BOOL=ON \
-    -DDESKTOP_APP_USE_PACKAGED_VARIANT:BOOL=ON \
-    -DDESKTOP_APP_USE_PACKAGED_QRCODE:BOOL=ON \
-    -DDESKTOP_APP_USE_GLIBC_WRAPS:BOOL=OFF \
-    -DDESKTOP_APP_DISABLE_CRASH_REPORTS:BOOL=ON \
-    -DTDESKTOP_USE_PACKAGED_TGVOIP:BOOL=OFF \
-    -DTDESKTOP_DISABLE_REGISTER_CUSTOM_SCHEME:BOOL=ON \
-    -DTDESKTOP_DISABLE_DESKTOP_FILE_GENERATION:BOOL=ON \
-    -DTDESKTOP_LAUNCHER_BASENAME=%{launcher}
+	-DTDESKTOP_API_ID=%{apiid} \
+	-DTDESKTOP_API_HASH=%{apihash} \
+	-DDESKTOP_APP_USE_PACKAGED:BOOL=ON \
+	-DDESKTOP_APP_USE_PACKAGED_GSL:BOOL=OFF \
+	-DDESKTOP_APP_USE_PACKAGED_EXPECTED:BOOL=ON \
+	-DDESKTOP_APP_USE_PACKAGED_VARIANT:BOOL=ON \
+	-DDESKTOP_APP_USE_PACKAGED_QRCODE:BOOL=ON \
+	-DDESKTOP_APP_USE_GLIBC_WRAPS:BOOL=OFF \
+	-DDESKTOP_APP_DISABLE_CRASH_REPORTS:BOOL=ON \
+	-DDESKTOP_APP_DISABLE_QT_PLUGINS:BOOL=ON \
+	-DTDESKTOP_USE_PACKAGED_TGVOIP:BOOL=OFF \
+	-DTDESKTOP_DISABLE_REGISTER_CUSTOM_SCHEME:BOOL=ON \
+	-DTDESKTOP_DISABLE_DESKTOP_FILE_GENERATION:BOOL=ON \
+	-DTDESKTOP_LAUNCHER_BASENAME=%{launcher}
 
 %build
 touch build/changelog.txt
@@ -263,7 +269,7 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/org.telegram.d
 %files
 %doc README.md changelog.txt
 %license LICENSE LEGAL
-%{_bindir}/%{name}
+%{_bindir}/Telegram
 %{_datadir}/applications/org.telegram.desktop.desktop
 %{_datadir}/icons/hicolor/*/apps/*.*
 %{_datadir}/dbus-1/services/org.telegram.desktop.service

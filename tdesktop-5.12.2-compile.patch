@@ -10,15 +10,3 @@ diff -up tdesktop-5.12.2-full/Telegram/lib_ui/ui/widgets/buttons.cpp.omv~ tdeskt
  	const style::SettingsButton &st)
  : RippleButton(parent, st.ripple)
  , _st(st)
-diff -up tdesktop-5.12.2-full/Telegram/lib_ui/ui/widgets/buttons.h.omv~ tdesktop-5.12.2-full/Telegram/lib_ui/ui/widgets/buttons.h
---- tdesktop-5.12.2-full/Telegram/lib_ui/ui/widgets/buttons.h.omv~	2025-03-10 01:25:31.897271577 +0100
-+++ tdesktop-5.12.2-full/Telegram/lib_ui/ui/widgets/buttons.h	2025-03-10 01:25:36.834463015 +0100
-@@ -273,7 +273,7 @@ public:
- 		const style::SettingsButton &st = st::defaultSettingsButton);
- 	SettingsButton(
- 		QWidget *parent,
--		nullptr_t,
-+		std::nullptr_t,
- 		const style::SettingsButton &st = st::defaultSettingsButton);
- 	~SettingsButton();
- 
