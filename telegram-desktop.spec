@@ -139,6 +139,7 @@ BuildRequires: cmake(Qt6WaylandClient)
 BuildRequires: cmake(Qt6WaylandCompositor)
 BuildRequires: cmake(KF6CoreAddons)
 BuildRequires: cmake(tg_owt)
+BuildRequires: tdlib-static
 BuildRequires: wayland-devel
 BuildRequires: qt6-qtwayland
 BuildRequires: ninja
