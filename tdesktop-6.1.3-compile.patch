@@ -1,28 +1,3 @@
-diff -up tdesktop-6.1.3-full/CMakeLists.txt.omv~ tdesktop-6.1.3-full/CMakeLists.txt
---- tdesktop-6.1.3-full/CMakeLists.txt.omv~	2025-09-23 23:09:25.877718409 +0200
-+++ tdesktop-6.1.3-full/CMakeLists.txt	2025-09-24 12:33:24.883764043 +0200
-@@ -52,5 +52,21 @@ set(desktop_app_skip_libs
-     variant
- )
- 
-+include_directories(/usr/lib64/qt6/include/QtCore/6.10.0)
-+include_directories(/usr/lib64/qt6/include/QtGui/6.10.0)
-+include_directories(/usr/lib64/qt6/include/QtWaylandClient/6.10.0)
-+include_directories(/usr/lib64/qt6/include/QtWaylandGlobal/6.10.0)
-+include_directories(/usr/lib64/qt6/include/QtWidgets/6.10.0)
-+include_directories(/usr/lib64/qt6/include/QtCore/6.10.0/QtCore)
-+include_directories(/usr/lib64/qt6/include/QtGui/6.10.0/QtGui)
-+include_directories(/usr/lib64/qt6/include/QtWaylandClient/6.10.0/QtWaylandClient)
-+include_directories(/usr/lib64/qt6/include/QtWaylandGlobal/6.10.0/QtWaylandGlobal)
-+include_directories(/usr/lib64/qt6/include/QtWidgets/6.10.0/QtWidgets)
-+include_directories(/usr/lib64/qt6/include/QtCore/6.10.0/QtCore/private)
-+include_directories(/usr/lib64/qt6/include/QtGui/6.10.0/QtGui/private)
-+include_directories(/usr/lib64/qt6/include/QtWaylandClient/6.10.0/QtWaylandClient/private)
-+include_directories(/usr/lib64/qt6/include/QtWaylandGlobal/6.10.0/QtWaylandGlobal/private)
-+include_directories(/usr/lib64/qt6/include/QtWidgets/6.10.0/QtWidgets/private)
-+
- add_subdirectory(cmake)
- add_subdirectory(Telegram)
 diff -up tdesktop-6.1.3-full/Telegram/ThirdParty/dispatch/src/event/event_epoll.c.omv~ tdesktop-6.1.3-full/Telegram/ThirdParty/dispatch/src/event/event_epoll.c
 --- tdesktop-6.1.3-full/Telegram/ThirdParty/dispatch/src/event/event_epoll.c.omv~	2025-09-23 21:50:33.732341536 +0200
 +++ tdesktop-6.1.3-full/Telegram/ThirdParty/dispatch/src/event/event_epoll.c	2025-09-23 21:50:40.868745523 +0200
@@ -35,75 +10,6 @@ diff -up tdesktop-6.1.3-full/Telegram/ThirdParty/dispatch/src/event/event_epoll.
  }
  
  DISPATCH_ALWAYS_INLINE
-diff -up tdesktop-6.1.3-full/Telegram/lib_base/CMakeLists.txt.omv~ tdesktop-6.1.3-full/Telegram/lib_base/CMakeLists.txt
---- tdesktop-6.1.3-full/Telegram/lib_base/CMakeLists.txt.omv~	2025-09-23 21:49:57.612029909 +0200
-+++ tdesktop-6.1.3-full/Telegram/lib_base/CMakeLists.txt	2025-09-23 22:56:07.891669276 +0200
-@@ -263,6 +263,13 @@ PRIVATE
- )
- 
- if (LINUX)
-+    include_directories(/usr/include/giomm-2.68)
-+    include_directories(/usr/lib64/giomm-2.68/include)
-+    include_directories(/usr/include/glibmm-2.68)
-+    include_directories(/usr/lib64/glibmm-2.68/include)
-+    include_directories(/usr/include/sigc++-3.0)
-+    include_directories(/usr/lib64/sigc++-3.0/include)
-+
-     target_link_libraries(lib_base
-     PUBLIC
-         desktop-app::external_kcoreaddons
-diff -up tdesktop-6.1.3-full/Telegram/lib_base/base/platform/linux/base_linux_xdg_activation_token.cpp.omv~ tdesktop-6.1.3-full/Telegram/lib_base/base/platform/linux/base_linux_xdg_activation_token.cpp
---- tdesktop-6.1.3-full/Telegram/lib_base/base/platform/linux/base_linux_xdg_activation_token.cpp.omv~	2025-09-23 21:33:05.391060821 +0200
-+++ tdesktop-6.1.3-full/Telegram/lib_base/base/platform/linux/base_linux_xdg_activation_token.cpp	2025-09-23 22:38:34.248874863 +0200
-@@ -10,7 +10,7 @@
- 
- #include <QtGui/QGuiApplication>
- #include <QtGui/QWindow>
--#include <qpa/qplatformwindow_p.h>
-+#include <QtWaylandClient/private/qwaylandwindow_p.h>
- 
- namespace base::Platform {
- 
-diff -up tdesktop-6.1.3-full/Telegram/lib_base/base/platform/linux/base_url_scheme_linux.cpp.omv~ tdesktop-6.1.3-full/Telegram/lib_base/base/platform/linux/base_url_scheme_linux.cpp
---- tdesktop-6.1.3-full/Telegram/lib_base/base/platform/linux/base_url_scheme_linux.cpp.omv~	2025-09-23 21:39:22.028219076 +0200
-+++ tdesktop-6.1.3-full/Telegram/lib_base/base/platform/linux/base_url_scheme_linux.cpp	2025-09-23 23:06:00.513163489 +0200
-@@ -15,6 +15,7 @@
- #include <ksandbox.h>
- 
- #include <gio/gio.hpp>
-+#include <giomm-2.68/giomm/desktopappinfo.h>
- #include <snapcraft/snapcraft.hpp>
- 
- namespace base::Platform {
-@@ -22,11 +23,12 @@ namespace {
- 
- using namespace gi::repository;
- namespace GObject = gi::repository::GObject;
-+namespace Gio = gi::repository::Gio;
- 
- void SnapDefaultHandler(const QString &protocol) {
- 	Snapcraft::SettingsProxy::new_for_bus(
--		Gio::BusType::SESSION_,
--		Gio::DBusProxyFlags::NONE_,
-+		gi::repository::Gio::BusType::SESSION_,
-+		gi::repository::Gio::DBusProxyFlags::NONE_,
- 		"io.snapcraft.Settings",
- 		"/io/snapcraft/Settings",
- 		[=](GObject::Object, Gio::AsyncResult res) {
-@@ -117,10 +119,10 @@ void RegisterUrlScheme(const UrlSchemeDe
- 
- 	const auto appId = QGuiApplication::desktopFileName().toStdString();
- 	if (!appId.empty()) {
--		Gio::AppInfo appInfo = Gio::DesktopAppInfo::new_(appId + ".desktop");
-+		Glib::RefPtr<::Gio::DesktopAppInfo> appInfo = ::Gio::DesktopAppInfo::create(appId + ".desktop");
- 		if (appInfo) {
--			if (appInfo.get_commandline() == commandlineForCreator + " %u") {
--				appInfo.set_as_default_for_type(handlerType);
-+			if (appInfo->get_commandline() == commandlineForCreator + " %u") {
-+				appInfo->set_as_default_for_type(handlerType);
- 				return;
- 			}
- 		}
 diff -up tdesktop-6.1.3-full/Telegram/lib_ui/CMakeLists.txt.omv~ tdesktop-6.1.3-full/Telegram/lib_ui/CMakeLists.txt
 diff -up tdesktop-6.1.3-full/Telegram/lib_ui/ui/widgets/buttons.h.omv~ tdesktop-6.1.3-full/Telegram/lib_ui/ui/widgets/buttons.h
 --- tdesktop-6.1.3-full/Telegram/lib_ui/ui/widgets/buttons.h.omv~	2025-09-23 23:06:48.632993713 +0200
@@ -117,37 +23,6 @@ diff -up tdesktop-6.1.3-full/Telegram/lib_ui/ui/widgets/buttons.h.omv~ tdesktop-
  		const style::SettingsButton &st = st::defaultSettingsButton);
  	~SettingsButton();
  
-diff -up tdesktop-6.1.3-full/cmake/external/glibmm/CMakeLists.txt.omv~ tdesktop-6.1.3-full/cmake/external/glibmm/CMakeLists.txt
---- tdesktop-6.1.3-full/cmake/external/glibmm/CMakeLists.txt.omv~	2025-09-23 21:43:12.762117372 +0200
-+++ tdesktop-6.1.3-full/cmake/external/glibmm/CMakeLists.txt	2025-09-23 21:48:53.825833575 +0200
-@@ -10,6 +10,9 @@ add_library(desktop-app::external_glibmm
- find_package(PkgConfig REQUIRED)
- pkg_check_modules(DESKTOP_APP_GLIBMM REQUIRED IMPORTED_TARGET glibmm-2.68>=2.77 giomm-2.68>=2.77)
- 
-+include_directories(/usr/include/giomm-2.68)
-+include_directories(/usr/lib64/giomm-2.68/include)
-+
- target_link_libraries(external_glibmm
- INTERFACE
-     PkgConfig::DESKTOP_APP_GLIBMM
-diff -up tdesktop-6.1.3-full/Telegram/SourceFiles/ffmpeg/ffmpeg_utility.cpp.omv~ tdesktop-6.1.3-full/Telegram/SourceFiles/ffmpeg/ffmpeg_utility.cpp
---- tdesktop-6.1.3-full/Telegram/SourceFiles/ffmpeg/ffmpeg_utility.cpp.omv~	2025-09-25 00:35:07.383575419 +0200
-+++ tdesktop-6.1.3-full/Telegram/SourceFiles/ffmpeg/ffmpeg_utility.cpp	2025-09-25 00:37:23.698122113 +0200
-@@ -683,10 +683,10 @@ int DurationByPacket(const Packet &packe
- }
- 
- int ReadRotationFromMetadata(not_null<AVStream*> stream) {
--	const auto displaymatrix = av_stream_get_side_data(
--		stream,
--		AV_PKT_DATA_DISPLAYMATRIX,
--		nullptr);
-+	const auto displaymatrix = av_packet_side_data_get(
-+		stream->codecpar->coded_side_data,
-+		stream->codecpar->nb_coded_side_data,
-+		AV_PKT_DATA_DISPLAYMATRIX);
- 	auto theta = 0;
- 	if (displaymatrix) {
- 		theta = -round(av_display_rotation_get((int32_t*)displaymatrix));
 diff -up tdesktop-6.1.3-full/Telegram/SourceFiles/platform/linux/integration_linux.cpp.omv~ tdesktop-6.1.3-full/Telegram/SourceFiles/platform/linux/integration_linux.cpp
 --- tdesktop-6.1.3-full/Telegram/SourceFiles/platform/linux/integration_linux.cpp.omv~	2025-09-25 01:48:10.855627410 +0200
 +++ tdesktop-6.1.3-full/Telegram/SourceFiles/platform/linux/integration_linux.cpp	2025-09-25 01:48:19.715897742 +0200
@@ -159,14 +34,3 @@ diff -up tdesktop-6.1.3-full/Telegram/SourceFiles/platform/linux/integration_lin
  
  #include <gio/gio.hpp>
  #include <xdpinhibit/xdpinhibit.hpp>
-diff -up tdesktop-6.1.3-full/Telegram/CMakeLists.txt.omv~ tdesktop-6.1.3-full/Telegram/CMakeLists.txt
---- tdesktop-6.1.3-full/Telegram/CMakeLists.txt.omv~	2025-09-26 04:37:38.133563701 +0200
-+++ tdesktop-6.1.3-full/Telegram/CMakeLists.txt	2025-09-26 04:37:47.090172834 +0200
-@@ -93,6 +93,7 @@ PRIVATE
-     desktop-app::external_openal
-     desktop-app::external_xxhash
-     -ldl -ljpeg -lvpx -lopenh264
-+    -lgiomm-2.68
- )
- 
- target_precompile_headers(Telegram PRIVATE $<$<COMPILE_LANGUAGE:CXX,OBJCXX>:${src_loc}/stdafx.h>)

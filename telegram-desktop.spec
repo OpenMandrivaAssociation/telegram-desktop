@@ -39,7 +39,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	6.1.3
+Version:	6.1.4
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -175,14 +175,12 @@ Requires: open-sans-fonts
 %patchlist
 tdesktop-4.11.3-system-libyuv.patch
 tdesktop-4.6.5-workaround-assert-on-startup.patch
-telegram-6.1.3-qt-6.10.patch
 tdesktop-4.16.4-compile.patch
 tdesktop-2.3.2-no-underlinking.patch
 tdesktop-4.11.3-zlib-ng.patch
 tdesktop-3.3.2-system-minizip.patch
 tdesktop-4.15.6-compile.patch
 tdesktop-5.12.2-compile.patch
-#tdesktop-4.16.2-ffmpeg-7.0.patch
 tdesktop-6.1.3-compile.patch
 
 %description
