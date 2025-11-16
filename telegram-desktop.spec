@@ -39,7 +39,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	6.2.3
+Version:	6.3.0
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -180,8 +180,8 @@ tdesktop-2.3.2-no-underlinking.patch
 tdesktop-4.11.3-zlib-ng.patch
 tdesktop-3.3.2-system-minizip.patch
 tdesktop-4.15.6-compile.patch
-tdesktop-5.12.2-compile.patch
 tdesktop-6.1.3-compile.patch
+tdesktop-6.3.0-compile.patch
 
 %description
 Telegram is a messaging app with a focus on speed and security, it’s super
