@@ -1,6 +1,17 @@
-diff -up tdesktop-6.1.3-full/Telegram/ThirdParty/dispatch/src/event/event_epoll.c.omv~ tdesktop-6.1.3-full/Telegram/ThirdParty/dispatch/src/event/event_epoll.c
---- tdesktop-6.1.3-full/Telegram/ThirdParty/dispatch/src/event/event_epoll.c.omv~	2025-09-23 21:50:33.732341536 +0200
-+++ tdesktop-6.1.3-full/Telegram/ThirdParty/dispatch/src/event/event_epoll.c	2025-09-23 21:50:40.868745523 +0200
+diff -up tdesktop-6.5.0-full/Telegram/SourceFiles/platform/linux/integration_linux.cpp.8~ tdesktop-6.5.0-full/Telegram/SourceFiles/platform/linux/integration_linux.cpp
+--- tdesktop-6.5.0-full/Telegram/SourceFiles/platform/linux/integration_linux.cpp.8~	2026-02-08 06:04:18.000000000 +0100
++++ tdesktop-6.5.0-full/Telegram/SourceFiles/platform/linux/integration_linux.cpp	2026-02-08 06:07:54.112177006 +0100
+@@ -19,6 +19,7 @@ https://github.com/telegramdesktop/tdesk
+ #include "base/qt_connection.h"
+ 
+ #include <QtCore/QAbstractEventDispatcher>
++#include <QElapsedTimer>
+ 
+ #include <gio/gio.hpp>
+ #include <xdpinhibit/xdpinhibit.hpp>
+diff -up tdesktop-6.5.0-full/Telegram/ThirdParty/dispatch/src/event/event_epoll.c.8~ tdesktop-6.5.0-full/Telegram/ThirdParty/dispatch/src/event/event_epoll.c
+--- tdesktop-6.5.0-full/Telegram/ThirdParty/dispatch/src/event/event_epoll.c.8~	2026-02-08 06:04:54.000000000 +0100
++++ tdesktop-6.5.0-full/Telegram/ThirdParty/dispatch/src/event/event_epoll.c	2026-02-08 06:07:23.409670765 +0100
 @@ -89,7 +89,7 @@ DISPATCH_ALWAYS_INLINE
  static inline uint32_t
  _dispatch_muxnote_armed_events(dispatch_muxnote_t dmn)
@@ -10,14 +21,3 @@ diff -up tdesktop-6.1.3-full/Telegram/ThirdParty/dispatch/src/event/event_epoll.
  }
  
  DISPATCH_ALWAYS_INLINE
-diff -up tdesktop-6.1.3-full/Telegram/SourceFiles/platform/linux/integration_linux.cpp.omv~ tdesktop-6.1.3-full/Telegram/SourceFiles/platform/linux/integration_linux.cpp
---- tdesktop-6.1.3-full/Telegram/SourceFiles/platform/linux/integration_linux.cpp.omv~	2025-09-25 01:48:10.855627410 +0200
-+++ tdesktop-6.1.3-full/Telegram/SourceFiles/platform/linux/integration_linux.cpp	2025-09-25 01:48:19.715897742 +0200
-@@ -18,6 +18,7 @@ https://github.com/telegramdesktop/tdesk
- #include "base/random.h"
- 
- #include <QtCore/QAbstractEventDispatcher>
-+#include <QElapsedTimer>
- 
- #include <gio/gio.hpp>
- #include <xdpinhibit/xdpinhibit.hpp>
