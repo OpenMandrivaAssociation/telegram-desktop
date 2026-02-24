@@ -184,17 +184,11 @@ tdesktop-6.1.3-compile.patch
 tdesktop-6.3.0-compile.patch
 
 %description
-Telegram is a messaging app with a focus on speed and security, it’s super
-fast, simple and free. You can use Telegram on all your devices at the same
-time — your messages sync seamlessly across any number of your phones,
-tablets or computers.
-
-With Telegram, you can send messages, photos, videos and files of any type
-(doc, zip, mp3, etc), as well as create groups for up to 50,000 people or
-channels for broadcasting to unlimited audiences. You can write to your
-phone contacts and find people by their usernames. As a result, Telegram is
-like SMS and email combined — and can take care of all your personal or
-business messaging needs.
+Telegram is a non-profit cloud-based instant messaging service.
+Users can send messages and exchange photos, videos, stickers, audio and files of any type.
+Its client-side code is open-source software but the source code for recent versions is not
+always immediately published, whereas its server-side code is closed-source and proprietary.
+The service also provides APIs to independent developers.
 
 %prep
 export LC_ALL=en_US.utf-8
