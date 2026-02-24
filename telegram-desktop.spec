@@ -40,7 +40,7 @@ Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
 Version:	6.5.1
-Release:	1
+Release:	2
 
 # Application and 3rd-party modules licensing:
 # * Telegram Desktop - GPLv3+ with OpenSSL exception -- main tarball;
@@ -142,6 +142,7 @@ BuildRequires: cmake(tg_owt)
 BuildRequires: tdlib-static
 BuildRequires: wayland-devel
 BuildRequires: qt6-qtwayland
+BuildRequires: mold
 BuildRequires: ninja
 %ifarch %{x86_64} %{ix86}
 BuildRequires: yasm
@@ -243,13 +244,10 @@ export PATH=%{_libdir}/qt6/bin:$PATH
 %build
 touch build/changelog.txt
 
-PROCESSES="$(expr $(echo $(getconf _NPROCESSORS_ONLN)) - 2)"
-# Linking Telegram with LTO enabled is VERY RAM intensive
-# and breaks boxes that have loads of CPU cores but not
-# terabytes of RAM...
-#[ "$PROCESSES" -gt 4 ] && PROCESSES=4
+%global _lto_cflags %{_lto_cflags} -ffat-lto-objects
+CFLAGS="%{optflags} -fPIC -g1 -Wl,-v -fuse-ld=mold"
 
-%ninja_build -C build -j${PROCESSES}
+%ninja_build -C build
 
 %install
 %ninja_install -C build
