@@ -1,11 +1,11 @@
-diff -up tdesktop-6.7.0-full/Telegram/CMakeLists.txt.4~ tdesktop-6.7.0-full/Telegram/CMakeLists.txt
---- tdesktop-6.7.0-full/Telegram/CMakeLists.txt.4~	2026-04-01 08:24:42.000000000 +0200
-+++ tdesktop-6.7.0-full/Telegram/CMakeLists.txt	2026-04-01 19:01:30.061456816 +0200
+diff -up tdesktop-6.7.5-full/Telegram/CMakeLists.txt.4~ tdesktop-6.7.5-full/Telegram/CMakeLists.txt
+--- tdesktop-6.7.5-full/Telegram/CMakeLists.txt.4~	2026-04-07 18:19:25.000000000 +0200
++++ tdesktop-6.7.5-full/Telegram/CMakeLists.txt	2026-04-08 13:04:36.170591780 +0200
 @@ -95,6 +95,7 @@ PRIVATE
      desktop-app::external_openssl
      desktop-app::external_openal
      desktop-app::external_xxhash
-+    -ldl -ljpeg -lvpx -lopenh264
++    -ljpeg -lvpx -lopenh264
  )
  
- telegram_add_apple_swift_runtime(Telegram)
+ if (NOT DESKTOP_APP_DISABLE_SWIFT6)
