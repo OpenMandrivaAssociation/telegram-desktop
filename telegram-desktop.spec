@@ -1,6 +1,5 @@
 # Build conditionals (with - OFF, without - ON)...
 %bcond_with rlottie
-%bcond_with gtk3
 # FIXME as of 2.8.1, telegram-desktop crashes on startup with
 # an illegal instruction while calling global constructors
 # if built with clang.
@@ -24,9 +23,9 @@
 
 # Applying workaround to RHBZ#1559007...
 %if %{with clang}
-%global optflags %(echo %{optflags} | sed -e 's/-mcet//g' -e 's/-fcf-protection//g' -e 's/-fstack-clash-protection//g' -e 's/$/ -Qunused-arguments -Wno-unknown-warning-option/') -I%{_includedir}/minizip -Wno-missing-template-arg-list-after-template-kw
+%global optflags %(echo %{optflags} | sed -e 's/-mcet//g' -e 's/-fcf-protection//g' -e 's/-fstack-clash-protection//g' -e 's/$/ -Qunused-arguments -Wno-unknown-warning-option/') -I%{_includedir}/minizip $(pkg-config --cflags gio-2.0) -Wno-missing-template-arg-list-after-template-kw
 %else
-%global optflags %{optflags} -fno-lto -I%{_includedir}/minizip -Wno-missing-template-arg-list-after-template-kw
+%global optflags %{optflags} -fno-lto -I%{_includedir}/minizip -Wno-missing-template-arg-list-after-template-kw $(pkg-config --cflags gio-2.0)
 %endif
 
 %global build_ldflags %(echo %{build_ldflags} -Wl,-z,notext)
@@ -39,8 +38,8 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	6.8.2
-Release:	3
+Version:	6.9.3
+Release:	1
 
 # Application and 3rd-party modules licensing:
 # * Telegram Desktop - GPLv3+ with OpenSSL exception -- main tarball;
@@ -80,7 +79,6 @@ BuildRequires: mapbox-variant-devel
 BuildRequires: pkgconfig(libavcodec)
 BuildRequires: pkgconfig(libavformat)
 BuildRequires: pkgconfig(xkbcommon)
-BuildRequires: pkgconfig(glibmm-2.68)
 # For __printflike
 BuildRequires: pkgconfig(libbsd)
 BuildRequires: cmake(ECM)
@@ -111,7 +109,6 @@ BuildRequires: pkgconfig(openh264)
 BuildRequires: pkgconfig(vpx)
 BuildRequires: pkgconfig(rnnoise)
 BuildRequires: pkgconfig(libzip)
-BuildRequires: pkgconfig(gobject-introspection-1.0)
 # FIXME is this really necessary? It's there because
 # cppgir forces -lstdc++fs, but that may not actually
 # be needed...
@@ -152,13 +149,6 @@ BuildRequires: yasm
 #BuildRequires: cmake(Qt5Svg)
 #BuildRequires: cmake(KF5CoreAddons)
 
-%if %{with gtk3}
-BuildRequires: pkgconfig(appindicator3-0.1)
-BuildRequires: pkgconfig(gtk+-3.0)
-BuildRequires: pkgconfig(dee-1.0)
-Requires: %{_lib}gtk3_0
-%endif
-
 %if %{with spellcheck}
 BuildRequires: enchant2-devel
 BuildRequires: glib2.0-devel
@@ -180,8 +170,8 @@ tdesktop-2.3.2-no-underlinking.patch
 tdesktop-4.11.3-zlib-ng.patch
 tdesktop-3.3.2-system-minizip.patch
 tdesktop-4.15.6-compile.patch
-tdesktop-6.1.3-compile.patch
 tdesktop-6.3.0-compile.patch
+tdesktop-6.9.3-qtify-integration.patch
 
 %description
 Telegram is a non-profit cloud-based instant messaging service.
@@ -194,6 +184,7 @@ The service also provides APIs to independent developers.
 export LC_ALL=en_US.utf-8
 # Unpacking Telegram Desktop source archive...
 %autosetup -p1 -n %{appname}-%{version}%{tarsuffix}
+
 # Unbundling libraries...
 rm -rf Telegram/ThirdParty/{Catch,GSL,QR,SPMediaKeyTap,expected,libdbusmenu-qt,libtgvoip,lz4,variant,xxHash,mallocng,minizip,zlib}
 
@@ -205,10 +196,6 @@ export PATH=%{_libdir}/qt6/bin:$PATH
 	-DDESKTOP_APP_QT6:BOOL=ON \
 	-DQT_VERSION_MAJOR=6 \
 	-DDESKTOP_APP_DISABLE_JEMALLOC:BOOL=ON \
-%if %{without gtk3}
-	-DDESKTOP_APP_DISABLE_GTK_INTEGRATION:BOOL=ON \
-	-DDESKTOP_APP_DISABLE_WEBKITGTK:BOOL=ON \
-%endif
 %if %{without spellcheck}
 	-DDESKTOP_APP_DISABLE_SPELLCHECK:BOOL=ON \
 %endif
