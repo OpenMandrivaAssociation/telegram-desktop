@@ -135,6 +135,7 @@ BuildRequires: cmake(Qt6QuickWidgets)
 BuildRequires: cmake(Qt6Widgets)
 BuildRequires: cmake(Qt6WaylandClient)
 BuildRequires: cmake(Qt6WaylandCompositor)
+BuildRequires: cmake(Qt6WebEngineWidgets)
 BuildRequires: cmake(KF6CoreAddons)
 BuildRequires: cmake(tg_owt)
 BuildRequires: tdlib-static
