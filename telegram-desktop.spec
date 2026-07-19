@@ -38,7 +38,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	6.9.3
+Version:	7.0.3
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -136,6 +136,7 @@ BuildRequires: cmake(Qt6Widgets)
 BuildRequires: cmake(Qt6WaylandClient)
 BuildRequires: cmake(Qt6WaylandCompositor)
 BuildRequires: cmake(Qt6WebEngineWidgets)
+BuildRequires: cmake(Qt6Positioning)
 BuildRequires: cmake(KF6CoreAddons)
 BuildRequires: cmake(tg_owt)
 BuildRequires: tdlib-static
@@ -173,7 +174,7 @@ tdesktop-4.11.3-zlib-ng.patch
 tdesktop-3.3.2-system-minizip.patch
 tdesktop-4.15.6-compile.patch
 tdesktop-6.3.0-compile.patch
-tdesktop-6.9.3-qtify-integration.patch
+tdesktop-7.0.3-qtify-integration.patch
 
 %description
 Telegram is a non-profit cloud-based instant messaging service.
