@@ -1,15 +1,6 @@
-From: Bernhard Rosenkränzer <bero@lindev.ch>
-Date: Sat, 19 Jul 2026 18:45:00 +0200
-Subject: [PATCH] Linux: replace glibmm/giomm + GTKWebKit with native Qt (QtWebEngine + QtDBus)
-
-Rebased for tdesktop 7.0.3 (applies after the other package patches).
-Targeted at Plasma and LXQt; no GNOME/gtk/gi stack.
-
-Eliminates the glibmm/GTKWebKit mismatch for this Qt app.
-
-diff --git a/CMakeLists.txt b/CMakeLists.txt
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/CMakeLists.txt	2026-07-17 22:00:00.000000000 +0200
++++ b/CMakeLists.txt	2026-07-21 01:32:26.087296923 +0200
 @@ -58,7 +58,6 @@
  include(cmake/external/qt/package.cmake)
  
@@ -18,9 +9,9 @@ diff --git a/CMakeLists.txt b/CMakeLists.txt
      variant
  )
  
-diff --git a/Telegram/CMakeLists.txt b/Telegram/CMakeLists.txt
---- a/Telegram/CMakeLists.txt
-+++ b/Telegram/CMakeLists.txt
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/CMakeLists.txt	2026-07-21 01:33:14.032907793 +0200
++++ b/Telegram/CMakeLists.txt	2026-07-21 01:32:26.087437275 +0200
 @@ -63,6 +63,7 @@
      tdesktop::td_scheme
      tdesktop::td_tde2e
@@ -41,9 +32,9 @@ diff --git a/Telegram/CMakeLists.txt b/Telegram/CMakeLists.txt
  endif()
  
  if (build_macstore)
-diff --git a/Telegram/SourceFiles/core/update_checker.cpp b/Telegram/SourceFiles/core/update_checker.cpp
---- a/Telegram/SourceFiles/core/update_checker.cpp
-+++ b/Telegram/SourceFiles/core/update_checker.cpp
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/SourceFiles/core/update_checker.cpp	2026-07-17 22:00:00.000000000 +0200
++++ b/Telegram/SourceFiles/core/update_checker.cpp	2026-07-21 01:32:26.087646128 +0200
 @@ -36,11 +36,15 @@
  
  #include <ksandbox.h>
@@ -134,9 +125,9 @@ diff --git a/Telegram/SourceFiles/core/update_checker.cpp b/Telegram/SourceFiles
  
  } // namespace
  
-diff --git a/Telegram/SourceFiles/media/system_media_controls_manager.cpp b/Telegram/SourceFiles/media/system_media_controls_manager.cpp
---- a/Telegram/SourceFiles/media/system_media_controls_manager.cpp
-+++ b/Telegram/SourceFiles/media/system_media_controls_manager.cpp
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/SourceFiles/media/system_media_controls_manager.cpp	2026-07-17 22:00:00.000000000 +0200
++++ b/Telegram/SourceFiles/media/system_media_controls_manager.cpp	2026-07-21 01:32:26.087902211 +0200
 @@ -9,6 +9,7 @@
  
  #include "base/platform/base_platform_system_media_controls.h"
@@ -727,9 +718,9 @@ diff --git a/Telegram/SourceFiles/media/system_media_controls_manager.cpp b/Tele
 +} // namespace base::Platform
 +
 +#include "system_media_controls_manager.moc"
-diff --git a/Telegram/SourceFiles/platform/linux/current_geo_location_linux.cpp b/Telegram/SourceFiles/platform/linux/current_geo_location_linux.cpp
---- a/Telegram/SourceFiles/platform/linux/current_geo_location_linux.cpp
-+++ b/Telegram/SourceFiles/platform/linux/current_geo_location_linux.cpp
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/SourceFiles/platform/linux/current_geo_location_linux.cpp	2026-07-17 22:00:00.000000000 +0200
++++ b/Telegram/SourceFiles/platform/linux/current_geo_location_linux.cpp	2026-07-21 01:32:26.087980392 +0200
 @@ -8,98 +8,49 @@
  #include "platform/linux/current_geo_location_linux.h"
  
@@ -861,9 +852,9 @@ diff --git a/Telegram/SourceFiles/platform/linux/current_geo_location_linux.cpp 
  }
  
  } // namespace Platform
-diff --git a/Telegram/SourceFiles/platform/linux/file_utilities_linux.cpp b/Telegram/SourceFiles/platform/linux/file_utilities_linux.cpp
---- a/Telegram/SourceFiles/platform/linux/file_utilities_linux.cpp
-+++ b/Telegram/SourceFiles/platform/linux/file_utilities_linux.cpp
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/SourceFiles/platform/linux/file_utilities_linux.cpp	2026-07-17 22:00:00.000000000 +0200
++++ b/Telegram/SourceFiles/platform/linux/file_utilities_linux.cpp	2026-07-21 01:32:26.088021282 +0200
 @@ -7,119 +7,59 @@
  */
  #include "platform/linux/file_utilities_linux.h"
@@ -1025,10 +1016,10 @@ diff --git a/Telegram/SourceFiles/platform/linux/file_utilities_linux.cpp b/Tele
  }
  
  } // namespace File
-diff --git a/Telegram/SourceFiles/platform/linux/integration_linux.cpp b/Telegram/SourceFiles/platform/linux/integration_linux.cpp
---- a/Telegram/SourceFiles/platform/linux/integration_linux.cpp
-+++ b/Telegram/SourceFiles/platform/linux/integration_linux.cpp
-@@ -12,109 +12,22 @@
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/SourceFiles/platform/linux/integration_linux.cpp	2026-07-17 22:00:00.000000000 +0200
++++ b/Telegram/SourceFiles/platform/linux/integration_linux.cpp	2026-07-21 01:32:43.680941947 +0200
+@@ -12,16 +12,16 @@
  #include "base/platform/linux/base_linux_xdp_utilities.h"
  #include "core/sandbox.h"
  #include "core/application.h"
@@ -1039,29 +1030,46 @@ diff --git a/Telegram/SourceFiles/platform/linux/integration_linux.cpp b/Telegra
  #include "base/qt_connection.h"
  
  #include <QtCore/QAbstractEventDispatcher>
-+#include <QtCore/QCoreApplication>
-+#include <QtGui/QGuiApplication>
-+#include <QtGui/QIcon>
-+#include <QtDBus/QDBusConnection>
- 
+-
 -#include <gio/gio.hpp>
 -#include <xdpinhibit/xdpinhibit.hpp>
-+#include <optional>
++#include <QtCore/QCoreApplication>
++#include <QtGui/QGuiApplication>
++#include <QtGui/QFileOpenEvent>
++#include <QtGui/QIcon>
++#include <QtDBus/QDBusConnection>
++#include <QtDBus/QDBusAbstractAdaptor>
  
  #ifdef __GLIBC__
  #include <malloc.h>
- #endif // __GLIBC__
- 
+@@ -30,91 +30,101 @@
  namespace Platform {
--namespace {
--
+ namespace {
+ 
 -using namespace gi::repository;
 -namespace GObject = gi::repository::GObject;
--
++// FreeDesktop Application interface for DBusActivatable sessions
++// (Plasma / LXQt). Path is / + app-id with '.' -> '/'.
++// https://specifications.freedesktop.org/desktop-entry-spec/
++class ApplicationAdaptor final : public QDBusAbstractAdaptor {
++	Q_OBJECT
++	Q_CLASSINFO("D-Bus Interface", "org.freedesktop.Application")
+ 
 -class Application : public Gio::impl::ApplicationImpl {
--public:
+ public:
 -	Application();
--
++	explicit ApplicationAdaptor(QObject *parent)
++	: QDBusAbstractAdaptor(parent) {
++	}
++
++public Q_SLOTS:
++	void Activate(const QVariantMap &platformData) {
++		applyPlatformData(platformData);
++		Core::Sandbox::Instance().customEnterFromEventLoop([] {
++			Core::App().activate();
++		});
++	}
+ 
 -	void before_emit_(GLib::Variant platformData) noexcept override {
 -		if (Platform::IsWayland()) {
 -			static const auto keys = {
@@ -1075,16 +1083,34 @@ diff --git a/Telegram/SourceFiles/platform/linux/integration_linux.cpp b/Telegra
 -						token.get_string(nullptr).c_str());
 -					break;
 -				}
--			}
++	void Open(const QStringList &uris, const QVariantMap &platformData) {
++		applyPlatformData(platformData);
++		Core::Sandbox::Instance().customEnterFromEventLoop([=] {
++			for (const auto &uri : uris) {
++				QFileOpenEvent event(QUrl(uri));
++				QCoreApplication::sendEvent(qApp, &event);
+ 			}
 -		}
--	}
--
++		});
+ 	}
+ 
 -	void activate_() noexcept override {
--		Core::Sandbox::Instance().customEnterFromEventLoop([] {
--			Core::App().activate();
--		});
--	}
--
++	void ActivateAction(
++			const QString &actionName,
++			const QVariantList &,
++			const QVariantMap &platformData) {
++		applyPlatformData(platformData);
++		if (actionKeyIsQuit(actionName)) {
++			Core::Sandbox::Instance().customEnterFromEventLoop([] {
++				Core::Quit();
++			});
++			return;
++		}
+ 		Core::Sandbox::Instance().customEnterFromEventLoop([] {
+ 			Core::App().activate();
+ 		});
+ 	}
+ 
 -	void open_(
 -			gi::Collection<gi::DSpan, ::GFile*, gi::transfer_none_t> files,
 -			const gi::cstring_v hint) noexcept override {
@@ -1092,8 +1118,11 @@ diff --git a/Telegram/SourceFiles/platform/linux/integration_linux.cpp b/Telegra
 -			QFileOpenEvent e(QUrl(QString::fromStdString(file.get_uri())));
 -			QGuiApplication::sendEvent(qApp, &e);
 -		}
--	}
--
++private:
++	[[nodiscard]] static bool actionKeyIsQuit(const QString &actionName) {
++		return actionName == u"quit"_q || actionName == u"Quit"_q;
+ 	}
+ 
 -	void add_platform_data_(
 -			GLib::VariantBuilder_Ref builder) noexcept override {
 -		if (Platform::IsWayland()) {
@@ -1105,11 +1134,21 @@ diff --git a/Telegram/SourceFiles/platform/linux/integration_linux.cpp b/Telegra
 -						GLib::Variant::new_variant(
 -							GLib::Variant::new_string(token.toStdString()))));
 -				qunsetenv("XDG_ACTIVATION_TOKEN");
--			}
--		}
--	}
--};
--
++	void applyPlatformData(const QVariantMap &platformData) {
++		// Wayland activation token from the launcher / portal.
++		for (const auto key : {
++			u"activation-token"_q,
++			u"desktop-startup-id"_q,
++		}) {
++			const auto value = platformData.value(key).toString();
++			if (!value.isEmpty()) {
++				qputenv("XDG_ACTIVATION_TOKEN", value.toUtf8());
++				return;
+ 			}
+ 		}
+ 	}
+ };
+ 
 -Application::Application()
 -: Gio::impl::ApplicationImpl(this) {
 -	const auto appId = QGuiApplication::desktopFileName().toStdString();
@@ -1130,20 +1169,47 @@ diff --git a/Telegram/SourceFiles/platform/linux/integration_linux.cpp b/Telegra
 -	});
 -	actionMap.add_action(quitAction);
 -}
--
++class ApplicationObject final : public QObject {
++public:
++	ApplicationObject() {
++		new ApplicationAdaptor(this);
++		auto bus = QDBusConnection::sessionBus();
++		const auto id = QGuiApplication::desktopFileName();
++		if (id.isEmpty()) {
++			return;
++		}
+ 
 -gi::ref_ptr<Application> MakeApplication() {
 -	const auto result = gi::make_ref<Application>();
 -	if (const auto registered = result->register_(); !registered) {
 -		LOG(("App Error: Failed to register: %1").arg(
 -			registered.error().message_().c_str()));
 -		return nullptr;
--	}
++		// FreeDesktop: org.telegram.desktop -> /org/telegram/desktop
++		auto path = '/' + id;
++		path.replace('.', '/');
++
++		// Own the well-known name when possible (non-sandboxed package).
++		if (!bus.registerService(id)) {
++			LOG(("App Info: D-Bus name %1 already taken "
++				"(another instance?). Still exporting %2.").arg(id, path));
++		}
++		if (!bus.registerObject(
++				path,
++				this,
++				QDBusConnection::ExportAdaptors)) {
++			LOG(("App Error: Failed to export D-Bus object %1").arg(path));
++		}
+ 	}
 -	return result;
 -}
++};
++
++} // namespace
  
  class LinuxIntegration final : public Integration, public base::has_weak_ptr {
  public:
-@@ -123,43 +36,23 @@
+@@ -123,44 +133,22 @@
  	void init() override;
  
  private:
@@ -1158,6 +1224,7 @@ diff --git a/Telegram/SourceFiles/platform/linux/integration_linux.cpp b/Telegra
 -#if QT_VERSION < QT_VERSION_CHECK(6, 5, 0)
 -	base::Platform::XDP::SettingWatcher _darkModeWatcher;
 -#endif // Qt < 6.5.0
++	std::unique_ptr<ApplicationObject> _application;
  #ifdef __GLIBC__
  	base::qt_connection _memoryTrim;
  	crl::time _memoryTrimmed = 0;
@@ -1185,17 +1252,16 @@ diff --git a/Telegram/SourceFiles/platform/linux/integration_linux.cpp b/Telegra
 -		"QEventDispatcherGlib")) {
 -		g_warning("Qt is running without GLib event loop integration, "
 -			"expect various functionality to not to work.");
-+	// Own well-known name when possible so Plasma can DBus-activate us via
-+	// the desktop file (DBusActivatable=true). Method handlers are optional;
-+	// Activate/Open are also delivered as command-line / QFileOpenEvent by
-+	// the session for non-activatable launches.
-+	const auto id = QGuiApplication::desktopFileName();
-+	if (!id.isEmpty()) {
-+		QDBusConnection::sessionBus().registerService(id);
- 	}
+-	}
++	// Platform::start() sets desktopFileName before CreateIntegration().
++	// Export org.freedesktop.Application so DBusActivatable=true works and
++	// notification / panel activation does not hit
++	// "No such object path /org/telegram/desktop".
++	_application = std::make_unique<ApplicationObject>();
  
  #ifdef __GLIBC__
-@@ -176,77 +69,25 @@
+ 	_memoryTrim = QObject::connect(
+@@ -176,79 +164,33 @@
  }
  
  void LinuxIntegration::init() {
@@ -1216,10 +1282,8 @@ diff --git a/Telegram/SourceFiles/platform/linux/integration_linux.cpp b/Telegra
 -void LinuxIntegration::initInhibit() {
 -	if (!_inhibitProxy) {
 -		return;
-+	if (QGuiApplication::desktopFileName().isEmpty()) {
-+		QGuiApplication::setDesktopFileName(u"org.telegram.desktop"_q);
- 	}
- 
+-	}
+-
 -	std::string uniqueName = _inhibitProxy.get_connection().get_unique_name();
 -	uniqueName.erase(0, 1);
 -	uniqueName.replace(uniqueName.find('.'), 1, 1, '_');
@@ -1244,18 +1308,14 @@ diff --git a/Telegram/SourceFiles/platform/linux/integration_linux.cpp b/Telegra
 -			GLib::Variant state) {
 -		if (sessionHandle != mySessionHandle) {
 -			return;
-+#if QT_VERSION < QT_VERSION_CHECK(6, 5, 0)
-+	// One-shot read; live watch needs moc. Qt 6.5+ follows system dark mode.
-+	const auto scheme = base::Platform::XDP::ReadSetting(
-+		"org.freedesktop.appearance",
-+		"color-scheme");
-+	if (scheme) {
-+		const auto v = scheme->toUInt();
-+		if (v == 1 || v == 2) {
-+			Core::App().settings().setSystemDarkMode(
-+				std::optional<bool>(v == 1));
++	if (QGuiApplication::desktopFileName().isEmpty()) {
++		QGuiApplication::setDesktopFileName(u"org.telegram.desktop"_q);
++		// Late path: desktop file name was empty at construction.
++		if (!_application) {
++			_application = std::make_unique<ApplicationObject>();
  		}
--
++	}
+ 
 -		Core::App().setScreenIsLocked(
 -			GLib::VariantDict::new_(
 -				state
@@ -1278,6 +1338,17 @@ diff --git a/Telegram/SourceFiles/platform/linux/integration_linux.cpp b/Telegra
 -					GLib::Variant::new_string(sessionHandleToken))),
 -		}),
 -		nullptr);
++#if QT_VERSION < QT_VERSION_CHECK(6, 5, 0)
++	// One-shot read; live watch needs moc. Qt 6.5+ follows system dark mode.
++	const auto scheme = base::Platform::XDP::ReadSetting(
++		"org.freedesktop.appearance",
++		"color-scheme");
++	if (scheme) {
++		const auto v = scheme->toUInt();
++		if (v == 1 || v == 2) {
++			Core::App().settings().setSystemDarkMode(
++				std::optional<bool>(v == 1));
++		}
 +	}
 +#endif // Qt < 6.5.0
  }
@@ -1287,9 +1358,13 @@ diff --git a/Telegram/SourceFiles/platform/linux/integration_linux.cpp b/Telegra
  std::unique_ptr<Integration> CreateIntegration() {
  	return std::make_unique<LinuxIntegration>();
  }
-diff --git a/Telegram/SourceFiles/platform/linux/launcher_linux.cpp b/Telegram/SourceFiles/platform/linux/launcher_linux.cpp
---- a/Telegram/SourceFiles/platform/linux/launcher_linux.cpp
-+++ b/Telegram/SourceFiles/platform/linux/launcher_linux.cpp
+ 
+ } // namespace Platform
++
++#include "integration_linux.moc"
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/SourceFiles/platform/linux/launcher_linux.cpp	2026-07-17 22:00:00.000000000 +0200
++++ b/Telegram/SourceFiles/platform/linux/launcher_linux.cpp	2026-07-21 01:32:26.088126434 +0200
 @@ -9,18 +9,17 @@
  
  #include "core/crash_reports.h"
@@ -1469,9 +1544,9 @@ diff --git a/Telegram/SourceFiles/platform/linux/launcher_linux.cpp b/Telegram/S
  		return false;
  	}
  	return launchUpdater(UpdaterLaunch::JustRelaunch);
-diff --git a/Telegram/SourceFiles/platform/linux/main_window_linux.cpp b/Telegram/SourceFiles/platform/linux/main_window_linux.cpp
---- a/Telegram/SourceFiles/platform/linux/main_window_linux.cpp
-+++ b/Telegram/SourceFiles/platform/linux/main_window_linux.cpp
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/SourceFiles/platform/linux/main_window_linux.cpp	2026-07-17 22:00:00.000000000 +0200
++++ b/Telegram/SourceFiles/platform/linux/main_window_linux.cpp	2026-07-21 01:32:26.088161924 +0200
 @@ -39,7 +39,8 @@
  #include <QtWidgets/QLineEdit>
  #include <QtWidgets/QTextEdit>
@@ -1548,15 +1623,15 @@ diff --git a/Telegram/SourceFiles/platform/linux/main_window_linux.cpp b/Telegra
  #endif // Qt < 6.6.0
  }
  
-diff --git a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp b/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp
---- a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp
-+++ b/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp	2026-07-21 01:33:14.034068248 +0200
++++ b/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp	2026-07-21 01:32:52.768918800 +0200
 @@ -1,4 +1,3 @@
 -
  /*
  This file is part of Telegram Desktop,
  the official desktop application for the Telegram messaging service.
-@@ -29,134 +28,52 @@
+@@ -29,134 +28,54 @@
  #include <QtCore/QBuffer>
  #include <QtCore/QVersionNumber>
  #include <QtGui/QGuiApplication>
@@ -1710,6 +1785,8 @@ diff --git a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp
  
 -class Manager::Private : public base::has_weak_ptr {
 +class Manager::Private : public QObject {
++	Q_OBJECT
++
  public:
  	explicit Private(not_null<Manager*> manager);
 -
@@ -1718,7 +1795,7 @@ diff --git a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp
  
  	void showNotification(
  		NotificationInfo &&info,
-@@ -167,365 +84,156 @@
+@@ -167,365 +86,183 @@
  	void clearFromSublist(not_null<Data::SavedSublist*> sublist);
  	void clearFromHistory(not_null<History*> history);
  	void clearFromSession(not_null<Main::Session*> session);
@@ -1997,8 +2074,7 @@ diff --git a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp
 -					dictToNotificationId(GLib::VariantDict::new_(parameter)));
 -			});
 -		});
-+Manager::Private::~Private() = default;
- 
+-
 -		auto markAsRead = Gio::SimpleAction::new_(
 -			"notification-mark-as-read",
 -			notificationIdVariantType);
@@ -2007,7 +2083,8 @@ diff --git a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp
 -		_lifetime.add([=]() mutable {
 -			actionMap.remove_action("notification-mark-as-read");
 -		});
--
++Manager::Private::~Private() = default;
+ 
 -		markAsRead.signal_activate().connect([=](
 -				Gio::SimpleAction,
 -				GLib::Variant parameter) {
@@ -2020,14 +2097,7 @@ diff --git a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp
 +void Manager::Private::ensureInterface() {
 +	if (_interface && _interface->isValid()) {
 +		return;
- 	}
--}
--
--void Manager::Private::init(XdgNotifications::NotificationsProxy proxy) {
--	_proxy = proxy;
--	_interface = proxy;
--
--	if (!_interface) {
++	}
 +	_interface = std::make_unique<QDBusInterface>(
 +		QString::fromLatin1(kService),
 +		QString::fromLatin1(kObjectPath),
@@ -2037,22 +2107,54 @@ diff --git a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp
 +
 +void Manager::Private::connectSignals() {
 +	auto bus = QDBusConnection::sessionBus();
-+	bus.connect(
-+		QString::fromLatin1(kService),
-+		QString::fromLatin1(kObjectPath),
-+		QString::fromLatin1(kInterface),
++	const auto service = QString::fromLatin1(kService);
++	const auto path = QString::fromLatin1(kObjectPath);
++	const auto iface = QString::fromLatin1(kInterface);
++
++	// Drop previous match rules before re-subscribing (service restart).
++	bus.disconnect(
++		service,
++		path,
++		iface,
 +		u"ActionInvoked"_q,
 +		this,
 +		SLOT(onActionInvoked(uint,QString)));
-+	bus.connect(
-+		QString::fromLatin1(kService),
-+		QString::fromLatin1(kObjectPath),
-+		QString::fromLatin1(kInterface),
++	bus.disconnect(
++		service,
++		path,
++		iface,
 +		u"NotificationClosed"_q,
 +		this,
 +		SLOT(onNotificationClosed(uint,uint)));
-+}
 +
++	// Requires Q_OBJECT on this class so the meta-object has the slots.
++	if (!bus.connect(
++			service,
++			path,
++			iface,
++			u"ActionInvoked"_q,
++			this,
++			SLOT(onActionInvoked(uint,QString)))) {
++		LOG(("Native Notification Error: failed to connect ActionInvoked: %1"
++			).arg(bus.lastError().message()));
++	}
++	if (!bus.connect(
++			service,
++			path,
++			iface,
++			u"NotificationClosed"_q,
++			this,
++			SLOT(onNotificationClosed(uint,uint)))) {
++		LOG(("Native Notification Error: failed to connect NotificationClosed: %1"
++			).arg(bus.lastError().message()));
+ 	}
+ }
+ 
+-void Manager::Private::init(XdgNotifications::NotificationsProxy proxy) {
+-	_proxy = proxy;
+-	_interface = proxy;
+-
+-	if (!_interface) {
 +void Manager::Private::refreshServerInfo() {
 +	ensureInterface();
 +	if (!_interface || !_interface->isValid()) {
@@ -2204,7 +2306,7 @@ diff --git a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp
  	const auto peer = info.peer;
  	const auto options = info.options;
  	const auto key = ContextId{
-@@ -534,350 +242,224 @@
+@@ -534,350 +271,224 @@
  		.topicRootId = info.topicRootId,
  		.monoforumPeerId = info.monoforumPeerId,
  	};
@@ -2726,9 +2828,15 @@ diff --git a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp
  }
  
  Manager::Manager(not_null<Window::Notifications::System*> system)
-diff --git a/Telegram/SourceFiles/platform/linux/org.freedesktop.portal.Flatpak.xml b/Telegram/SourceFiles/platform/linux/org.freedesktop.portal.Flatpak.xml
---- a/Telegram/SourceFiles/platform/linux/org.freedesktop.portal.Flatpak.xml
-+++ b/Telegram/SourceFiles/platform/linux/org.freedesktop.portal.Flatpak.xml
+@@ -931,3 +542,5 @@
+ 
+ } // namespace Notifications
+ } // namespace Platform
++
++#include "notifications_manager_linux.moc"
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/SourceFiles/platform/linux/org.freedesktop.portal.Flatpak.xml	2026-07-17 22:00:00.000000000 +0200
++++ b/Telegram/SourceFiles/platform/linux/org.freedesktop.portal.Flatpak.xml	2026-07-21 01:32:26.088396777 +0200
 @@ -1,583 +0,0 @@
 -<!DOCTYPE node PUBLIC
 -"-//freedesktop//DTD D-BUS Object Introspection 1.0//EN"
@@ -3313,9 +3421,9 @@ diff --git a/Telegram/SourceFiles/platform/linux/org.freedesktop.portal.Flatpak.
 -  </interface>
 -
 -</node>
-diff --git a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/SourceFiles/platform/linux/specific_linux.cpp
---- a/Telegram/SourceFiles/platform/linux/specific_linux.cpp
-+++ b/Telegram/SourceFiles/platform/linux/specific_linux.cpp
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/SourceFiles/platform/linux/specific_linux.cpp	2026-07-21 01:33:14.035138031 +0200
++++ b/Telegram/SourceFiles/platform/linux/specific_linux.cpp	2026-07-21 01:32:26.088640230 +0200
 @@ -11,36 +11,37 @@
  #include "base/random.h"
  #include "base/platform/base_platform_info.h"
@@ -4170,9 +4278,9 @@ diff --git a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/S
  	if (fchmod(fileno(fto), fst.st_mode) != 0) {
  		fclose(ffrom);
  		fclose(fto);
-diff --git a/Telegram/SourceFiles/platform/linux/tray_linux.cpp b/Telegram/SourceFiles/platform/linux/tray_linux.cpp
---- a/Telegram/SourceFiles/platform/linux/tray_linux.cpp
-+++ b/Telegram/SourceFiles/platform/linux/tray_linux.cpp
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/SourceFiles/platform/linux/tray_linux.cpp	2026-07-17 22:00:00.000000000 +0200
++++ b/Telegram/SourceFiles/platform/linux/tray_linux.cpp	2026-07-21 01:32:26.088753882 +0200
 @@ -23,12 +23,11 @@
  #include <QtWidgets/QMenu>
  #include <QtWidgets/QSystemTrayIcon>
@@ -4223,9 +4331,9 @@ diff --git a/Telegram/SourceFiles/platform/linux/tray_linux.cpp b/Telegram/Sourc
  }
  
  void Tray::createIcon() {
-diff --git a/Telegram/lib_base/CMakeLists.txt b/Telegram/lib_base/CMakeLists.txt
---- a/Telegram/lib_base/CMakeLists.txt
-+++ b/Telegram/lib_base/CMakeLists.txt
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_base/CMakeLists.txt	2026-07-14 07:25:20.000000000 +0200
++++ b/Telegram/lib_base/CMakeLists.txt	2026-07-21 01:32:26.088795512 +0200
 @@ -271,18 +271,6 @@
          desktop-app::external_kcoreaddons
      )
@@ -4245,9 +4353,9 @@ diff --git a/Telegram/lib_base/CMakeLists.txt b/Telegram/lib_base/CMakeLists.txt
  endif()
  
  if (DESKTOP_APP_USE_ALLOCATION_TRACER)
-diff --git a/Telegram/lib_base/base/platform/linux/base_battery_saving_linux.cpp b/Telegram/lib_base/base/platform/linux/base_battery_saving_linux.cpp
---- a/Telegram/lib_base/base/platform/linux/base_battery_saving_linux.cpp
-+++ b/Telegram/lib_base/base/platform/linux/base_battery_saving_linux.cpp
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_base/base/platform/linux/base_battery_saving_linux.cpp	2026-07-14 07:25:20.000000000 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_battery_saving_linux.cpp	2026-07-21 01:32:26.088837793 +0200
 @@ -7,97 +7,47 @@
  #include "base/platform/linux/base_battery_saving_linux.h"
  
@@ -4375,9 +4483,9 @@ diff --git a/Telegram/lib_base/base/platform/linux/base_battery_saving_linux.cpp
  
  } // namespace
  
-diff --git a/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp b/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp
---- a/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp
-+++ b/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp	2026-07-14 07:25:20.000000000 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp	2026-07-21 01:32:26.088900783 +0200
 @@ -7,17 +7,18 @@
  #include "base/platform/linux/base_file_utilities_linux.h"
  
@@ -4623,9 +4731,9 @@ diff --git a/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp
  	return !rmdir(pathRaw.constData());
  }
  
-diff --git a/Telegram/lib_base/base/platform/linux/base_global_shortcuts_linux.cpp b/Telegram/lib_base/base/platform/linux/base_global_shortcuts_linux.cpp
---- a/Telegram/lib_base/base/platform/linux/base_global_shortcuts_linux.cpp
-+++ b/Telegram/lib_base/base/platform/linux/base_global_shortcuts_linux.cpp
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_base/base/platform/linux/base_global_shortcuts_linux.cpp	2026-07-14 07:25:20.000000000 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_global_shortcuts_linux.cpp	2026-07-21 01:32:26.088957234 +0200
 @@ -15,6 +15,15 @@
  
  #include <QKeySequence>
@@ -4811,9 +4919,9 @@ diff --git a/Telegram/lib_base/base/platform/linux/base_global_shortcuts_linux.c
  QString KeyName(GlobalShortcutKeyGeneric descriptor) {
  	// Telegram/ThirdParty/fcitx-qt5/platforminputcontext/qtkey.cpp
  	static const auto KeyToString = flat_map<uint64, int>{
-diff --git a/Telegram/lib_base/base/platform/linux/base_haptic_linux.cpp b/Telegram/lib_base/base/platform/linux/base_haptic_linux.cpp
---- a/Telegram/lib_base/base/platform/linux/base_haptic_linux.cpp
-+++ b/Telegram/lib_base/base/platform/linux/base_haptic_linux.cpp
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_base/base/platform/linux/base_haptic_linux.cpp	2026-07-14 07:25:20.000000000 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_haptic_linux.cpp	2026-07-21 01:32:26.088997995 +0200
 @@ -6,44 +6,12 @@
  //
  #include "base/platform/linux/base_haptic_linux.h"
@@ -4861,9 +4969,9 @@ diff --git a/Telegram/lib_base/base/platform/linux/base_haptic_linux.cpp b/Teleg
  }
  
  bool IsSwipeBackEnabled() {
-diff --git a/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp b/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp
---- a/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp
-+++ b/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp	2026-07-14 07:25:20.000000000 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp	2026-07-21 01:32:26.089036675 +0200
 @@ -11,39 +11,38 @@
  
  #include <sys/uio.h>
@@ -5015,9 +5123,9 @@ diff --git a/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp b/T
  }
  
  } // namespace base::Platform
-diff --git a/Telegram/lib_base/base/platform/linux/base_linux_app_launch_context.cpp b/Telegram/lib_base/base/platform/linux/base_linux_app_launch_context.cpp
---- a/Telegram/lib_base/base/platform/linux/base_linux_app_launch_context.cpp
-+++ b/Telegram/lib_base/base/platform/linux/base_linux_app_launch_context.cpp
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_base/base/platform/linux/base_linux_app_launch_context.cpp	2026-07-14 07:25:20.000000000 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_linux_app_launch_context.cpp	2026-07-21 01:32:26.089056675 +0200
 @@ -7,42 +7,9 @@
  */
  #include "base/platform/linux/base_linux_app_launch_context.h"
@@ -5062,9 +5170,9 @@ diff --git a/Telegram/lib_base/base/platform/linux/base_linux_app_launch_context
  }
  
  } // namespace base::Platform
-diff --git a/Telegram/lib_base/base/platform/linux/base_linux_app_launch_context.h b/Telegram/lib_base/base/platform/linux/base_linux_app_launch_context.h
---- a/Telegram/lib_base/base/platform/linux/base_linux_app_launch_context.h
-+++ b/Telegram/lib_base/base/platform/linux/base_linux_app_launch_context.h
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_base/base/platform/linux/base_linux_app_launch_context.h	2026-07-14 07:25:20.000000000 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_linux_app_launch_context.h	2026-07-21 01:32:26.089070956 +0200
 @@ -7,12 +7,8 @@
  */
  #pragma once
@@ -5079,9 +5187,9 @@ diff --git a/Telegram/lib_base/base/platform/linux/base_linux_app_launch_context
 +void AppLaunchContext();
  
  } // namespace base::Platform
-diff --git a/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.cpp b/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.cpp
---- a/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.cpp
-+++ b/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.cpp
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.cpp	2026-07-14 07:25:20.000000000 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.cpp	2026-07-21 01:32:26.089120476 +0200
 @@ -6,145 +6,113 @@
  //
  #include "base/platform/linux/base_linux_dbus_utilities.h"
@@ -5296,9 +5404,9 @@ diff --git a/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.cpp
  }
  
  ServiceWatcher::~ServiceWatcher() = default;
-diff --git a/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h b/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h
---- a/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h
-+++ b/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h	2026-07-14 07:25:20.000000000 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h	2026-07-21 01:32:26.089142147 +0200
 @@ -9,7 +9,7 @@
  #include "base/expected.h"
  #include "base/weak_ptr.h"
@@ -5346,9 +5454,9 @@ diff --git a/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h b
  		const std::string &service,
  		Fn<void(
  			const std::string &,
-diff --git a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp
---- a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp
-+++ b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp	2026-07-21 01:33:14.034175779 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp	2026-07-21 01:32:26.089182027 +0200
 @@ -8,8 +8,11 @@
  
  #include "base/platform/base_platform_info.h"
@@ -5499,9 +5607,9 @@ diff --git a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp 
  }
  
  SettingWatcher::~SettingWatcher() = default;
-diff --git a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h
---- a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h
-+++ b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h	2026-07-14 07:25:20.000000000 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h	2026-07-21 01:32:26.089217537 +0200
 @@ -9,11 +9,7 @@
  #include "base/expected.h"
  #include "base/weak_ptr.h"
@@ -5648,9 +5756,9 @@ diff --git a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h b/
  	~SettingWatcher();
  
  private:
-diff --git a/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp b/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp
---- a/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp
-+++ b/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp	2026-07-14 07:25:20.000000000 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp	2026-07-21 01:32:26.089275458 +0200
 @@ -4,170 +4,66 @@
  // For license and copyright information please follow this link:
  // https://github.com/desktop-app/legal/blob/master/LEGAL
@@ -5921,9 +6029,9 @@ diff --git a/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux
  }
  
  } // namespace base::Platform
-diff --git a/Telegram/lib_base/base/platform/linux/base_screen_reader_state_linux.cpp b/Telegram/lib_base/base/platform/linux/base_screen_reader_state_linux.cpp
---- a/Telegram/lib_base/base/platform/linux/base_screen_reader_state_linux.cpp
-+++ b/Telegram/lib_base/base/platform/linux/base_screen_reader_state_linux.cpp
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_base/base/platform/linux/base_screen_reader_state_linux.cpp	2026-07-14 07:25:20.000000000 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_screen_reader_state_linux.cpp	2026-07-21 01:32:26.089322909 +0200
 @@ -8,24 +8,15 @@
  
  #include "base/platform/linux/base_linux_dbus_utilities.h"
@@ -6130,9 +6238,9 @@ diff --git a/Telegram/lib_base/base/platform/linux/base_screen_reader_state_linu
  	return _isActive.current();
  }
  
-diff --git a/Telegram/lib_base/base/platform/linux/base_system_media_controls_linux.cpp b/Telegram/lib_base/base/platform/linux/base_system_media_controls_linux.cpp
---- a/Telegram/lib_base/base/platform/linux/base_system_media_controls_linux.cpp
-+++ b/Telegram/lib_base/base/platform/linux/base_system_media_controls_linux.cpp
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_base/base/platform/linux/base_system_media_controls_linux.cpp	2026-07-14 07:25:20.000000000 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_system_media_controls_linux.cpp	2026-07-21 01:32:26.089419590 +0200
 @@ -1,488 +1,6 @@
 -// This file is part of Desktop App Toolkit,
 -// a set of libraries for developing nice desktop applications.
@@ -6625,9 +6733,9 @@ diff --git a/Telegram/lib_base/base/platform/linux/base_system_media_controls_li
 -}
 -
  } // namespace base::Platform
-diff --git a/Telegram/lib_base/base/platform/linux/base_url_scheme_linux.cpp b/Telegram/lib_base/base/platform/linux/base_url_scheme_linux.cpp
---- a/Telegram/lib_base/base/platform/linux/base_url_scheme_linux.cpp
-+++ b/Telegram/lib_base/base/platform/linux/base_url_scheme_linux.cpp
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_base/base/platform/linux/base_url_scheme_linux.cpp	2026-07-14 07:25:20.000000000 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_url_scheme_linux.cpp	2026-07-21 01:32:26.089478701 +0200
 @@ -1,169 +1,92 @@
 -// This file is part of Desktop App Toolkit,
 -// a set of libraries for developing nice desktop applications.
@@ -6867,9 +6975,9 @@ diff --git a/Telegram/lib_base/base/platform/linux/base_url_scheme_linux.cpp b/T
  }
  
  } // namespace base::Platform
-diff --git a/Telegram/lib_ui/ui/platform/linux/ui_window_title_linux.cpp b/Telegram/lib_ui/ui/platform/linux/ui_window_title_linux.cpp
---- a/Telegram/lib_ui/ui/platform/linux/ui_window_title_linux.cpp
-+++ b/Telegram/lib_ui/ui/platform/linux/ui_window_title_linux.cpp
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_ui/ui/platform/linux/ui_window_title_linux.cpp	2026-07-17 11:41:52.000000000 +0200
++++ b/Telegram/lib_ui/ui/platform/linux/ui_window_title_linux.cpp	2026-07-21 01:32:26.089508601 +0200
 @@ -110,7 +110,7 @@
  		}
  
@@ -6879,9 +6987,9 @@ diff --git a/Telegram/lib_ui/ui/platform/linux/ui_window_title_linux.cpp b/Teleg
  	}();
  
  	if (portalResult.has_value()) {
-diff --git a/Telegram/lib_webview/CMakeLists.txt b/Telegram/lib_webview/CMakeLists.txt
---- a/Telegram/lib_webview/CMakeLists.txt
-+++ b/Telegram/lib_webview/CMakeLists.txt
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_webview/CMakeLists.txt	2026-07-15 08:30:36.000000000 +0200
++++ b/Telegram/lib_webview/CMakeLists.txt	2026-07-21 01:32:26.089529781 +0200
 @@ -27,14 +27,6 @@
  
      webview/platform/linux/webview_linux.h
@@ -6912,9 +7020,9 @@ diff --git a/Telegram/lib_webview/CMakeLists.txt b/Telegram/lib_webview/CMakeLis
 +        desktop-app::external_qt
      )
  endif()
-diff --git a/Telegram/lib_webview/webview/platform/linux/webview_linux.cpp b/Telegram/lib_webview/webview/platform/linux/webview_linux.cpp
---- a/Telegram/lib_webview/webview/platform/linux/webview_linux.cpp
-+++ b/Telegram/lib_webview/webview/platform/linux/webview_linux.cpp
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_webview/webview/platform/linux/webview_linux.cpp	2026-07-15 08:30:36.000000000 +0200
++++ b/Telegram/lib_webview/webview/platform/linux/webview_linux.cpp	2026-07-21 01:32:26.089638163 +0200
 @@ -7,12 +7,565 @@
  #include "webview/platform/linux/webview_linux.h"
  
@@ -7503,9 +7611,9 @@ diff --git a/Telegram/lib_webview/webview/platform/linux/webview_linux.cpp b/Tel
  }
  
  } // namespace Webview
-diff --git a/Telegram/lib_webview/webview/platform/linux/webview_linux_compositor.cpp b/Telegram/lib_webview/webview/platform/linux/webview_linux_compositor.cpp
---- a/Telegram/lib_webview/webview/platform/linux/webview_linux_compositor.cpp
-+++ b/Telegram/lib_webview/webview/platform/linux/webview_linux_compositor.cpp
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_webview/webview/platform/linux/webview_linux_compositor.cpp	2026-07-15 08:30:36.000000000 +0200
++++ b/Telegram/lib_webview/webview/platform/linux/webview_linux_compositor.cpp	2026-07-21 01:32:26.089658893 +0200
 @@ -1,313 +0,0 @@
 -// This file is part of Desktop App Toolkit,
 -// a set of libraries for developing nice desktop applications.
@@ -7820,9 +7928,9 @@ diff --git a/Telegram/lib_webview/webview/platform/linux/webview_linux_composito
 -
 -} // namespace Webview
 -#endif // DESKTOP_APP_WEBVIEW_WAYLAND_COMPOSITOR
-diff --git a/Telegram/lib_webview/webview/platform/linux/webview_linux_compositor.h b/Telegram/lib_webview/webview/platform/linux/webview_linux_compositor.h
---- a/Telegram/lib_webview/webview/platform/linux/webview_linux_compositor.h
-+++ b/Telegram/lib_webview/webview/platform/linux/webview_linux_compositor.h
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_webview/webview/platform/linux/webview_linux_compositor.h	2026-07-15 08:30:36.000000000 +0200
++++ b/Telegram/lib_webview/webview/platform/linux/webview_linux_compositor.h	2026-07-21 01:32:26.089725624 +0200
 @@ -1,52 +0,0 @@
 -// This file is part of Desktop App Toolkit,
 -// a set of libraries for developing nice desktop applications.
@@ -7876,9 +7984,9 @@ diff --git a/Telegram/lib_webview/webview/platform/linux/webview_linux_composito
 -
 -} // namespace Webview
 -#endif // !DESKTOP_APP_WEBVIEW_WAYLAND_COMPOSITOR
-diff --git a/Telegram/lib_webview/webview/platform/linux/webview_linux_http_server.cpp b/Telegram/lib_webview/webview/platform/linux/webview_linux_http_server.cpp
---- a/Telegram/lib_webview/webview/platform/linux/webview_linux_http_server.cpp
-+++ b/Telegram/lib_webview/webview/platform/linux/webview_linux_http_server.cpp
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_webview/webview/platform/linux/webview_linux_http_server.cpp	2026-07-15 08:30:36.000000000 +0200
++++ b/Telegram/lib_webview/webview/platform/linux/webview_linux_http_server.cpp	2026-07-21 01:32:26.089745054 +0200
 @@ -1,189 +0,0 @@
 -// This file is part of Desktop App Toolkit,
 -// a set of libraries for developing nice desktop applications.
@@ -8069,9 +8177,9 @@ diff --git a/Telegram/lib_webview/webview/platform/linux/webview_linux_http_serv
 -HttpServer::~HttpServer() = default;
 -
 -} // namespace Webview
-diff --git a/Telegram/lib_webview/webview/platform/linux/webview_linux_http_server.h b/Telegram/lib_webview/webview/platform/linux/webview_linux_http_server.h
---- a/Telegram/lib_webview/webview/platform/linux/webview_linux_http_server.h
-+++ b/Telegram/lib_webview/webview/platform/linux/webview_linux_http_server.h
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_webview/webview/platform/linux/webview_linux_http_server.h	2026-07-15 08:30:36.000000000 +0200
++++ b/Telegram/lib_webview/webview/platform/linux/webview_linux_http_server.h	2026-07-21 01:32:26.089784745 +0200
 @@ -1,36 +0,0 @@
 -// This file is part of Desktop App Toolkit,
 -// a set of libraries for developing nice desktop applications.
@@ -8109,9 +8217,9 @@ diff --git a/Telegram/lib_webview/webview/platform/linux/webview_linux_http_serv
 -};
 -
 -} // namespace Webview
-diff --git a/Telegram/lib_webview/webview/platform/linux/webview_linux_interface.xml b/Telegram/lib_webview/webview/platform/linux/webview_linux_interface.xml
---- a/Telegram/lib_webview/webview/platform/linux/webview_linux_interface.xml
-+++ b/Telegram/lib_webview/webview/platform/linux/webview_linux_interface.xml
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_webview/webview/platform/linux/webview_linux_interface.xml	2026-07-15 08:30:36.000000000 +0200
++++ b/Telegram/lib_webview/webview/platform/linux/webview_linux_interface.xml	2026-07-21 01:32:26.089799985 +0200
 @@ -1,106 +0,0 @@
 -<node>
 -	<interface name='org.desktop_app.GtkIntegration.Webview.Master'>
@@ -8219,9 +8327,9 @@ diff --git a/Telegram/lib_webview/webview/platform/linux/webview_linux_interface
 -		<signal name='Started'/>
 -	</interface>
 -</node>
-diff --git a/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk.cpp b/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk.cpp
---- a/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk.cpp
-+++ b/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk.cpp
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk.cpp	2026-07-15 08:30:36.000000000 +0200
++++ b/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk.cpp	2026-07-21 01:32:26.089831695 +0200
 @@ -1,2972 +0,0 @@
 -// This file is part of Desktop App Toolkit,
 -// a set of libraries for developing nice desktop applications.
@@ -11195,9 +11303,9 @@ diff --git a/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk
 -}
 -
 -} // namespace Webview::WebKitGTK
-diff --git a/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk.h b/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk.h
---- a/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk.h
-+++ b/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk.h
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk.h	2026-07-15 08:30:36.000000000 +0200
++++ b/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk.h	2026-07-21 01:32:26.090353162 +0200
 @@ -1,19 +0,0 @@
 -// This file is part of Desktop App Toolkit,
 -// a set of libraries for developing nice desktop applications.
@@ -11218,9 +11326,9 @@ diff --git a/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk
 -void SetSocketPath(const std::string &socketPath);
 -
 -} // namespace Webview::WebKitGTK
-diff --git a/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk_library.cpp b/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk_library.cpp
---- a/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk_library.cpp
-+++ b/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk_library.cpp
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk_library.cpp	2026-07-15 08:30:36.000000000 +0200
++++ b/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk_library.cpp	2026-07-21 01:32:26.090368512 +0200
 @@ -1,160 +0,0 @@
 -// This file is part of Desktop App Toolkit,
 -// a set of libraries for developing nice desktop applications.
@@ -11382,9 +11490,9 @@ diff --git a/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk
 -}
 -
 -} // namespace Webview::WebKitGTK::Library
-diff --git a/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk_library.h b/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk_library.h
---- a/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk_library.h
-+++ b/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk_library.h
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk_library.h	2026-07-15 08:30:36.000000000 +0200
++++ b/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk_library.h	2026-07-21 01:32:26.090419393 +0200
 @@ -1,504 +0,0 @@
 -// This file is part of Desktop App Toolkit,
 -// a set of libraries for developing nice desktop applications.
@@ -11890,9 +11998,9 @@ diff --git a/Telegram/lib_webview/webview/platform/linux/webview_linux_webkitgtk
 -	WindowMode mode);
 -
 -} // namespace Webview::WebKitGTK::Library
-diff --git a/cmake/external/CMakeLists.txt b/cmake/external/CMakeLists.txt
---- a/cmake/external/CMakeLists.txt
-+++ b/cmake/external/CMakeLists.txt
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/cmake/external/CMakeLists.txt	2026-07-21 01:33:14.032998224 +0200
++++ b/cmake/external/CMakeLists.txt	2026-07-21 01:32:26.090549914 +0200
 @@ -27,7 +27,6 @@
  add_checked_subdirectory(ffmpeg)
  if (LINUX)
@@ -11901,9 +12009,9 @@ diff --git a/cmake/external/CMakeLists.txt b/cmake/external/CMakeLists.txt
  endif()
  add_checked_subdirectory(gsl)
  if (add_hunspell_library)
-diff --git a/cmake/external/glib/CMakeLists.txt b/cmake/external/glib/CMakeLists.txt
---- a/cmake/external/glib/CMakeLists.txt
-+++ b/cmake/external/glib/CMakeLists.txt
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/cmake/external/glib/CMakeLists.txt	2026-07-07 21:26:27.000000000 +0200
++++ b/cmake/external/glib/CMakeLists.txt	2026-07-21 01:32:26.090570584 +0200
 @@ -4,6 +4,8 @@
  # For license and copyright information please follow this link:
  # https://github.com/desktop-app/legal/blob/master/LEGAL
@@ -11938,9 +12046,9 @@ diff --git a/cmake/external/glib/CMakeLists.txt b/cmake/external/glib/CMakeLists
 -else()
 -    generate_cppgir(external_glib Gio-2.0)
 -endif()
-diff --git a/cmake/external/qt/CMakeLists.txt b/cmake/external/qt/CMakeLists.txt
---- a/cmake/external/qt/CMakeLists.txt
-+++ b/cmake/external/qt/CMakeLists.txt
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/cmake/external/qt/CMakeLists.txt	2026-07-07 21:26:27.000000000 +0200
++++ b/cmake/external/qt/CMakeLists.txt	2026-07-21 01:32:26.090595205 +0200
 @@ -34,6 +34,14 @@
          target_link_libraries(external_qt INTERFACE Qt::DBus)
      endif()
@@ -11956,9 +12064,9 @@ diff --git a/cmake/external/qt/CMakeLists.txt b/cmake/external/qt/CMakeLists.txt
      if (TARGET Qt::Quick)
          target_link_libraries(external_qt INTERFACE Qt::Quick)
      endif()
-diff --git a/cmake/external/qt/package.cmake b/cmake/external/qt/package.cmake
---- a/cmake/external/qt/package.cmake
-+++ b/cmake/external/qt/package.cmake
+diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
+--- a/cmake/external/qt/package.cmake	2026-07-07 21:26:27.000000000 +0200
++++ b/cmake/external/qt/package.cmake	2026-07-21 01:32:26.090619175 +0200
 @@ -80,7 +80,7 @@
  endif()
  
