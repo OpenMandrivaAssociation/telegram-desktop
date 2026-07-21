@@ -1018,7 +1018,7 @@ diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
  } // namespace File
 diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
 --- a/Telegram/SourceFiles/platform/linux/integration_linux.cpp	2026-07-17 22:00:00.000000000 +0200
-+++ b/Telegram/SourceFiles/platform/linux/integration_linux.cpp	2026-07-21 01:32:43.680941947 +0200
++++ b/Telegram/SourceFiles/platform/linux/integration_linux.cpp	2026-07-21 02:01:34.872069157 +0200
 @@ -12,16 +12,16 @@
  #include "base/platform/linux/base_linux_xdp_utilities.h"
  #include "core/sandbox.h"
@@ -1042,7 +1042,7 @@ diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
  
  #ifdef __GLIBC__
  #include <malloc.h>
-@@ -30,91 +30,101 @@
+@@ -30,91 +30,102 @@
  namespace Platform {
  namespace {
  
@@ -1087,8 +1087,9 @@ diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
 +		applyPlatformData(platformData);
 +		Core::Sandbox::Instance().customEnterFromEventLoop([=] {
 +			for (const auto &uri : uris) {
-+				QFileOpenEvent event(QUrl(uri));
-+				QCoreApplication::sendEvent(qApp, &event);
++				// Brace-init avoids most-vexing-parse (function declaration).
++				QFileOpenEvent openEvent{QUrl(uri)};
++				QCoreApplication::sendEvent(qApp, &openEvent);
  			}
 -		}
 +		});
@@ -1136,7 +1137,7 @@ diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
 -				qunsetenv("XDG_ACTIVATION_TOKEN");
 +	void applyPlatformData(const QVariantMap &platformData) {
 +		// Wayland activation token from the launcher / portal.
-+		for (const auto key : {
++		for (const auto &key : {
 +			u"activation-token"_q,
 +			u"desktop-startup-id"_q,
 +		}) {
@@ -1209,7 +1210,7 @@ diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
  
  class LinuxIntegration final : public Integration, public base::has_weak_ptr {
  public:
-@@ -123,44 +133,22 @@
+@@ -123,44 +134,22 @@
  	void init() override;
  
  private:
@@ -1261,7 +1262,7 @@ diff -ruN a/'--exclude=.git' b/'--exclude=*.orig'
  
  #ifdef __GLIBC__
  	_memoryTrim = QObject::connect(
-@@ -176,79 +164,33 @@
+@@ -176,79 +165,33 @@
  }
  
  void LinuxIntegration::init() {
