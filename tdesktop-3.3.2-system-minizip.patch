@@ -1,6 +1,7 @@
-diff -up tdesktop-6.9.3-full/Telegram/CMakeLists.txt.5~ tdesktop-6.9.3-full/Telegram/CMakeLists.txt
---- tdesktop-6.9.3-full/Telegram/CMakeLists.txt.5~	2026-06-15 02:15:18.258969473 +0200
-+++ tdesktop-6.9.3-full/Telegram/CMakeLists.txt	2026-06-15 02:16:35.329996793 +0200
+diff --git a/Telegram/CMakeLists.txt b/Telegram/CMakeLists.txt
+index 911326b..87cf107 100644
+--- a/Telegram/CMakeLists.txt
++++ b/Telegram/CMakeLists.txt
 @@ -78,7 +78,7 @@ PRIVATE
      desktop-app::lib_stripe
      desktop-app::external_rlottie
@@ -10,9 +11,10 @@ diff -up tdesktop-6.9.3-full/Telegram/CMakeLists.txt.5~ tdesktop-6.9.3-full/Tele
      desktop-app::external_kcoreaddons
      desktop-app::external_qt_static_plugins
      desktop-app::external_qt
-diff -up tdesktop-6.9.3-full/cmake/external/CMakeLists.txt.5~ tdesktop-6.9.3-full/cmake/external/CMakeLists.txt
---- tdesktop-6.9.3-full/cmake/external/CMakeLists.txt.5~	2026-06-11 11:30:12.000000000 +0200
-+++ tdesktop-6.9.3-full/cmake/external/CMakeLists.txt	2026-06-15 02:16:23.488804841 +0200
+diff --git a/cmake/external/CMakeLists.txt b/cmake/external/CMakeLists.txt
+index ce7e67d..0e225c5 100644
+--- a/cmake/external/CMakeLists.txt
++++ b/cmake/external/CMakeLists.txt
 @@ -38,7 +38,6 @@ add_checked_subdirectory(jpeg)
  add_checked_subdirectory(kcoreaddons)
  add_checked_subdirectory(lz4)

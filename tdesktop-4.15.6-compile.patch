@@ -1,7 +1,8 @@
-diff -up tdesktop-6.3.4-full/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp.7~ tdesktop-6.3.4-full/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp
---- tdesktop-6.3.4-full/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp.7~	2025-11-26 13:44:09.000000000 +0100
-+++ tdesktop-6.3.4-full/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp	2025-11-26 17:25:41.188184578 +0100
-@@ -262,7 +262,7 @@ void Create(Window::Notifications::Syste
+diff --git a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp b/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp
+index 44f5acd..53de16c 100644
+--- a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp
++++ b/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp
+@@ -268,7 +268,7 @@ void Create(Window::Notifications::System *system) {
  		Gio::DBusProxyFlags::NONE_,
  		kService,
  		kObjectPath,
@@ -10,7 +11,7 @@ diff -up tdesktop-6.3.4-full/Telegram/SourceFiles/platform/linux/notifications_m
  			auto result =
  				XdgNotifications::NotificationsProxy::new_for_bus_finish(res);
  
-@@ -286,7 +286,7 @@ void Create(Window::Notifications::Syste
+@@ -292,7 +292,7 @@ void Create(Window::Notifications::System *system) {
  			auto interface = XdgNotifications::Notifications(proxy);
  
  			interface.call_get_server_information([=](
@@ -19,7 +20,7 @@ diff -up tdesktop-6.3.4-full/Telegram/SourceFiles/platform/linux/notifications_m
  					Gio::AsyncResult res) mutable {
  				const auto result =
  					interface.call_get_server_information_finish(res);
-@@ -311,7 +311,7 @@ void Create(Window::Notifications::Syste
+@@ -317,7 +317,7 @@ void Create(Window::Notifications::System *system) {
  			});
  
  			interface.call_get_capabilities([=](
@@ -28,7 +29,7 @@ diff -up tdesktop-6.3.4-full/Telegram/SourceFiles/platform/linux/notifications_m
  					Gio::AsyncResult res) mutable {
  				const auto result = interface.call_get_capabilities_finish(
  					res);
-@@ -750,7 +750,7 @@ void Manager::Private::showNotification(
+@@ -741,7 +741,7 @@ void Manager::Private::showNotification(
  				const auto callbackWrap = gi::unwrap(
  					Gio::AsyncReadyCallback(
  						crl::guard(this, [=](
@@ -37,9 +38,10 @@ diff -up tdesktop-6.3.4-full/Telegram/SourceFiles/platform/linux/notifications_m
  								Gio::AsyncResult res) {
  							auto &sandbox = Core::Sandbox::Instance();
  							sandbox.customEnterFromEventLoop([&] {
-diff -up tdesktop-6.3.4-full/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp.7~ tdesktop-6.3.4-full/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp
---- tdesktop-6.3.4-full/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp.7~	2025-11-09 05:14:42.000000000 +0100
-+++ tdesktop-6.3.4-full/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp	2025-11-26 17:24:56.989835343 +0100
+diff --git a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp
+index 6b781fb..70a9a4c 100644
+--- a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp
++++ b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp
 @@ -99,7 +99,7 @@ SettingWatcher::SettingWatcher(
  		Gio::DBusProxyFlags::NONE_,
  		kService,

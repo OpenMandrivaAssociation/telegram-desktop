@@ -1,7 +1,8 @@
-diff -up tdesktop-6.3.0-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp.omv~ tdesktop-6.3.0-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp
---- tdesktop-6.3.0-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp.omv~	2025-11-16 18:23:10.127221131 +0100
-+++ tdesktop-6.3.0-full/Telegram/SourceFiles/platform/linux/specific_linux.cpp	2025-11-16 18:24:56.495747149 +0100
-@@ -804,7 +804,7 @@ void LaunchMaps(const Data::LocationPoin
+diff --git a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/SourceFiles/platform/linux/specific_linux.cpp
+index a5249ff..46e8879 100644
+--- a/Telegram/SourceFiles/platform/linux/specific_linux.cpp
++++ b/Telegram/SourceFiles/platform/linux/specific_linux.cpp
+@@ -550,7 +550,7 @@ void PortalCheckScheme(
  		Gio::DBusProxyFlags::NONE_,
  		base::Platform::XDP::kService,
  		base::Platform::XDP::kObjectPath,
@@ -10,7 +11,7 @@ diff -up tdesktop-6.3.0-full/Telegram/SourceFiles/platform/linux/specific_linux.
  			auto interface = XdpOpenURI::OpenURI(
  				XdpOpenURI::OpenURIProxy::new_for_bus_finish(res, nullptr));
  
-@@ -818,7 +818,7 @@ void LaunchMaps(const Data::LocationPoin
+@@ -564,7 +564,7 @@ void PortalCheckScheme(
  				GLib::Variant::new_array(
  					GLib::VariantType::new_("{sv}"),
  					{}),

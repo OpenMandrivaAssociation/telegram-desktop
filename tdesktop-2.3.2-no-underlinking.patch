@@ -1,7 +1,8 @@
-diff -up tdesktop-6.7.5-full/Telegram/CMakeLists.txt.4~ tdesktop-6.7.5-full/Telegram/CMakeLists.txt
---- tdesktop-6.7.5-full/Telegram/CMakeLists.txt.4~	2026-04-07 18:19:25.000000000 +0200
-+++ tdesktop-6.7.5-full/Telegram/CMakeLists.txt	2026-04-08 13:04:36.170591780 +0200
-@@ -95,6 +95,7 @@ PRIVATE
+diff --git a/Telegram/CMakeLists.txt b/Telegram/CMakeLists.txt
+index b695d6b..911326b 100644
+--- a/Telegram/CMakeLists.txt
++++ b/Telegram/CMakeLists.txt
+@@ -88,6 +88,7 @@ PRIVATE
      desktop-app::external_openssl
      desktop-app::external_openal
      desktop-app::external_xxhash
