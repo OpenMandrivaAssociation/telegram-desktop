@@ -38,7 +38,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	7.0.6
+Version:	7.0.9
 Release:	1
 
 # Application and 3rd-party modules licensing:
@@ -116,6 +116,8 @@ BuildRequires: stdc++-static-devel
 BuildRequires: cmake(fmt)
 BuildRequires: cmake(ada)
 BuildRequires: cmake(RapidJSON)
+BuildRequires: pkgconfig(libfido2)
+BuildRequires: pkgconfig(gio-unix-2.0)
 BuildRequires: qmake-qt6
 BuildRequires: qt6-qtbase-tools
 BuildRequires: cmake(Qt6)
@@ -174,7 +176,7 @@ tdesktop-4.11.3-zlib-ng.patch
 tdesktop-3.3.2-system-minizip.patch
 tdesktop-4.15.6-compile.patch
 tdesktop-6.3.0-compile.patch
-tdesktop-7.0.6-qtify-integration.patch
+tdesktop-7.0.9-qtify-integration.patch
 
 %description
 Telegram is a non-profit cloud-based instant messaging service.
@@ -186,7 +188,7 @@ The service also provides APIs to independent developers.
 %prep
 export LC_ALL=en_US.utf-8
 # Unpacking Telegram Desktop source archive...
-%autosetup -p1 -n tdesktop-7.0.6-full
+%autosetup -p1 -n %{appname}-%{version}%{tarsuffix}
 
 # Unbundling libraries...
 rm -rf Telegram/ThirdParty/{Catch,GSL,QR,SPMediaKeyTap,expected,libdbusmenu-qt,libtgvoip,lz4,variant,xxHash,mallocng,minizip,zlib}
@@ -206,7 +208,7 @@ export PATH=%{_libdir}/qt6/bin:$PATH
 	-DDESKTOP_APP_USE_PACKAGED_FONTS:BOOL=OFF \
 %endif
 %if %{with ipo} && %{with mindbg} && %{without clang}
-    	-DESKTOP_APP_ENABLE_IPO_OPTIMIZATIONS:BOOL=ON \
+    	-DDESKTOP_APP_ENABLE_IPO_OPTIMIZATIONS:BOOL=ON \
 %endif
 %if %{with rlottie}
 	-DDESKTOP_APP_USE_PACKAGED_RLOTTIE:BOOL=ON \
