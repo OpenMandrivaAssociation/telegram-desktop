@@ -23,9 +23,9 @@
 
 # Applying workaround to RHBZ#1559007...
 %if %{with clang}
-%global optflags %(echo %{optflags} | sed -e 's/-mcet//g' -e 's/-fcf-protection//g' -e 's/-fstack-clash-protection//g' -e 's/$/ -Qunused-arguments -Wno-unknown-warning-option/') -I%{_includedir}/minizip $(pkg-config --cflags gio-2.0) -Wno-missing-template-arg-list-after-template-kw
+%global optflags %(echo %{optflags} | sed -e 's/-mcet//g' -e 's/-fcf-protection//g' -e 's/-fstack-clash-protection//g' -e 's/$/ -Qunused-arguments -Wno-unknown-warning-option/') -I%{_includedir}/minizip -Wno-missing-template-arg-list-after-template-kw
 %else
-%global optflags %{optflags} -fno-lto -I%{_includedir}/minizip -Wno-missing-template-arg-list-after-template-kw $(pkg-config --cflags gio-2.0)
+%global optflags %{optflags} -fno-lto -I%{_includedir}/minizip -Wno-missing-template-arg-list-after-template-kw
 %endif
 
 %global build_ldflags %(echo %{build_ldflags} -Wl,-z,notext)
@@ -39,7 +39,7 @@ Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
 Version:	7.0.9
-Release:	3
+Release:	4
 
 # Application and 3rd-party modules licensing:
 # * Telegram Desktop - GPLv3+ with OpenSSL exception -- main tarball;
@@ -126,6 +126,9 @@ BuildRequires: cmake(Qt6Core5Compat)
 BuildRequires: cmake(Qt6DBus)
 BuildRequires: cmake(Qt6Network)
 BuildRequires: cmake(Qt6Gui)
+BuildRequires: cmake(Qt6GuiPrivate)
+BuildRequires: pkgconfig(vulkan)
+BuildRequires: vulkan-headers
 BuildRequires: cmake(Qt6ShaderTools)
 BuildRequires: cmake(Qt6Svg)
 BuildRequires: cmake(Qt6WaylandClient)
