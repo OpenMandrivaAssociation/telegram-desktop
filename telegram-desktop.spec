@@ -39,7 +39,7 @@ Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
 Version:	7.0.9
-Release:	4
+Release:	5
 
 # Application and 3rd-party modules licensing:
 # * Telegram Desktop - GPLv3+ with OpenSSL exception -- main tarball;
@@ -117,6 +117,7 @@ BuildRequires: cmake(fmt)
 BuildRequires: cmake(ada)
 BuildRequires: cmake(RapidJSON)
 BuildRequires: pkgconfig(libfido2)
+BuildRequires: pkgconfig(gio-2.0)
 BuildRequires: pkgconfig(gio-unix-2.0)
 BuildRequires: qmake-qt6
 BuildRequires: qt6-qtbase-tools
@@ -198,6 +199,9 @@ rm -rf Telegram/ThirdParty/{Catch,GSL,QR,SPMediaKeyTap,expected,libdbusmenu-qt,l
 
 # FIXME we currently DISABLE_QT_PLUGINS because they break the build
 export PATH=%{_libdir}/qt6/bin:$PATH
+# tg_owt public headers include gio/gio.h; pass glib flags at cmake time (not spec parse time)
+export CXXFLAGS="${CXXFLAGS:-%{optflags}} $(pkg-config --cflags gio-2.0)"
+export CFLAGS="${CFLAGS:-%{optflags}} $(pkg-config --cflags gio-2.0)"
 %cmake -G Ninja \
 	-DCMAKE_CXX_STANDARD=20 \
 	-DCMAKE_BUILD_TYPE=Release \
