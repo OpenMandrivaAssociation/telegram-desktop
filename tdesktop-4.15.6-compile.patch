@@ -1,5 +1,5 @@
 diff --git a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp b/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp
-index 44f5acd..53de16c 100644
+index a2295101..2de7100d 100644
 --- a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp
 +++ b/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp
 @@ -268,7 +268,7 @@ void Create(Window::Notifications::System *system) {
@@ -29,7 +29,7 @@ index 44f5acd..53de16c 100644
  					Gio::AsyncResult res) mutable {
  				const auto result = interface.call_get_capabilities_finish(
  					res);
-@@ -741,7 +741,7 @@ void Manager::Private::showNotification(
+@@ -786,7 +786,7 @@ void Manager::Private::showNotification(
  				const auto callbackWrap = gi::unwrap(
  					Gio::AsyncReadyCallback(
  						crl::guard(this, [=](
@@ -39,7 +39,7 @@ index 44f5acd..53de16c 100644
  							auto &sandbox = Core::Sandbox::Instance();
  							sandbox.customEnterFromEventLoop([&] {
 diff --git a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp
-index 6b781fb..70a9a4c 100644
+index 6b781fb1..70a9a4c7 100644
 --- a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp
 +++ b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp
 @@ -99,7 +99,7 @@ SettingWatcher::SettingWatcher(

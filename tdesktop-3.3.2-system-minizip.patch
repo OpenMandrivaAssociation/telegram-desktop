@@ -1,8 +1,8 @@
 diff --git a/Telegram/CMakeLists.txt b/Telegram/CMakeLists.txt
-index 911326b..87cf107 100644
+index d96697dd..b0caeb72 100644
 --- a/Telegram/CMakeLists.txt
 +++ b/Telegram/CMakeLists.txt
-@@ -78,7 +78,7 @@ PRIVATE
+@@ -82,7 +82,7 @@ PRIVATE
      desktop-app::lib_stripe
      desktop-app::external_rlottie
      desktop-app::external_zlib
@@ -11,8 +11,21 @@ index 911326b..87cf107 100644
      desktop-app::external_kcoreaddons
      desktop-app::external_qt_static_plugins
      desktop-app::external_qt
+diff --git a/Telegram/cmake/td_ui.cmake b/Telegram/cmake/td_ui.cmake
+index 1111111..2222222 100644
+--- a/Telegram/cmake/td_ui.cmake
++++ b/Telegram/cmake/td_ui.cmake
+@@ -729,7 +729,7 @@ PRIVATE
+     desktop-app::lib_webrtc
+     desktop-app::lib_spellcheck
+     desktop-app::lib_stripe
+     desktop-app::external_kcoreaddons
+-    desktop-app::external_minizip
++    minizip
+     desktop-app::external_webrtc
+ )
 diff --git a/cmake/external/CMakeLists.txt b/cmake/external/CMakeLists.txt
-index ce7e67d..0e225c5 100644
+index ce7e67d4..0e225c5a 100644
 --- a/cmake/external/CMakeLists.txt
 +++ b/cmake/external/CMakeLists.txt
 @@ -38,7 +38,6 @@ add_checked_subdirectory(jpeg)
@@ -23,3 +36,4 @@ index ce7e67d..0e225c5 100644
  add_checked_subdirectory(openal)
  add_checked_subdirectory(openh264)
  add_checked_subdirectory(openssl)
+

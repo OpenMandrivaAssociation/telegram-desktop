@@ -38,8 +38,8 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	7.0.9
-Release:	5
+Version:	7.1.1
+Release:	1
 
 # Application and 3rd-party modules licensing:
 # * Telegram Desktop - GPLv3+ with OpenSSL exception -- main tarball;
@@ -180,7 +180,7 @@ tdesktop-4.11.3-zlib-ng.patch
 tdesktop-3.3.2-system-minizip.patch
 tdesktop-4.15.6-compile.patch
 tdesktop-6.3.0-compile.patch
-tdesktop-7.0.9-qtify-integration.patch
+tdesktop-7.1.1-qtify-integration.patch
 
 %description
 Telegram is a non-profit cloud-based instant messaging service.

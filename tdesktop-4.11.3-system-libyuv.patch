@@ -1,5 +1,5 @@
 diff --git a/Telegram/ThirdParty/tgcalls/tgcalls/desktop_capturer/DesktopCaptureSourceHelper.cpp b/Telegram/ThirdParty/tgcalls/tgcalls/desktop_capturer/DesktopCaptureSourceHelper.cpp
-index 8f32965..c0bfc3d 100644
+index 8f32965f..c0bfc3d9 100644
 --- a/Telegram/ThirdParty/tgcalls/tgcalls/desktop_capturer/DesktopCaptureSourceHelper.cpp
 +++ b/Telegram/ThirdParty/tgcalls/tgcalls/desktop_capturer/DesktopCaptureSourceHelper.cpp
 @@ -24,7 +24,7 @@
@@ -12,7 +12,7 @@ index 8f32965..c0bfc3d 100644
  #ifdef WEBRTC_MAC
  #import <QuartzCore/QuartzCore.h>
 diff --git a/Telegram/ThirdParty/tgcalls/tgcalls/desktop_capturer/DesktopCaptureSourceManager.cpp b/Telegram/ThirdParty/tgcalls/tgcalls/desktop_capturer/DesktopCaptureSourceManager.cpp
-index b4c7f38..4380651 100644
+index b4c7f386..43806516 100644
 --- a/Telegram/ThirdParty/tgcalls/tgcalls/desktop_capturer/DesktopCaptureSourceManager.cpp
 +++ b/Telegram/ThirdParty/tgcalls/tgcalls/desktop_capturer/DesktopCaptureSourceManager.cpp
 @@ -10,7 +10,7 @@

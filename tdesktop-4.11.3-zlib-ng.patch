@@ -1,5 +1,5 @@
 diff --git a/Telegram/SourceFiles/core/crash_report_window.cpp b/Telegram/SourceFiles/core/crash_report_window.cpp
-index 07782ef..137fd03 100644
+index 07782efa..137fd038 100644
 --- a/Telegram/SourceFiles/core/crash_report_window.cpp
 +++ b/Telegram/SourceFiles/core/crash_report_window.cpp
 @@ -28,6 +28,8 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
@@ -12,7 +12,7 @@ index 07782ef..137fd03 100644
  
  constexpr auto kDefaultProxyPort = 80;
 diff --git a/Telegram/SourceFiles/payments/ui/payments_panel.cpp b/Telegram/SourceFiles/payments/ui/payments_panel.cpp
-index eac1cf9..c9cff01 100644
+index d5085396..12b2bc73 100644
 --- a/Telegram/SourceFiles/payments/ui/payments_panel.cpp
 +++ b/Telegram/SourceFiles/payments/ui/payments_panel.cpp
 @@ -26,6 +26,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
@@ -24,7 +24,7 @@ index eac1cf9..c9cff01 100644
  namespace Payments::Ui {
  namespace {
 diff --git a/Telegram/SourceFiles/window/themes/window_theme_editor_box.cpp b/Telegram/SourceFiles/window/themes/window_theme_editor_box.cpp
-index b458a0d..7b97ed8 100644
+index fe51b4b0..0b569d0c 100644
 --- a/Telegram/SourceFiles/window/themes/window_theme_editor_box.cpp
 +++ b/Telegram/SourceFiles/window/themes/window_theme_editor_box.cpp
 @@ -49,6 +49,10 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
@@ -39,10 +39,10 @@ index b458a0d..7b97ed8 100644
  namespace Theme {
  namespace {
 diff --git a/Telegram/lib_base/base/zlib_help.h b/Telegram/lib_base/base/zlib_help.h
-index 59d70fd..f78e21f 100644
+index 8480fa3d..75d35de5 100644
 --- a/Telegram/lib_base/base/zlib_help.h
 +++ b/Telegram/lib_base/base/zlib_help.h
-@@ -15,6 +15,11 @@
+@@ -17,6 +17,11 @@
  #undef small
  #endif // small
  
