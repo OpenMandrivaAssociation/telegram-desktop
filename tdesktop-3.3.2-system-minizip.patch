@@ -15,7 +15,7 @@ diff --git a/Telegram/cmake/td_ui.cmake b/Telegram/cmake/td_ui.cmake
 index 1111111..2222222 100644
 --- a/Telegram/cmake/td_ui.cmake
 +++ b/Telegram/cmake/td_ui.cmake
-@@ -729,7 +729,7 @@ PRIVATE
+@@ -728,7 +728,7 @@ PRIVATE
      desktop-app::lib_webrtc
      desktop-app::lib_spellcheck
      desktop-app::lib_stripe
