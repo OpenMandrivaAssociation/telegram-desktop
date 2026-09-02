@@ -2,7 +2,7 @@ diff --git a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/S
 index a5249ff4..46e88791 100644
 --- a/Telegram/SourceFiles/platform/linux/specific_linux.cpp
 +++ b/Telegram/SourceFiles/platform/linux/specific_linux.cpp
-@@ -550,7 +550,7 @@ void PortalCheckScheme(
+@@ -551,7 +551,7 @@ void PortalCheckScheme(
  		Gio::DBusProxyFlags::NONE_,
  		base::Platform::XDP::kService,
  		base::Platform::XDP::kObjectPath,
@@ -11,7 +11,7 @@ index a5249ff4..46e88791 100644
  			auto interface = XdpOpenURI::OpenURI(
  				XdpOpenURI::OpenURIProxy::new_for_bus_finish(res, nullptr));
  
-@@ -564,7 +564,7 @@ void PortalCheckScheme(
+@@ -565,7 +565,7 @@ void PortalCheckScheme(
  				GLib::Variant::new_array(
  					GLib::VariantType::new_("{sv}"),
  					{}),
