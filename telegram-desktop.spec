@@ -11,6 +11,9 @@
 %bcond_without ipo
 %bcond_without mindbg
 %bcond_without gsl
+# 7.2+ can shape text with Pango to match GNOME/XSettings hinting.
+# Off: we already have the Qt shaper, and Pango pulls in the GNOME stack.
+%bcond_with pango
 
 # Telegram Desktop's constants...
 %global appname tdesktop
@@ -38,8 +41,9 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	7.1.5
+Version:	7.2.6
 Release:	1
+Group:	Networking/Instant Messenger
 
 # Application and 3rd-party modules licensing:
 # * Telegram Desktop - GPLv3+ with OpenSSL exception -- main tarball;
@@ -119,6 +123,10 @@ BuildRequires: cmake(RapidJSON)
 BuildRequires: pkgconfig(libfido2)
 BuildRequires: pkgconfig(gio-2.0)
 BuildRequires: pkgconfig(gio-unix-2.0)
+%if %{with pango}
+BuildRequires: pkgconfig(pangocairo)
+BuildRequires: pkgconfig(pangoft2)
+%endif
 BuildRequires: qmake-qt6
 BuildRequires: qt6-qtbase-tools
 BuildRequires: cmake(Qt6)
@@ -180,7 +188,7 @@ tdesktop-4.11.3-zlib-ng.patch
 tdesktop-3.3.2-system-minizip.patch
 tdesktop-4.15.6-compile.patch
 tdesktop-6.3.0-compile.patch
-tdesktop-7.1.5-qtify-integration.patch
+tdesktop-7.2.6-qtify-integration.patch
 
 %description
 Telegram is a non-profit cloud-based instant messaging service.
@@ -234,6 +242,11 @@ export CFLAGS="${CFLAGS:-%{optflags}} $(pkg-config --cflags gio-2.0)"
 	-DDESKTOP_APP_USE_GLIBC_WRAPS:BOOL=OFF \
 	-DDESKTOP_APP_DISABLE_CRASH_REPORTS:BOOL=ON \
 	-DDESKTOP_APP_DISABLE_QT_PLUGINS:BOOL=ON \
+%if %{with pango}
+	-DDESKTOP_APP_USE_PANGO:BOOL=ON \
+%else
+	-DDESKTOP_APP_USE_PANGO:BOOL=OFF \
+%endif
 	-DTDESKTOP_USE_PACKAGED_TGVOIP:BOOL=OFF \
 	-DTDESKTOP_DISABLE_REGISTER_CUSTOM_SCHEME:BOOL=ON \
 	-DTDESKTOP_DISABLE_DESKTOP_FILE_GENERATION:BOOL=ON \
