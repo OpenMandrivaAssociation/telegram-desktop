@@ -2,9 +2,9 @@ diff --git a/Telegram/CMakeLists.txt b/Telegram/CMakeLists.txt
 index d96697dd..b0caeb72 100644
 --- a/Telegram/CMakeLists.txt
 +++ b/Telegram/CMakeLists.txt
-@@ -89,7 +89,7 @@ PRIVATE
+@@ -87,7 +87,7 @@
+     desktop-app::lib_ffmpeg
      desktop-app::lib_stripe
-     desktop-app::external_rlottie
      desktop-app::external_zlib
 -    desktop-app::external_minizip
 +    minizip
@@ -15,7 +15,7 @@ diff --git a/Telegram/cmake/td_ui.cmake b/Telegram/cmake/td_ui.cmake
 index 1111111..2222222 100644
 --- a/Telegram/cmake/td_ui.cmake
 +++ b/Telegram/cmake/td_ui.cmake
-@@ -730,7 +730,7 @@ PRIVATE
+@@ -734,7 +734,7 @@
      desktop-app::lib_webrtc
      desktop-app::lib_spellcheck
      desktop-app::lib_stripe
