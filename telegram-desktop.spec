@@ -41,7 +41,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	7.2.6
+Version:	7.2.7
 Release:	1
 Group:	Networking/Instant Messenger
 
