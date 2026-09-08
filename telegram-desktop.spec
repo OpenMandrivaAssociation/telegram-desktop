@@ -187,9 +187,11 @@ tdesktop-7.2.6-qtify-integration.patch
 
 %description
 Telegram is a non-profit cloud-based instant messaging service.
-Users can send messages and exchange photos, videos, stickers, audio and files of any type.
-Its client-side code is open-source software but the source code for recent versions is not
-always immediately published, whereas its server-side code is closed-source and proprietary.
+Users can send messages and exchange photos, videos, stickers,
+audio and files of any type.
+Its client-side code is open-source software but the source code
+for recent versions is not always immediately published, whereas
+its server-side code is closed-source and proprietary.
 The service also provides APIs to independent developers.
 
 %prep
