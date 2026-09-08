@@ -1,5 +1,4 @@
 # Build conditionals (with - OFF, without - ON)...
-%bcond_with rlottie
 # FIXME as of 2.8.1, telegram-desktop crashes on startup with
 # an illegal instruction while calling global constructors
 # if built with clang.
@@ -47,7 +46,7 @@ Group:	Networking/Instant Messenger
 
 # Application and 3rd-party modules licensing:
 # * Telegram Desktop - GPLv3+ with OpenSSL exception -- main tarball;
-# * rlottie - LGPLv2+ -- static dependency;
+# * tlottie - MIT -- system static library since 7.2.7;
 # * qt_functions.cpp - LGPLv3 -- build-time dependency.
 License: GPLv3+ and LGPLv2+ and LGPLv3
 URL: https://github.com/telegramdesktop/%{appname}
@@ -60,13 +59,9 @@ Source0: https://github.com/telegramdesktop/tdesktop/releases/download/v%{versio
 
 Requires: hicolor-icon-theme
 
-# Telegram Desktop require patched version of rlottie since 1.8.0.
-# Pull Request pending: https://github.com/Samsung/rlottie/pull/252
-%if %{with rlottie}
-BuildRequires: pkgconfig(rlottie)
-%else
-Provides: bundled(rlottie) = 0~git
-%endif
+# 7.2.7 replaced rlottie with tlottie (Rust C API). Official Linux
+# docker pins the same 758c7cb snapshot as the cooker tlottie package.
+BuildRequires: pkgconfig(tlottie)
 
 # Telegram Desktop require patched version of lxqt-qtplugin.
 # Pull Request pending: https://github.com/lxqt/lxqt-qtplugin/pull/52
@@ -224,13 +219,6 @@ export CFLAGS="${CFLAGS:-%{optflags}} $(pkg-config --cflags gio-2.0)"
 %endif
 %if %{with ipo} && %{with mindbg} && %{without clang}
     	-DDESKTOP_APP_ENABLE_IPO_OPTIMIZATIONS:BOOL=ON \
-%endif
-%if %{with rlottie}
-	-DDESKTOP_APP_USE_PACKAGED_RLOTTIE:BOOL=ON \
-	-DDESKTOP_APP_LOTTIE_USE_CACHE:BOOL=OFF \
-%else
-	-DDESKTOP_APP_USE_PACKAGED_RLOTTIE:BOOL=OFF \
-	-Drlottie_DIR=`pwd`/../Telegram/ThirdParty/rlottie \
 %endif
 	-DTDESKTOP_API_ID=%{apiid} \
 	-DTDESKTOP_API_HASH=%{apihash} \
