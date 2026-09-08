@@ -36,6 +36,9 @@
 %if %{with mindbg}
 %global optflags %(echo %{optflags} | sed 's/-g3 /-gdwarf-5 -g1 /')
 %endif
+# dwz on the Telegram binary OOMs/fails in %%install after a successful link.
+%global _find_debuginfo_dwz_opts %{nil}
+%undefine _debugsource_packages
 
 Name: telegram-desktop
 # before every upgrade
