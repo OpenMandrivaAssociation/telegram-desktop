@@ -59,12 +59,20 @@ Summary: Telegram Desktop official messaging app
 # Upstream frequently forgets to make the -full release. When that happens,
 # use the package-source.sh script in this repository.
 Source0: https://github.com/telegramdesktop/tdesktop/releases/download/v%{version}/%{appname}-%{version}%{tarsuffix}.tar.gz
+# cooker x86_64 createrepo never indexes the new tlottie package (RPM is
+# on the file server; primary.xml is not). Unpack the same cooker RPM
+# so find_library(tlottie) works until metadata catches up.
+%ifarch x86_64
+Source10: tlottie-0.1.0-2-omv2690.x86_64.rpm
+%endif
 
 Requires: hicolor-icon-theme
 
 # 7.2.7 replaced rlottie with tlottie (Rust C API). Official Linux
 # docker pins the same 758c7cb snapshot as the cooker tlottie package.
+%ifnarch x86_64
 BuildRequires: pkgconfig(tlottie)
+%endif
 
 # Telegram Desktop require patched version of lxqt-qtplugin.
 # Pull Request pending: https://github.com/lxqt/lxqt-qtplugin/pull/52
@@ -73,6 +81,7 @@ Provides: bundled(lxqt-qtplugin) = 0.14.0~git
 # Compilers and tools...
 BuildRequires: desktop-file-utils
 BuildRequires: cmake
+BuildRequires: cpio
 
 # Development packages for Telegram Desktop...
 BuildRequires: cmake(Microsoft.GSL)
@@ -205,6 +214,11 @@ export LC_ALL=en_US.utf-8
 # Unbundling libraries...
 rm -rf Telegram/ThirdParty/{Catch,GSL,QR,SPMediaKeyTap,expected,libdbusmenu-qt,libtgvoip,lz4,variant,xxHash,mallocng,minizip,zlib}
 
+%ifarch x86_64
+mkdir -p _sys_tlottie
+rpm2cpio %{SOURCE10} | cpio -idm -D _sys_tlottie
+%endif
+
 # FIXME we currently DISABLE_QT_PLUGINS because they break the build
 export PATH=%{_libdir}/qt6/bin:$PATH
 # tg_owt public headers include gio/gio.h; pass glib flags at cmake time (not spec parse time)
@@ -243,7 +257,14 @@ export CFLAGS="${CFLAGS:-%{optflags}} $(pkg-config --cflags gio-2.0)"
 	-DTDESKTOP_USE_PACKAGED_TGVOIP:BOOL=OFF \
 	-DTDESKTOP_DISABLE_REGISTER_CUSTOM_SCHEME:BOOL=ON \
 	-DTDESKTOP_DISABLE_DESKTOP_FILE_GENERATION:BOOL=ON \
+%ifarch x86_64
+	-DTDESKTOP_LAUNCHER_BASENAME=%{launcher} \
+	-DCMAKE_PREFIX_PATH="$PWD/_sys_tlottie/usr" \
+	-DCMAKE_LIBRARY_PATH="$PWD/_sys_tlottie/usr/%{_lib}" \
+	-DCMAKE_INCLUDE_PATH="$PWD/_sys_tlottie/usr/include"
+%else
 	-DTDESKTOP_LAUNCHER_BASENAME=%{launcher}
+%endif
 
 %build
 touch build/changelog.txt
