@@ -62,9 +62,8 @@ Source0: https://github.com/telegramdesktop/tdesktop/releases/download/v%{versio
 # cooker x86_64 createrepo never indexes the new tlottie package (RPM is
 # on the file server; primary.xml is not). Unpack the same cooker RPM
 # so find_library(tlottie) works until metadata catches up.
-%ifarch x86_64
+# Source tag is unconditional: %%ifarch around SourceN breaks mock --buildsrpm.
 Source10: tlottie-0.1.0-2-omv2690.x86_64.rpm
-%endif
 
 Requires: hicolor-icon-theme
 
