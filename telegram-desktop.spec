@@ -43,7 +43,7 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	7.2.7
+Version:	7.2.8
 Release:	1
 Group:	Networking/Instant Messenger
 
@@ -186,7 +186,7 @@ tdesktop-4.11.3-zlib-ng.patch
 tdesktop-3.3.2-system-minizip.patch
 tdesktop-4.15.6-compile.patch
 tdesktop-6.3.0-compile.patch
-tdesktop-7.2.6-qtify-integration.patch
+tdesktop-7.2.8-qtify-integration.patch
 
 %description
 Telegram is a non-profit cloud-based instant messaging service.

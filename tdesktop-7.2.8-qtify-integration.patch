@@ -1,0 +1,4973 @@
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -58,7 +58,6 @@
+ include(cmake/external/qt/package.cmake)
+ 
+ set(desktop_app_skip_libs
+-    glibmm
+     variant
+ )
+ 
+diff -Nru a/Telegram/CMakeLists.txt b/Telegram/CMakeLists.txt
+--- a/Telegram/CMakeLists.txt	2026-09-10 21:11:45.000000000 +0200
++++ b/Telegram/CMakeLists.txt	2026-09-11 19:30:41.269188209 +0200
+@@ -74,6 +74,7 @@
+     tdesktop::td_tde2e
+     tdesktop::td_ui
+     tdesktop::td_webauthn
++    desktop-app::external_glib
+     desktop-app::lib_webrtc
+     desktop-app::lib_base
+     desktop-app::lib_crl
+diff -Nru a/Telegram/SourceFiles/core/update_checker.cpp b/Telegram/SourceFiles/core/update_checker.cpp
+--- a/Telegram/SourceFiles/core/update_checker.cpp	2026-09-10 21:11:45.000000000 +0200
++++ b/Telegram/SourceFiles/core/update_checker.cpp	2026-09-11 19:30:41.269631465 +0200
+@@ -41,11 +41,15 @@
+ 
+ #include <ksandbox.h>
+ 
++#if 0
++// Entire Linux Flatpak auto-update gi path disabled (headers and types removed).
+ #if !defined Q_OS_WIN && !defined Q_OS_MAC
+ #include "base/platform/linux/base_linux_xdp_utilities.h"
+ 
+-#include <flatpakportal/flatpakportal.hpp>
++// flatpakportal/flatpakportal.hpp removed (cppgir / glibmm / portal gi code gone).
++// Flatpak builds now use the generic relaunch / external updater path.
+ #endif // !Q_OS_WIN && !Q_OS_MAC
++#endif
+ 
+ extern "C" {
+ #include <openssl/rsa.h>
+@@ -104,8 +108,7 @@
+ using Loader = MTP::AbstractDedicatedLoader;
+ 
+ #if !defined Q_OS_WIN && !defined Q_OS_MAC
+-using namespace gi::repository;
+-namespace GObject = gi::repository::GObject;
++// using namespace gi::repository;  // removed (no more glibmm / cppgir / gi)
+ #endif // !Q_OS_WIN && !Q_OS_MAC
+ 
+ struct BIODeleter {
+@@ -263,36 +266,22 @@
+ };
+ 
+ #if !defined Q_OS_WIN && !defined Q_OS_MAC
++// Intentionally disabled: RPM packages use the distro package manager for updates,
++// not the Flatpak portal auto-update path (which also required glibmm/cppgir).
+ class FlatpakChecker : public Checker {
+ public:
+-	FlatpakChecker(bool testing);
+-
+-	void start() override;
+-
+-	bool poll() const override;
+-
+-	~FlatpakChecker();
+-
+-private:
+-	FlatpakPortal::Flatpak _interface;
+-	FlatpakPortal::FlatpakUpdateMonitor _monitor;
+-	QFileSystemWatcher _watcher;
+-	ulong _updateAvailableSignal = 0;
+-
++	FlatpakChecker(bool testing) : Checker(testing) {}
++	void start() override { done(nullptr); }
++	bool poll() const override { return false; }
++	~FlatpakChecker() = default;
+ };
+ 
+ class FlatpakLoader : public Loader {
+ public:
+-	FlatpakLoader(FlatpakPortal::FlatpakUpdateMonitor monitor);
+-
+-	~FlatpakLoader();
+-
++	FlatpakLoader() = delete;
++	~FlatpakLoader() = default;
+ private:
+-	void startLoading() override;
+-
+-	FlatpakPortal::FlatpakUpdateMonitor _monitor;
+-	ulong _progressSignal = 0;
+-
++	void startLoading() override {}
+ };
+ #endif // !Q_OS_WIN && !Q_OS_MAC
+ 
+@@ -1597,6 +1586,7 @@
+ 	};
+ }
+ 
++#if 0
+ #if !defined Q_OS_WIN && !defined Q_OS_MAC
+ FlatpakChecker::FlatpakChecker(bool testing)
+ : Checker(testing)
+diff -Nru a/Telegram/SourceFiles/media/system_media_controls_manager.cpp b/Telegram/SourceFiles/media/system_media_controls_manager.cpp
+--- a/Telegram/SourceFiles/media/system_media_controls_manager.cpp	2026-09-10 21:11:45.000000000 +0200
++++ b/Telegram/SourceFiles/media/system_media_controls_manager.cpp	2026-09-11 19:30:41.269775117 +0200
+@@ -9,6 +9,7 @@
+ 
+ #include "base/platform/base_platform_system_media_controls.h"
+ #include "core/application.h"
++#include "core/sandbox.h"
+ #include "core/core_settings.h"
+ #include "core/version.h"
+ #include "data/data_document_media.h"
+@@ -29,6 +30,17 @@
+ #include "media/system_media_controls_video.h"
+ #include "ui/text/format_song_document_name.h"
+ 
++#include <QtDBus/QDBusAbstractAdaptor>
++#include <QtDBus/QDBusConnection>
++#include <QtDBus/QDBusMessage>
++#include <QtDBus/QDBusObjectPath>
++#include <QtCore/QFile>
++#include <QtCore/QDir>
++#include <QtCore/QUrl>
++#include <QtGui/QGuiApplication>
++#include <QtCore/QCoreApplication>
++
++
+ namespace Media {
+ namespace {
+ 
+diff -Nru a/Telegram/SourceFiles/platform/linux/integration_linux.cpp b/Telegram/SourceFiles/platform/linux/integration_linux.cpp
+--- a/Telegram/SourceFiles/platform/linux/integration_linux.cpp	2026-09-10 21:11:45.000000000 +0200
++++ b/Telegram/SourceFiles/platform/linux/integration_linux.cpp	2026-09-11 19:30:41.270294683 +0200
+@@ -12,16 +12,16 @@
+ #include "base/platform/linux/base_linux_xdp_utilities.h"
+ #include "core/sandbox.h"
+ #include "core/application.h"
+-#if QT_VERSION < QT_VERSION_CHECK(6, 5, 0)
+ #include "core/core_settings.h"
+-#endif
+-#include "base/random.h"
+ #include "base/qt_connection.h"
+ 
+ #include <QtCore/QAbstractEventDispatcher>
+-
+-#include <gio/gio.hpp>
+-#include <xdpinhibit/xdpinhibit.hpp>
++#include <QtCore/QCoreApplication>
++#include <QtGui/QGuiApplication>
++#include <QtGui/QFileOpenEvent>
++#include <QtGui/QIcon>
++#include <QtDBus/QDBusConnection>
++#include <QtDBus/QDBusAbstractAdaptor>
+ 
+ #ifdef __GLIBC__
+ #include <malloc.h>
+@@ -30,91 +30,102 @@
+ namespace Platform {
+ namespace {
+ 
+-using namespace gi::repository;
+-namespace GObject = gi::repository::GObject;
++// FreeDesktop Application interface for DBusActivatable sessions
++// (Plasma / LXQt). Path is / + app-id with '.' -> '/'.
++// https://specifications.freedesktop.org/desktop-entry-spec/
++class ApplicationAdaptor final : public QDBusAbstractAdaptor {
++	Q_OBJECT
++	Q_CLASSINFO("D-Bus Interface", "org.freedesktop.Application")
+ 
+-class Application : public Gio::impl::ApplicationImpl {
+ public:
+-	Application();
++	explicit ApplicationAdaptor(QObject *parent)
++	: QDBusAbstractAdaptor(parent) {
++	}
++
++public Q_SLOTS:
++	void Activate(const QVariantMap &platformData) {
++		applyPlatformData(platformData);
++		Core::Sandbox::Instance().customEnterFromEventLoop([] {
++			Core::App().activate();
++		});
++	}
+ 
+-	void before_emit_(GLib::Variant platformData) noexcept override {
+-		if (Platform::IsWayland()) {
+-			static const auto keys = {
+-				"activation-token",
+-				"desktop-startup-id",
+-			};
+-			for (const auto &key : keys) {
+-				if (auto token = platformData.lookup_value(key)) {
+-					qputenv(
+-						"XDG_ACTIVATION_TOKEN",
+-						token.get_string(nullptr).c_str());
+-					break;
+-				}
++	void Open(const QStringList &uris, const QVariantMap &platformData) {
++		applyPlatformData(platformData);
++		Core::Sandbox::Instance().customEnterFromEventLoop([=] {
++			for (const auto &uri : uris) {
++				// Brace-init avoids most-vexing-parse (function declaration).
++				QFileOpenEvent openEvent{QUrl(uri)};
++				QCoreApplication::sendEvent(qApp, &openEvent);
+ 			}
+-		}
++		});
+ 	}
+ 
+-	void activate_() noexcept override {
++	void ActivateAction(
++			const QString &actionName,
++			const QVariantList &,
++			const QVariantMap &platformData) {
++		applyPlatformData(platformData);
++		if (actionKeyIsQuit(actionName)) {
++			Core::Sandbox::Instance().customEnterFromEventLoop([] {
++				Core::Quit();
++			});
++			return;
++		}
+ 		Core::Sandbox::Instance().customEnterFromEventLoop([] {
+ 			Core::App().activate();
+ 		});
+ 	}
+ 
+-	void open_(
+-			gi::Collection<gi::DSpan, ::GFile*, gi::transfer_none_t> files,
+-			const gi::cstring_v hint) noexcept override {
+-		for (auto file : files) {
+-			QFileOpenEvent e(QUrl(QString::fromStdString(file.get_uri())));
+-			QGuiApplication::sendEvent(qApp, &e);
+-		}
++private:
++	[[nodiscard]] static bool actionKeyIsQuit(const QString &actionName) {
++		return actionName == u"quit"_q || actionName == u"Quit"_q;
+ 	}
+ 
+-	void add_platform_data_(
+-			GLib::VariantBuilder_Ref builder) noexcept override {
+-		if (Platform::IsWayland()) {
+-			const auto token = qgetenv("XDG_ACTIVATION_TOKEN");
+-			if (!token.isEmpty()) {
+-				builder.add_value(
+-					GLib::Variant::new_dict_entry(
+-						GLib::Variant::new_string("activation-token"),
+-						GLib::Variant::new_variant(
+-							GLib::Variant::new_string(token.toStdString()))));
+-				qunsetenv("XDG_ACTIVATION_TOKEN");
++	void applyPlatformData(const QVariantMap &platformData) {
++		// Wayland activation token from the launcher / portal.
++		for (const auto &key : {
++			u"activation-token"_q,
++			u"desktop-startup-id"_q,
++		}) {
++			const auto value = platformData.value(key).toString();
++			if (!value.isEmpty()) {
++				qputenv("XDG_ACTIVATION_TOKEN", value.toUtf8());
++				return;
+ 			}
+ 		}
+ 	}
+ };
+ 
+-Application::Application()
+-: Gio::impl::ApplicationImpl(this) {
+-	const auto appId = QGuiApplication::desktopFileName().toStdString();
+-	if (Gio::Application::id_is_valid(appId)) {
+-		set_application_id(appId);
+-	}
+-	set_flags(Gio::ApplicationFlags::HANDLES_OPEN_);
+-
+-	auto actionMap = Gio::ActionMap(*this);
+-
+-	auto quitAction = Gio::SimpleAction::new_("quit");
+-	quitAction.signal_activate().connect([](
+-			Gio::SimpleAction,
+-			GLib::Variant parameter) {
+-		Core::Sandbox::Instance().customEnterFromEventLoop([] {
+-			Core::Quit();
+-		});
+-	});
+-	actionMap.add_action(quitAction);
+-}
+-
+-gi::ref_ptr<Application> MakeApplication() {
+-	const auto result = gi::make_ref<Application>();
+-	if (const auto registered = result->register_(); !registered) {
+-		LOG(("App Error: Failed to register: %1").arg(
+-			registered.error().message_().c_str()));
+-		return nullptr;
++class ApplicationObject final : public QObject {
++public:
++	ApplicationObject() {
++		new ApplicationAdaptor(this);
++		auto bus = QDBusConnection::sessionBus();
++		const auto id = QGuiApplication::desktopFileName();
++		if (id.isEmpty()) {
++			return;
++		}
++
++		// FreeDesktop: org.telegram.desktop -> /org/telegram/desktop
++		auto path = '/' + id;
++		path.replace('.', '/');
++
++		// Own the well-known name when possible (non-sandboxed package).
++		if (!bus.registerService(id)) {
++			LOG(("App Info: D-Bus name %1 already taken "
++				"(another instance?). Still exporting %2.").arg(id, path));
++		}
++		if (!bus.registerObject(
++				path,
++				this,
++				QDBusConnection::ExportAdaptors)) {
++			LOG(("App Error: Failed to export D-Bus object %1").arg(path));
++		}
+ 	}
+-	return result;
+-}
++};
++
++} // namespace
+ 
+ class LinuxIntegration final : public Integration, public base::has_weak_ptr {
+ public:
+@@ -123,44 +134,22 @@
+ 	void init() override;
+ 
+ private:
+-	[[nodiscard]] XdpInhibit::Inhibit inhibit() {
+-		return _inhibitProxy;
+-	}
+-
+-	void initInhibit();
+-
+-	const gi::ref_ptr<Application> _application;
+-	XdpInhibit::InhibitProxy _inhibitProxy;
+-#if QT_VERSION < QT_VERSION_CHECK(6, 5, 0)
+-	base::Platform::XDP::SettingWatcher _darkModeWatcher;
+-#endif // Qt < 6.5.0
++	std::unique_ptr<ApplicationObject> _application;
+ #ifdef __GLIBC__
+ 	base::qt_connection _memoryTrim;
+ 	crl::time _memoryTrimmed = 0;
+ #endif // __GLIBC__
+ };
+ 
+-LinuxIntegration::LinuxIntegration()
+-: _application(MakeApplication())
+-#if QT_VERSION < QT_VERSION_CHECK(6, 5, 0)
+-, _darkModeWatcher(
+-	"org.freedesktop.appearance",
+-	"color-scheme",
+-	[](GLib::Variant value) {
+-		Core::Sandbox::Instance().customEnterFromEventLoop([&] {
+-			Core::App().settings().setSystemDarkMode(value.get_uint32() == 1);
+-		});
+-})
+-#endif // Qt < 6.5.0
+-{
++LinuxIntegration::LinuxIntegration() {
+ 	LOG(("Icon theme: %1").arg(QIcon::themeName()));
+ 	LOG(("Fallback icon theme: %1").arg(QIcon::fallbackThemeName()));
+ 
+-	if (!QCoreApplication::eventDispatcher()->inherits(
+-		"QEventDispatcherGlib")) {
+-		g_warning("Qt is running without GLib event loop integration, "
+-			"expect various functionality to not to work.");
+-	}
++	// Platform::start() sets desktopFileName before CreateIntegration().
++	// Export org.freedesktop.Application so DBusActivatable=true works and
++	// notification / panel activation does not hit
++	// "No such object path /org/telegram/desktop".
++	_application = std::make_unique<ApplicationObject>();
+ 
+ #ifdef __GLIBC__
+ 	_memoryTrim = QObject::connect(
+diff -Nru a/Telegram/SourceFiles/platform/linux/launcher_linux.cpp b/Telegram/SourceFiles/platform/linux/launcher_linux.cpp
+--- a/Telegram/SourceFiles/platform/linux/launcher_linux.cpp	2026-09-10 21:11:45.000000000 +0200
++++ b/Telegram/SourceFiles/platform/linux/launcher_linux.cpp	2026-09-11 19:30:41.270424065 +0200
+@@ -9,18 +9,17 @@
+ 
+ #include "core/crash_reports.h"
+ #include "core/update_checker.h"
+-#include "webview/platform/linux/webview_linux_webkitgtk.h"
+ 
+ #include <QtWidgets/QApplication>
++#include <QtCore/QProcess>
++#include <QtCore/QStringList>
++
+ #include <ksandbox.h>
+-#include <glib/glib.hpp>
+ 
+ #ifdef __GLIBC__
+ #include <malloc.h>
+ #endif // __GLIBC__
+ 
+-using namespace gi::repository;
+-
+ namespace Platform {
+ 
+ Launcher::Launcher(int argc, char *argv[])
+@@ -31,13 +30,6 @@
+ }
+ 
+ int Launcher::exec() {
+-	for (auto i = arguments().begin(), e = arguments().end(); i != e; ++i) {
+-		if (*i == u"-webviewhelper"_q && std::distance(i, e) > 1) {
+-			Webview::WebKitGTK::SetSocketPath((i + 1)->toStdString());
+-			return Webview::WebKitGTK::Exec();
+-		}
+-	}
+-
+ 	return Core::Launcher::exec();
+ }
+ 
+diff -Nru a/Telegram/SourceFiles/platform/linux/main_window_linux.cpp b/Telegram/SourceFiles/platform/linux/main_window_linux.cpp
+--- a/Telegram/SourceFiles/platform/linux/main_window_linux.cpp	2026-09-10 21:11:45.000000000 +0200
++++ b/Telegram/SourceFiles/platform/linux/main_window_linux.cpp	2026-09-11 19:30:41.270524366 +0200
+@@ -38,7 +38,8 @@
+ #include <QtWidgets/QLineEdit>
+ #include <QtWidgets/QTextEdit>
+ 
+-#include <gio/gio.hpp>
++#include <QtDBus/QDBusMessage>
++#include <QtDBus/QDBusConnection>
+ 
+ namespace Platform {
+ namespace {
+diff -Nru a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp b/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp
+--- a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp	2026-09-10 21:11:45.000000000 +0200
++++ b/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp	2026-09-11 19:30:41.272473260 +0200
+@@ -1,4 +1,3 @@
+-
+ /*
+ This file is part of Telegram Desktop,
+ the official desktop application for the Telegram messaging service.
+@@ -29,134 +28,54 @@
+ #include <QtCore/QBuffer>
+ #include <QtCore/QVersionNumber>
+ #include <QtGui/QGuiApplication>
++#include <QtDBus/QDBusInterface>
++#include <QtDBus/QDBusConnection>
++#include <QtDBus/QDBusReply>
++#include <QtDBus/QDBusServiceWatcher>
++#include <QtDBus/QDBusArgument>
++#include <QtDBus/QDBusMetaType>
++#include <QtDBus/QDBusMessage>
+ 
+ #include <ksandbox.h>
+ 
+-#include <xdgnotifications/xdgnotifications.hpp>
+-
+-#include <dlfcn.h>
++// Pure QtDBus org.freedesktop.Notifications — Plasma / LXQt focused.
+ 
+ namespace Platform {
+ namespace Notifications {
+ namespace {
+ 
+-using namespace gi::repository;
+-namespace GObject = gi::repository::GObject;
+-
+ constexpr auto kService = "org.freedesktop.Notifications";
+ constexpr auto kObjectPath = "/org/freedesktop/Notifications";
++constexpr auto kInterface = "org.freedesktop.Notifications";
+ 
+-struct ServerInformation {
+-	std::string name;
+-	std::string vendor;
+-	QVersionNumber version;
+-	QVersionNumber specVersion;
+-};
+-
+-bool ServiceRegistered = false;
+-ServerInformation CurrentServerInformation;
+-std::vector<std::string> CurrentCapabilities;
+-
+-[[nodiscard]] const auto &OptionGNotification() {
+-	static const auto &result = base::options::lookup<bool>(
+-		Window::Notifications::kOptionGNotification);
+-	return result;
+-}
+-
+-[[nodiscard]] bool HasCapability(const char *value) {
+-	return ranges::contains(CurrentCapabilities, value);
+-}
+-
+-std::optional<base::Platform::DBus::ServiceWatcher> CreateServiceWatcher() {
+-	auto connection = Gio::bus_get_sync(Gio::BusType::SESSION_, nullptr);
+-	if (!connection) {
++[[nodiscard]] QVariant MakeImageHint(const QImage &image) {
++	if (image.isNull()) {
+ 		return {};
+ 	}
+-
+-	const auto activatable = [&] {
+-		const auto names = base::Platform::DBus::ListActivatableNames(
+-			connection.gobj_());
+-
+-		if (!names) {
+-			// avoid service restart loop in sandboxed environments
+-			return true;
+-		}
+-
+-		return ranges::contains(*names, kService);
+-	}();
+-
+-	return std::make_optional<base::Platform::DBus::ServiceWatcher>(
+-		connection.gobj_(),
+-		kService,
+-		[=](
+-			const std::string &service,
+-			const std::string &oldOwner,
+-			const std::string &newOwner) {
+-			Core::Sandbox::Instance().customEnterFromEventLoop([&] {
+-				if (activatable && newOwner.empty()) {
+-					Core::App().notifications().clearAll();
+-				} else {
+-					Core::App().notifications().createManager();
+-				}
+-			});
+-		});
+-}
+-
+-void StartServiceAsync(Gio::DBusConnection connection, Fn<void()> callback) {
+-	namespace DBus = base::Platform::DBus;
+-	DBus::StartServiceByNameAsync(
+-		connection.gobj_(),
+-		kService,
+-		[=](Fn<DBus::Result<DBus::StartReply>()> result) {
+-			Core::Sandbox::Instance().customEnterFromEventLoop([&] {
+-				// get the error if any
+-				if (const auto ret = result(); !ret) {
+-					const auto &error = *static_cast<GLib::Error*>(
+-						ret.error().get());
+-
+-					if (error.gobj_()->domain != G_DBUS_ERROR
+-							|| error.code_()
+-								!= G_DBUS_ERROR_SERVICE_UNKNOWN) {
+-						Gio::DBusErrorNS_::strip_remote_error(error);
+-						LOG(("Native Notification Error: %1").arg(
+-							error.message_().c_str()));
+-					}
+-				}
+-
+-				callback();
+-			});
+-		});
+-}
+-
+-std::string GetImageKey() {
+-	const auto &specVersion = CurrentServerInformation.specVersion;
+-	if (specVersion >= QVersionNumber(1, 2)) {
+-		return "image-data";
+-	} else if (specVersion == QVersionNumber(1, 1)) {
+-		return "image_data";
+-	}
+-	return "icon_data";
+-}
+-
+-bool UseGNotification() {
+-	if (!Gio::Application::get_default()) {
+-		return false;
+-	}
+-
+-	if (OptionGNotification().value()) {
+-		return true;
+-	}
+-
+-	return KSandbox::isFlatpak() && !ServiceRegistered;
++	const auto argb = image.convertToFormat(QImage::Format_RGBA8888);
++	QDBusArgument arg;
++	arg.beginStructure();
++	arg << argb.width()
++		<< argb.height()
++		<< argb.bytesPerLine()
++		<< true
++		<< 8
++		<< 4
++		<< QByteArray(
++			reinterpret_cast<const char*>(argb.constBits()),
++			argb.sizeInBytes());
++	arg.endStructure();
++	return QVariant::fromValue(arg);
+ }
+ 
+ } // namespace
+ 
+-class Manager::Private : public base::has_weak_ptr {
++class Manager::Private : public QObject {
++	Q_OBJECT
++
+ public:
+ 	explicit Private(not_null<Manager*> manager);
+-
+-	void init(XdgNotifications::NotificationsProxy proxy);
++	~Private();
+ 
+ 	void showNotification(
+ 		NotificationInfo &&info,
+@@ -167,393 +86,187 @@
+ 	void clearFromSublist(not_null<Data::SavedSublist*> sublist);
+ 	void clearFromHistory(not_null<History*> history);
+ 	void clearFromSession(not_null<Main::Session*> session);
+-	void clearNotification(NotificationId id);
+ 	void invokeIfNotInhibited(Fn<void()> callback);
+ 
++	[[nodiscard]] bool hasCapability(const char *cap) const;
++
++private Q_SLOTS:
++	void onActionInvoked(uint id, const QString &actionKey);
++	void onNotificationClosed(uint id, uint reason);
++
+ private:
+-	struct NotificationData : public base::has_weak_ptr {
+-		std::variant<v::null_t, uint, std::string> id;
+-		rpl::lifetime lifetime;
+-	};
+-	using Notification = std::unique_ptr<NotificationData>;
++	void ensureInterface();
++	void connectSignals();
++	void refreshServerInfo();
++	void clearNotificationByDBusId(uint id);
+ 
+ 	const not_null<Manager*> _manager;
+-	Gio::Application _application;
+-	XdgNotifications::NotificationsProxy _proxy;
+-	XdgNotifications::Notifications _interface;
+-	Media::Audio::LocalDiskCache _sounds;
+-	base::flat_map<
+-		ContextId,
+-		base::flat_map<MsgId, Notification>> _notifications;
+-	rpl::lifetime _lifetime;
+-
++	std::unique_ptr<QDBusInterface> _interface;
++	QDBusServiceWatcher _watcher;
++	base::flat_map<ContextId, base::flat_map<MsgId, uint>> _notifications;
++	QStringList _capabilities;
++	bool _inhibited = false;
+ };
+ 
+-bool SkipToastForCustom() {
+-	return false;
+-}
+-
+-void MaybePlaySoundForCustom(Fn<void()> playSound) {
+-	playSound();
+-}
+-
+-void MaybeFlashBounceForCustom(Fn<void()> flashBounce) {
+-	flashBounce();
+-}
+-
+-bool WaitForInputForCustom() {
+-	return true;
+-}
+-
+-bool Supported() {
+-	return ServiceRegistered || UseGNotification();
+-}
+-
+-bool Enforced() {
+-	// Wayland doesn't support positioning
+-	// and custom notifications don't work here
+-	return IsWayland()
+-		|| (Gio::Application::get_default() && OptionGNotification().value());
+-}
+-
+-bool ByDefault() {
+-	// The capabilities are static, equivalent to 'body' and 'actions' only
+-	if (UseGNotification()) {
+-		return false;
+-	}
+-
+-	// A list of capabilities that offer feature parity
+-	// with custom notifications
+-	return ranges::all_of(std::array{
+-		// To show message content
+-		"body",
+-		// To have buttons on notifications
+-		"actions",
+-		// To have quick reply
+-		"inline-reply",
+-	}, HasCapability) && ranges::any_of(std::array{
+-		// To not to play sound with Don't Disturb activated
+-		"sound",
+-		"inhibitions",
+-	}, HasCapability);
+-}
+-
+-bool VolumeSupported() {
+-	return UseGNotification() || !HasCapability("sound");
+-}
+-
+-void Create(Window::Notifications::System *system) {
+-	static const auto ServiceWatcher = CreateServiceWatcher();
+-
+-	const auto managerSetter = [=](
+-			XdgNotifications::NotificationsProxy proxy) {
+-		Core::Sandbox::Instance().customEnterFromEventLoop([&] {
+-			system->setManager([=] {
+-				auto manager = std::make_unique<Manager>(system);
+-				manager->_private->init(proxy);
+-				return manager;
+-			});
+-		});
+-	};
+-
+-	const auto counter = std::make_shared<int>(2);
+-	const auto oneReady = [=](XdgNotifications::NotificationsProxy proxy) {
+-		if (!--*counter) {
+-			managerSetter(proxy);
+-		}
+-	};
+-
+-	XdgNotifications::NotificationsProxy::new_for_bus(
+-		Gio::BusType::SESSION_,
+-		Gio::DBusProxyFlags::NONE_,
+-		kService,
+-		kObjectPath,
+-		[=](GObject::Object, Gio::AsyncResult res) {
+-			auto result =
+-				XdgNotifications::NotificationsProxy::new_for_bus_finish(res);
+-
+-			if (result) {
+-				ServiceRegistered = bool(result->get_name_owner());
++Manager::Private::Private(not_null<Manager*> manager)
++: QObject()
++, _manager(manager)
++, _watcher(
++	QString::fromLatin1(kService),
++	QDBusConnection::sessionBus(),
++	QDBusServiceWatcher::WatchForOwnerChange) {
++	QObject::connect(
++		&_watcher,
++		&QDBusServiceWatcher::serviceOwnerChanged,
++		this,
++		[=](const QString &, const QString &, const QString &now) {
++			if (now.isEmpty()) {
++				clearAll();
++				_capabilities.clear();
+ 			} else {
+-				Gio::DBusErrorNS_::strip_remote_error(result.error());
+-				LOG(("Native Notification Error: %1").arg(
+-					result.error().message_().c_str()));
+-				ServiceRegistered = false;
++				ensureInterface();
++				connectSignals();
++				refreshServerInfo();
+ 			}
+-
+-			if (!ServiceRegistered) {
+-				CurrentServerInformation = {};
+-				CurrentCapabilities = {};
+-				managerSetter({});
+-				return;
+-			}
+-
+-			auto proxy = *result;
+-			auto interface = XdgNotifications::Notifications(proxy);
+-
+-			interface.call_get_server_information([=](
+-					GObject::Object,
+-					Gio::AsyncResult res) mutable {
+-				const auto result =
+-					interface.call_get_server_information_finish(res);
+-				if (result) {
+-					CurrentServerInformation = {
+-						std::get<1>(*result),
+-						std::get<2>(*result),
+-						QVersionNumber::fromString(
+-							QString::fromStdString(std::get<3>(*result))
+-						).normalized(),
+-						QVersionNumber::fromString(
+-							QString::fromStdString(std::get<4>(*result))
+-						).normalized(),
+-					};
+-				} else {
+-					Gio::DBusErrorNS_::strip_remote_error(result.error());
+-					LOG(("Native Notification Error: %1").arg(
+-						result.error().message_().c_str()));
+-					CurrentServerInformation = {};
+-				}
+-				oneReady(proxy);
+-			});
+-
+-			interface.call_get_capabilities([=](
+-					GObject::Object,
+-					Gio::AsyncResult res) mutable {
+-				const auto result = interface.call_get_capabilities_finish(
+-					res);
+-				if (result) {
+-					CurrentCapabilities = std::get<1>(*result)
+-						| ranges::to<std::vector<std::string>>;
+-				} else {
+-					Gio::DBusErrorNS_::strip_remote_error(result.error());
+-					LOG(("Native Notification Error: %1").arg(
+-						result.error().message_().c_str()));
+-					CurrentCapabilities = {};
+-				}
+-				oneReady(proxy);
+-			});
+ 		});
++	ensureInterface();
++	connectSignals();
++	refreshServerInfo();
+ }
+ 
+-Manager::Private::Private(not_null<Manager*> manager)
+-: _manager(manager)
+-, _application(Gio::Application::get_default())
+-, _sounds(cWorkingDir() + u"tdata/audio_cache"_q) {
+-	const auto &serverInformation = CurrentServerInformation;
+-
+-	if (!serverInformation.name.empty()) {
+-		LOG(("Notification daemon product name: %1")
+-			.arg(serverInformation.name.c_str()));
+-	}
+-
+-	if (!serverInformation.vendor.empty()) {
+-		LOG(("Notification daemon vendor name: %1")
+-			.arg(serverInformation.vendor.c_str()));
+-	}
+-
+-	if (!serverInformation.version.isNull()) {
+-		LOG(("Notification daemon version: %1")
+-			.arg(serverInformation.version.toString()));
+-	}
+-
+-	if (!serverInformation.specVersion.isNull()) {
+-		LOG(("Notification daemon specification version: %1")
+-			.arg(serverInformation.specVersion.toString()));
+-	}
+-
+-	if (!CurrentCapabilities.empty()) {
+-		LOG(("Notification daemon capabilities: %1").arg(
+-			ranges::fold_left(
+-				CurrentCapabilities,
+-				"",
+-				[](const std::string &a, const std::string &b) {
+-					return a + (a.empty() ? "" : ", ") + b;
+-				}).c_str()));
+-	}
+-
+-	if (auto actionMap = Gio::ActionMap(_application)) {
+-		const auto dictToNotificationId = [](GLib::VariantDict dict) {
+-			return NotificationId{
+-				.contextId = ContextId{
+-					.sessionId = dict.lookup_value("session").get_uint64(),
+-					.peerId = PeerId(dict.lookup_value("peer").get_uint64()),
+-					.topicRootId = MsgId(
+-						dict.lookup_value("topic").get_int64()),
+-					.monoforumPeerId = PeerId(dict.lookup_value(
+-						"monoforumpeer").get_uint64()),
+-				},
+-				.msgId = dict.lookup_value("msgid").get_int64(),
+-			};
+-		};
+-
+-		const auto notificationIdVariantType = GLib::VariantType::new_(
+-			"a{sv}");
+-
+-		auto activate = Gio::SimpleAction::new_(
+-			"notification-activate",
+-			notificationIdVariantType);
+-
+-		actionMap.add_action(activate);
+-		_lifetime.add([=]() mutable {
+-			actionMap.remove_action("notification-activate");
+-		});
+-
+-		activate.signal_activate().connect([=](
+-				Gio::SimpleAction,
+-				GLib::Variant parameter) {
+-			Core::Sandbox::Instance().customEnterFromEventLoop([&] {
+-				_manager->notificationActivated(
+-					dictToNotificationId(GLib::VariantDict::new_(parameter)));
+-			});
+-		});
+-
+-		auto markAsRead = Gio::SimpleAction::new_(
+-			"notification-mark-as-read",
+-			notificationIdVariantType);
+-
+-		actionMap.add_action(markAsRead);
+-		_lifetime.add([=]() mutable {
+-			actionMap.remove_action("notification-mark-as-read");
+-		});
+-
+-		markAsRead.signal_activate().connect([=](
+-				Gio::SimpleAction,
+-				GLib::Variant parameter) {
+-			Core::Sandbox::Instance().customEnterFromEventLoop([&] {
+-				_manager->notificationReplied(
+-					dictToNotificationId(GLib::VariantDict::new_(parameter)),
+-					{});
+-			});
+-		});
+-
+-		auto customAction = Gio::SimpleAction::new_(
+-			"notification-action",
+-			notificationIdVariantType);
+-
+-		actionMap.add_action(customAction);
+-		_lifetime.add([=]() mutable {
+-			actionMap.remove_action("notification-action");
+-		});
++Manager::Private::~Private() = default;
+ 
+-		customAction.signal_activate().connect([=](
+-				Gio::SimpleAction,
+-				GLib::Variant parameter) {
+-			Core::Sandbox::Instance().customEnterFromEventLoop([&] {
+-				auto dict = GLib::VariantDict::new_(parameter);
+-				auto action = dict.lookup_value("action");
+-				if (!action) {
+-					return;
+-				}
+-				_manager->notificationActionActivated(
+-					dictToNotificationId(dict),
+-					QString::fromUtf8(action.get_string(nullptr).c_str()));
+-			});
+-		});
++void Manager::Private::ensureInterface() {
++	if (_interface && _interface->isValid()) {
++		return;
++	}
++	_interface = std::make_unique<QDBusInterface>(
++		QString::fromLatin1(kService),
++		QString::fromLatin1(kObjectPath),
++		QString::fromLatin1(kInterface),
++		QDBusConnection::sessionBus());
++}
++
++void Manager::Private::connectSignals() {
++	auto bus = QDBusConnection::sessionBus();
++	const auto service = QString::fromLatin1(kService);
++	const auto path = QString::fromLatin1(kObjectPath);
++	const auto iface = QString::fromLatin1(kInterface);
++
++	// Drop previous match rules before re-subscribing (service restart).
++	bus.disconnect(
++		service,
++		path,
++		iface,
++		u"ActionInvoked"_q,
++		this,
++		SLOT(onActionInvoked(uint,QString)));
++	bus.disconnect(
++		service,
++		path,
++		iface,
++		u"NotificationClosed"_q,
++		this,
++		SLOT(onNotificationClosed(uint,uint)));
++
++	// Requires Q_OBJECT on this class so the meta-object has the slots.
++	if (!bus.connect(
++			service,
++			path,
++			iface,
++			u"ActionInvoked"_q,
++			this,
++			SLOT(onActionInvoked(uint,QString)))) {
++		LOG(("Native Notification Error: failed to connect ActionInvoked: %1"
++			).arg(bus.lastError().message()));
++	}
++	if (!bus.connect(
++			service,
++			path,
++			iface,
++			u"NotificationClosed"_q,
++			this,
++			SLOT(onNotificationClosed(uint,uint)))) {
++		LOG(("Native Notification Error: failed to connect NotificationClosed: %1"
++			).arg(bus.lastError().message()));
+ 	}
+ }
+ 
+-void Manager::Private::init(XdgNotifications::NotificationsProxy proxy) {
+-	_proxy = proxy;
+-	_interface = proxy;
+-
+-	if (!_interface) {
++void Manager::Private::refreshServerInfo() {
++	ensureInterface();
++	if (!_interface || !_interface->isValid()) {
+ 		return;
+ 	}
++	QDBusReply<QStringList> caps = _interface->call(u"GetCapabilities"_q);
++	if (caps.isValid()) {
++		_capabilities = caps.value();
++	}
++	// Inhibited property (spec extension used by Plasma).
++	const auto inhibited = _interface->property("Inhibited");
++	if (inhibited.isValid()) {
++		_inhibited = inhibited.toBool();
++	}
++}
+ 
+-	_interface.signal_action_invoked().connect([=](
+-			XdgNotifications::Notifications,
+-			uint id,
+-			std::string actionName) {
+-		Core::Sandbox::Instance().customEnterFromEventLoop([&] {
+-			for (const auto &[key, notifications] : _notifications) {
+-				for (const auto &[msgId, notification] : notifications) {
+-					const auto nid = std::get_if<uint>(&notification->id);
+-					if (nid && id == *nid) {
+-						if (actionName == "default") {
+-							_manager->notificationActivated({ key, msgId });
+-						} else if (actionName == "mail-mark-read") {
+-							_manager->notificationReplied({ key, msgId }, {});
+-						} else if (actionName != "inline-reply") {
+-							_manager->notificationActionActivated(
+-								{ key, msgId },
+-								QString::fromStdString(actionName));
+-						}
+-						return;
+-					}
+-				}
+-			}
+-		});
+-	});
++bool Manager::Private::hasCapability(const char *cap) const {
++	return _capabilities.contains(QString::fromLatin1(cap));
++}
+ 
+-	_interface.signal_notification_replied().connect([=](
+-			XdgNotifications::Notifications,
+-			uint id,
+-			std::string text) {
+-		Core::Sandbox::Instance().customEnterFromEventLoop([&] {
+-			for (const auto &[key, notifications] : _notifications) {
+-				for (const auto &[msgId, notification] : notifications) {
+-					const auto nid = std::get_if<uint>(&notification->id);
+-					if (nid && id == *nid) {
+-						_manager->notificationReplied(
+-							{ key, msgId },
+-							{ QString::fromStdString(text), {} });
+-						return;
+-					}
++void Manager::Private::onActionInvoked(uint id, const QString &actionKey) {
++	Core::Sandbox::Instance().customEnterFromEventLoop([=] {
++		for (const auto &[context, map] : _notifications) {
++			for (const auto &[msgId, dbusId] : map) {
++				if (dbusId != id) {
++					continue;
+ 				}
+-			}
+-		});
+-	});
+-
+-	_interface.signal_activation_token().connect([=](
+-			XdgNotifications::Notifications,
+-			uint id,
+-			std::string token) {
+-		for (const auto &[key, notifications] : _notifications) {
+-			for (const auto &[msgId, notification] : notifications) {
+-				const auto nid = std::get_if<uint>(&notification->id);
+-				if (nid && id == *nid) {
+-					GLib::setenv("XDG_ACTIVATION_TOKEN", token, true);
+-					return;
++				if (actionKey == u"default"_q) {
++					_manager->notificationActivated({ context, msgId });
++				} else if (actionKey == u"mail-mark-read"_q
++					|| actionKey == u"mark-as-read"_q) {
++					_manager->notificationReplied({ context, msgId }, {});
++				} else if (actionKey != u"inline-reply"_q) {
++					_manager->notificationActionActivated(
++						{ context, msgId },
++						actionKey);
+ 				}
++				return;
+ 			}
+ 		}
+ 	});
++}
+ 
+-	_interface.signal_notification_closed().connect([=](
+-			XdgNotifications::Notifications,
+-			uint id,
+-			uint reason) {
+-		Core::Sandbox::Instance().customEnterFromEventLoop([&] {
+-			for (const auto &[key, notifications] : _notifications) {
+-				for (const auto &[msgId, notification] : notifications) {
+-					/*
+-					* From: https://specifications.freedesktop.org/notification-spec/latest/ar01s09.html
+-					* The reason the notification was closed
+-					* 1 - The notification expired.
+-					* 2 - The notification was dismissed by the user.
+-					* 3 - The notification was closed by a call to CloseNotification.
+-					* 4 - Undefined/reserved reasons.
+-					*
+-					* If the notification was dismissed by the user (reason == 2), the notification is not kept in notification history.
+-					* We do not need to send a "CloseNotification" call later to clear it from history.
+-					* Therefore we can drop the notification reference now.
+-					* In all other cases we keep the notification reference so that we may clear the notification later from history,
+-					* if the message for that notification is read (e.g. chat is opened or read from another device).
+-					*/
+-					const auto nid = std::get_if<uint>(&notification->id);
+-					if (nid && id == *nid && reason == 2) {
+-						clearNotification({ key, msgId });
+-						return;
+-					}
+-				}
+-			}
+-		});
++void Manager::Private::onNotificationClosed(uint id, uint) {
++	Core::Sandbox::Instance().customEnterFromEventLoop([=] {
++		clearNotificationByDBusId(id);
+ 	});
+ }
+ 
++void Manager::Private::clearNotificationByDBusId(uint id) {
++	for (auto ctxIt = _notifications.begin(); ctxIt != _notifications.end(); ) {
++		auto &map = ctxIt->second;
++		for (auto idIt = map.begin(); idIt != map.end(); ) {
++			if (idIt->second == id) {
++				idIt = map.erase(idIt);
++			} else {
++				++idIt;
++			}
++		}
++		if (map.empty()) {
++			ctxIt = _notifications.erase(ctxIt);
++		} else {
++			++ctxIt;
++		}
++	}
++}
++
+ void Manager::Private::showNotification(
+ 		NotificationInfo &&info,
+ 		Ui::PeerUserpicView &userpicView) {
++	ensureInterface();
++	if (!_interface || !_interface->isValid()) {
++		return;
++	}
++
+ 	const auto peer = info.peer;
+ 	const auto options = info.options;
+ 	const auto key = ContextId{
+@@ -562,367 +275,231 @@
+ 		.topicRootId = info.topicRootId,
+ 		.monoforumPeerId = info.monoforumPeerId,
+ 	};
+-	const auto notificationId = NotificationId{
+-		.contextId = key,
+-		.msgId = info.itemId,
+-	};
+-	auto notification = UseGNotification()
+-		? Gio::Notification::new_(info.title.toStdString())
+-		: Gio::Notification();
+-
+-	std::vector<gi::cstring> actions;
+-	auto hints = GLib::VariantDict::new_();
+-	if (notification) {
+-		notification.set_body(info.subtitle.isEmpty()
+-			? info.message.toStdString()
+-			: tr::lng_dialogs_text_with_from(
+-				tr::now,
+-				lt_from_part,
+-				tr::lng_dialogs_text_from_wrapped(
+-					tr::now,
+-					lt_from,
+-					info.subtitle),
+-				lt_message,
+-				info.message).toStdString());
+-
+-		notification.set_icon(
+-			Gio::ThemedIcon::new_(ApplicationIconName().toStdString()));
+-
+-		// for chat messages, according to
+-		// https://docs.gtk.org/gio/enum.NotificationPriority.html
+-		notification.set_priority(Gio::NotificationPriority::HIGH_);
+-
+-		// glib 2.70+, we keep glib 2.56+ compatibility
+-		static const auto set_category = [] {
+-			// reset dlerror after dlsym call
+-			const auto guard = gsl::finally([] { dlerror(); });
+-			return reinterpret_cast<void(*)(GNotification*, const gchar*)>(
+-				dlsym(RTLD_DEFAULT, "g_notification_set_category"));
+-		}();
+-
+-		if (set_category) {
+-			set_category(notification.gobj_(), "im.received");
+-		}
+-
+-		const auto notificationVariant = GLib::Variant::new_array({
+-			GLib::Variant::new_dict_entry(
+-				GLib::Variant::new_string("session"),
+-				GLib::Variant::new_variant(
+-					GLib::Variant::new_uint64(peer->session().uniqueId()))),
+-			GLib::Variant::new_dict_entry(
+-				GLib::Variant::new_string("peer"),
+-				GLib::Variant::new_variant(
+-					GLib::Variant::new_uint64(peer->id.value))),
+-			GLib::Variant::new_dict_entry(
+-				GLib::Variant::new_string("peer"),
+-				GLib::Variant::new_variant(
+-					GLib::Variant::new_uint64(peer->id.value))),
+-			GLib::Variant::new_dict_entry(
+-				GLib::Variant::new_string("topic"),
+-				GLib::Variant::new_variant(
+-					GLib::Variant::new_int64(info.topicRootId.bare))),
+-			GLib::Variant::new_dict_entry(
+-				GLib::Variant::new_string("monoforumpeer"),
+-				GLib::Variant::new_variant(
+-					GLib::Variant::new_uint64(info.monoforumPeerId.value))),
+-			GLib::Variant::new_dict_entry(
+-				GLib::Variant::new_string("msgid"),
+-				GLib::Variant::new_variant(
+-					GLib::Variant::new_int64(info.itemId.bare))),
+-		});
++	const auto msgId = info.itemId;
+ 
+-		notification.set_default_action_and_target(
+-			"app.notification-activate",
+-			notificationVariant);
++	const auto title = info.title;
++	QString body;
++	if (hasCapability("body-markup") && !info.subtitle.isEmpty()) {
++		body = u"<b>%1</b>\n%2"_q.arg(
++			info.subtitle.toHtmlEscaped(),
++			info.message.toHtmlEscaped());
++	} else if (!info.subtitle.isEmpty()) {
++		body = tr::lng_dialogs_text_with_from(
++			tr::now,
++			lt_from_part,
++			tr::lng_dialogs_text_from_wrapped(
++				tr::now,
++				lt_from,
++				info.subtitle),
++			lt_message,
++			info.message);
++	} else {
++		body = info.message;
++	}
+ 
++	QStringList actions;
++	if (hasCapability("actions") || _capabilities.isEmpty()) {
++		actions << u"default"_q << QString();
+ 		if (!options.hideMarkAsRead) {
+-			notification.add_button_with_target(
+-				tr::lng_context_mark_read(tr::now).toStdString(),
+-				"app.notification-mark-as-read",
+-				notificationVariant);
++			actions << u"mail-mark-read"_q
++				<< tr::lng_context_mark_read(tr::now);
+ 		}
+-
+ 		for (const auto &action : info.actions) {
+-			auto target = GLib::VariantDict::new_(notificationVariant);
+-			target.insert_value(
+-				"action",
+-				GLib::Variant::new_string(action.id.toStdString()));
+-			notification.add_button_with_target(
+-				action.text.toStdString(),
+-				"app.notification-action",
+-				target.end());
+-		}
+-	} else {
+-		if (HasCapability("actions")) {
+-			actions.push_back("default");
+-			actions.push_back(tr::lng_open_link(tr::now).toStdString());
+-
+-			if (!options.hideMarkAsRead) {
+-				// icon name according to https://specifications.freedesktop.org/icon-naming-spec/icon-naming-spec-latest.html
+-				actions.push_back("mail-mark-read");
+-				actions.push_back(
+-					tr::lng_context_mark_read(tr::now).toStdString());
+-			}
+-
+-			if (HasCapability("inline-reply")
+-					&& !options.hideReplyButton) {
+-				actions.push_back("inline-reply");
+-				actions.push_back(
+-					tr::lng_notification_reply(tr::now).toStdString());
+-			}
+-
+-			for (const auto &action : info.actions) {
+-				actions.push_back(action.id.toStdString());
+-				actions.push_back(action.text.toStdString());
+-			}
+-		}
+-
+-		actions.push_back({});
+-
+-		// Custom actions have arbitrary texts and no icons to display.
+-		if (HasCapability("action-icons") && info.actions.empty()) {
+-			hints.insert_value(
+-				"action-icons",
+-				GLib::Variant::new_boolean(true));
+-		}
+-
+-		if (HasCapability("sound")) {
+-			const auto sound = info.sound
+-				? info.sound()
+-				: Media::Audio::LocalSound();
+-
+-			const auto path = sound
+-				? _sounds.path(sound).toStdString()
+-				: std::string();
+-
+-			if (!path.empty()) {
+-				hints.insert_value(
+-					"sound-file",
+-					GLib::Variant::new_string(path));
+-			} else {
+-				hints.insert_value(
+-					"suppress-sound",
+-					GLib::Variant::new_boolean(true));
+-			}
+-		}
+-
+-		if (HasCapability("x-canonical-append")) {
+-			hints.insert_value(
+-				"x-canonical-append",
+-				GLib::Variant::new_string("true"));
+-		}
+-
+-		hints.insert_value(
+-			"category",
+-			GLib::Variant::new_string("im.received"));
+-
+-		hints.insert_value("desktop-entry", GLib::Variant::new_string(
+-			QGuiApplication::desktopFileName().toStdString()));
+-	}
+-
+-	const auto imageKey = GetImageKey();
+-	if (!options.hideNameAndPhoto) {
+-		if (notification) {
+-			QByteArray imageData;
+-			QBuffer buffer(&imageData);
+-			buffer.open(QIODevice::WriteOnly);
+-			Window::Notifications::GenerateUserpic(peer, userpicView).save(
+-				&buffer,
+-				"PNG");
+-
+-			notification.set_icon(
+-				Gio::BytesIcon::new_(
+-					GLib::Bytes::new_with_free_func(
+-						reinterpret_cast<const uchar*>(imageData.constData()),
+-						imageData.size(),
+-						[imageData] {})));
+-		} else if (!imageKey.empty()) {
+-			const auto image = Window::Notifications::GenerateUserpic(
+-				peer,
+-				userpicView
+-			).convertToFormat(QImage::Format_RGBA8888);
+-
+-			hints.insert_value(imageKey, GLib::Variant::new_tuple({
+-				GLib::Variant::new_int32(image.width()),
+-				GLib::Variant::new_int32(image.height()),
+-				GLib::Variant::new_int32(image.bytesPerLine()),
+-				GLib::Variant::new_boolean(true),
+-				GLib::Variant::new_int32(8),
+-				GLib::Variant::new_int32(4),
+-				GLib::Variant::new_from_data(
+-					GLib::VariantType::new_("ay"),
+-					reinterpret_cast<const uchar*>(image.constBits()),
+-					image.sizeInBytes(),
+-					true,
+-					[image] {}),
+-			}));
++			actions << action.id << action.text;
+ 		}
+ 	}
+ 
+-	const auto &data
+-		= _notifications[key][info.itemId]
+-			= std::make_unique<NotificationData>();
+-	data->lifetime.add([=, notification = data.get()] {
+-		v::match(notification->id, [&](const std::string &id) {
+-			_application.withdraw_notification(id);
+-		}, [&](uint id) {
+-			_interface.call_close_notification(id, nullptr);
+-		}, [](v::null_t) {});
+-	});
++	QVariantMap hints;
++	hints.insert(u"desktop-entry"_q, QGuiApplication::desktopFileName());
++	hints.insert(u"urgency"_q, 1);
++	hints.insert(u"category"_q, u"im.received"_q);
++	// Custom actions have arbitrary texts and no icons to display.
++	if (hasCapability("action-icons") && info.actions.empty()) {
++		hints.insert(u"action-icons"_q, true);
++	}
++	if (hasCapability("suppress-sound") || hasCapability("sound")) {
++		// Let the DE decide; avoid forcing a sound path.
++	}
++
++	const auto userpic = Window::Notifications::GenerateUserpic(
++		peer,
++		userpicView);
++	if (!userpic.isNull()) {
++		// Plasma prefers image-data; some servers use image_data.
++		const auto image = MakeImageHint(userpic);
++		hints.insert(u"image-data"_q, image);
++		hints.insert(u"image_data"_q, image);
++	}
++
++	QDBusReply<uint> reply = _interface->call(
++		u"Notify"_q,
++		QString(AppName.utf16()),
++		uint(0),
++		QString(),
++		title,
++		body,
++		actions,
++		hints,
++		-1);
+ 
+-	if (notification) {
+-		const auto id = Gio::dbus_generate_guid();
+-		data->id = id;
+-		_application.send_notification(id, notification);
++	if (reply.isValid()) {
++		_notifications[key][msgId] = reply.value();
+ 	} else {
+-		// work around snap's activation restriction
+-		const auto weak = base::make_weak(data);
+-		StartServiceAsync(
+-			_proxy.get_connection(),
+-			crl::guard(weak, [=]() mutable {
+-				const auto hasImage = !imageKey.empty()
+-					&& hints.lookup_value(imageKey);
+-
+-				const auto callbackWrap = gi::unwrap(
+-					Gio::AsyncReadyCallback(
+-						crl::guard(this, [=](
+-								GObject::Object,
+-								Gio::AsyncResult res) {
+-							auto &sandbox = Core::Sandbox::Instance();
+-							sandbox.customEnterFromEventLoop([&] {
+-								const auto result
+-									= _interface.call_notify_finish(res);
+-
+-								if (!result) {
+-									Gio::DBusErrorNS_::strip_remote_error(
+-										result.error());
+-									LOG(("Native Notification Error: %1").arg(
+-										result.error().message_().c_str()));
+-									clearNotification(notificationId);
+-									return;
+-								}
+-
+-								if (!weak) {
+-									_interface.call_close_notification(
+-										std::get<1>(*result),
+-										nullptr);
+-									return;
+-								}
+-
+-								weak->id = std::get<1>(*result);
+-							});
+-						})),
+-					gi::scope_async);
+-
+-				xdg_notifications_notifications_call_notify(
+-					_interface.gobj_(),
+-					AppName.data(),
+-					0,
+-					(!hasImage
+-						? ApplicationIconName().toStdString()
+-						: std::string()).c_str(),
+-					info.title.toStdString().c_str(),
+-					(HasCapability("body-markup")
+-						? info.subtitle.isEmpty()
+-							? info.message.toHtmlEscaped().toStdString()
+-							: u"<b>%1</b>\n%2"_q.arg(
+-								info.subtitle.toHtmlEscaped(),
+-								info.message.toHtmlEscaped()).toStdString()
+-						: info.subtitle.isEmpty()
+-							? info.message.toStdString()
+-							: tr::lng_dialogs_text_with_from(
+-								tr::now,
+-								lt_from_part,
+-								tr::lng_dialogs_text_from_wrapped(
+-									tr::now,
+-									lt_from,
+-									info.subtitle),
+-								lt_message,
+-								info.message).toStdString()).c_str(),
+-					(actions
+-						| ranges::views::transform(&gi::cstring::c_str)
+-						| ranges::to_vector).data(),
+-					hints.end().gobj_(),
+-					-1,
+-					nullptr,
+-					&callbackWrap->wrapper,
+-					callbackWrap);
+-			}));
++		LOG(("Native Notification Error: %1").arg(reply.error().message()));
+ 	}
+ }
+ 
+ void Manager::Private::clearAll() {
+-	_notifications.clear();
++	auto copy = base::take(_notifications);
++	for (const auto &[k, m] : copy) {
++		for (const auto &[mid, nid] : m) {
++			if (_interface) {
++				_interface->call(u"CloseNotification"_q, nid);
++			}
++		}
++	}
+ }
+ 
+ void Manager::Private::clearFromItem(not_null<HistoryItem*> item) {
+-	const auto i = _notifications.find(ContextId{
++	const auto key = ContextId{
+ 		.sessionId = item->history()->session().uniqueId(),
+ 		.peerId = item->history()->peer->id,
+ 		.topicRootId = item->topicRootId(),
+ 		.monoforumPeerId = item->sublistPeerId(),
+-	});
+-	if (i != _notifications.cend()
+-			&& i->second.remove(item->id)
+-			&& i->second.empty()) {
+-		_notifications.erase(i);
++	};
++	if (auto i = _notifications.find(key); i != _notifications.end()) {
++		if (auto j = i->second.find(item->id); j != i->second.end()) {
++			if (_interface) {
++				_interface->call(u"CloseNotification"_q, j->second);
++			}
++			i->second.erase(j);
++			if (i->second.empty()) {
++				_notifications.erase(i);
++			}
++		}
+ 	}
+ }
+ 
+ void Manager::Private::clearFromTopic(not_null<Data::ForumTopic*> topic) {
+-	_notifications.remove(ContextId{
++	const auto key = ContextId{
+ 		.sessionId = topic->session().uniqueId(),
+ 		.peerId = topic->history()->peer->id,
+ 		.topicRootId = topic->rootId(),
+-	});
++	};
++	if (auto i = _notifications.find(key); i != _notifications.end()) {
++		for (const auto &[mid, nid] : i->second) {
++			if (_interface) {
++				_interface->call(u"CloseNotification"_q, nid);
++			}
++		}
++		_notifications.erase(i);
++	}
+ }
+ 
+ void Manager::Private::clearFromSublist(
+ 		not_null<Data::SavedSublist*> sublist) {
+-	_notifications.remove(ContextId{
++	const auto key = ContextId{
+ 		.sessionId = sublist->session().uniqueId(),
+ 		.peerId = sublist->owningHistory()->peer->id,
+ 		.monoforumPeerId = sublist->sublistPeer()->id,
+-	});
++	};
++	if (auto i = _notifications.find(key); i != _notifications.end()) {
++		for (const auto &[mid, nid] : i->second) {
++			if (_interface) {
++				_interface->call(u"CloseNotification"_q, nid);
++			}
++		}
++		_notifications.erase(i);
++	}
+ }
+ 
+ void Manager::Private::clearFromHistory(not_null<History*> history) {
+-	const auto sessionId = history->session().uniqueId();
+-	const auto peerId = history->peer->id;
+-	auto i = _notifications.lower_bound(ContextId{
+-		.sessionId = sessionId,
+-		.peerId = peerId,
+-	});
+-	while (i != _notifications.cend()
+-		&& i->first.sessionId == sessionId
+-		&& i->first.peerId == peerId) {
+-		i = _notifications.erase(i);
++	const auto sid = history->session().uniqueId();
++	const auto pid = history->peer->id;
++	for (auto it = _notifications.begin(); it != _notifications.end(); ) {
++		if (it->first.sessionId == sid && it->first.peerId == pid) {
++			for (const auto &p : it->second) {
++				if (_interface) {
++					_interface->call(u"CloseNotification"_q, p.second);
++				}
++			}
++			it = _notifications.erase(it);
++		} else {
++			++it;
++		}
+ 	}
+ }
+ 
+ void Manager::Private::clearFromSession(not_null<Main::Session*> session) {
+-	const auto sessionId = session->uniqueId();
+-	auto i = _notifications.lower_bound(ContextId{
+-		.sessionId = sessionId,
+-	});
+-	while (i != _notifications.cend() && i->first.sessionId == sessionId) {
+-		i = _notifications.erase(i);
++	const auto sid = session->uniqueId();
++	for (auto it = _notifications.begin(); it != _notifications.end(); ) {
++		if (it->first.sessionId == sid) {
++			for (const auto &p : it->second) {
++				if (_interface) {
++					_interface->call(u"CloseNotification"_q, p.second);
++				}
++			}
++			it = _notifications.erase(it);
++		} else {
++			++it;
++		}
+ 	}
+ }
+ 
+-void Manager::Private::clearNotification(NotificationId id) {
+-	auto i = _notifications.find(id.contextId);
+-	if (i != _notifications.cend()
+-			&& i->second.remove(id.msgId)
+-			&& i->second.empty()) {
+-		_notifications.erase(i);
++void Manager::Private::invokeIfNotInhibited(Fn<void()> callback) {
++	// Refresh inhibit state lazily (Plasma exposes Inhibited).
++	if (_interface && _interface->isValid()) {
++		const auto inhibited = _interface->property("Inhibited");
++		if (inhibited.isValid()) {
++			_inhibited = inhibited.toBool();
++		}
++	}
++	if (!_inhibited) {
++		callback();
+ 	}
+ }
+ 
+-void Manager::Private::invokeIfNotInhibited(Fn<void()> callback) {
+-	if (!_interface.get_inhibited()) {
+-		callback();
++bool SkipToastForCustom() {
++	return false;
++}
++
++void MaybePlaySoundForCustom(Fn<void()> playSound) {
++	playSound();
++}
++
++void MaybeFlashBounceForCustom(Fn<void()> flashBounce) {
++	flashBounce();
++}
++
++bool WaitForInputForCustom() {
++	return true;
++}
++
++bool Supported() {
++	return QDBusConnection::sessionBus().isConnected();
++}
++
++bool Enforced() {
++	// Wayland lacks reliable positioning for custom toasts.
++	return ::Platform::IsWayland();
++}
++
++bool ByDefault() {
++	// Prefer native notifications on Plasma / LXQt.
++	return true;
++}
++
++bool VolumeSupported() {
++	return false;
++}
++
++void Create(Window::Notifications::System *system) {
++	if (!Supported()) {
++		return;
+ 	}
++	system->setManager([=] {
++		return std::make_unique<Manager>(system);
++	});
+ }
+ 
+ Manager::Manager(not_null<Window::Notifications::System*> system)
+diff -Nru a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/SourceFiles/platform/linux/specific_linux.cpp
+--- a/Telegram/SourceFiles/platform/linux/specific_linux.cpp	2026-09-10 21:11:45.000000000 +0200
++++ b/Telegram/SourceFiles/platform/linux/specific_linux.cpp	2026-09-11 19:30:41.274107910 +0200
+@@ -11,37 +11,38 @@
+ #include "base/random.h"
+ #include "base/platform/base_platform_info.h"
+ #include "base/platform/linux/base_linux_dbus_utilities.h"
+-#include "base/platform/linux/base_linux_xcb_utilities.h"
+ #include "base/platform/linux/base_linux_xdp_utilities.h"
+-#include "base/platform/linux/base_linux_app_launch_context.h"
+ #include "base/platform/base_platform_process.h"
+ #include "lang/lang_keys.h"
++#include "mainwindow.h"
++#include "storage/localstorage.h"
+ #include "core/launcher.h"
+ #include "core/sandbox.h"
+ #include "core/application.h"
++#include "core/core_settings.h"
+ #include "core/update_checker.h"
+ #include "core/version.h"
+ #include "data/data_location.h"
+ #include "window/window_controller.h"
+-#include "webview/platform/linux/webview_linux_webkitgtk.h"
++#ifndef DESKTOP_APP_DISABLE_X11_INTEGRATION
++#include "base/platform/linux/base_linux_xcb_utilities.h"
++#endif // !DESKTOP_APP_DISABLE_X11_INTEGRATION
+ 
+ #include <QtWidgets/QApplication>
+ #include <QtWidgets/QSystemTrayIcon>
+-#include <QtGui/QDesktopServices>
+ #include <QtCore/QStandardPaths>
+ #include <QtCore/QProcess>
++#include <QtCore/QFile>
++#include <QtCore/QTextStream>
++#include <QtCore/QDir>
++#include <QtGui/QDesktopServices>
++#include <QtGui/QWindow>
+ 
+ #include <kshell.h>
+ #include <ksandbox.h>
+ 
+-#include <xdgdbus/xdgdbus.hpp>
+-#include <xdpbackground/xdpbackground.hpp>
+-#include <xdpopenuri/xdpopenuri.hpp>
+-#include <xdprequest/xdprequest.hpp>
+-
+ #include <sys/stat.h>
+ #include <sys/types.h>
+-#include <sys/un.h>
+ #include <cstdlib>
+ #include <unistd.h>
+ #include <dirent.h>
+@@ -49,175 +50,47 @@
+ 
+ namespace {
+ 
+-using namespace gi::repository;
+-namespace GObject = gi::repository::GObject;
+ using namespace Platform;
+ 
+ void PortalAutostart(bool enabled, Fn<void(bool)> done) {
+-	const auto executable = ExecutablePathForShortcuts();
+-	if (executable.isEmpty()) {
+-		if (done) {
+-			done(false);
++	// Pure Qt replacement: write or remove the autostart .desktop file.
++	const auto dir = QStandardPaths::writableLocation(
++		QStandardPaths::ConfigLocation) + u"/autostart"_q;
++	QDir().mkpath(dir);
++	const auto path = dir
++		+ u'/'
++		+ QGuiApplication::desktopFileName()
++		+ u".desktop"_q;
++	if (enabled) {
++		const auto executable = ExecutablePathForShortcuts();
++		if (executable.isEmpty()) {
++			if (done) {
++				done(false);
++			}
++			return;
+ 		}
+-		return;
+-	}
+-
+-	XdpBackground::BackgroundProxy::new_for_bus(
+-		Gio::BusType::SESSION_,
+-		Gio::DBusProxyFlags::NONE_,
+-		base::Platform::XDP::kService,
+-		base::Platform::XDP::kObjectPath,
+-		[=](GObject::Object, Gio::AsyncResult res) {
+-			auto proxy = XdpBackground::BackgroundProxy::new_for_bus_finish(
+-				res);
+-
+-			if (!proxy) {
+-				if (done) {
+-					Gio::DBusErrorNS_::strip_remote_error(proxy.error());
+-					LOG(("Portal Autostart Error: %1").arg(
+-						proxy.error().message_().c_str()));
+-					done(false);
+-				}
+-				return;
++		auto file = QFile(path);
++		if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
++			if (done) {
++				done(false);
+ 			}
+-
+-			auto interface = XdpBackground::Background(*proxy);
+-
+-			const auto handleToken = "tdesktop"
+-				+ std::to_string(base::RandomValue<uint>());
+-
+-			auto uniqueName = std::string(
+-				proxy->get_connection().get_unique_name());
+-			uniqueName.erase(0, 1);
+-			uniqueName.replace(uniqueName.find('.'), 1, 1, '_');
+-
+-			const auto parent = []() -> QPointer<QWidget> {
+-				const auto active = Core::App().activeWindow();
+-				if (!active) {
+-					return nullptr;
+-				}
+-
+-				return active->widget().get();
+-			}();
+-
+-			const auto window = std::make_shared<base::unique_qptr<QWidget>>(
+-				std::in_place,
+-				parent);
+-
+-			auto &raw = **window;
+-			raw.setAttribute(Qt::WA_DontShowOnScreen);
+-			raw.setWindowFlag(Qt::Window);
+-			raw.setWindowModality(Qt::WindowModal);
+-			raw.show();
+-
+-			XdpRequest::RequestProxy::new_(
+-				proxy->get_connection(),
+-				Gio::DBusProxyFlags::NONE_,
+-				base::Platform::XDP::kService,
+-				base::Platform::XDP::kObjectPath
+-					+ std::string("/request/")
+-					+ uniqueName
+-					+ '/'
+-					+ handleToken,
+-				nullptr,
+-				[=](GObject::Object, Gio::AsyncResult res) mutable {
+-					auto requestProxy = XdpRequest::RequestProxy::new_finish(
+-						res);
+-
+-					if (!requestProxy) {
+-						if (done) {
+-							Gio::DBusErrorNS_::strip_remote_error(
+-								requestProxy.error());
+-							LOG(("Portal Autostart Error: %1").arg(
+-								requestProxy.error().message_().c_str()));
+-							done(false);
+-						}
+-						return;
+-					}
+-
+-					auto request = XdpRequest::Request(*requestProxy);
+-					const auto signalId = std::make_shared<ulong>();
+-					*signalId = request.signal_response().connect([=](
+-							XdpRequest::Request,
+-							guint response,
+-							GLib::Variant) mutable {
+-						auto &sandbox = Core::Sandbox::Instance();
+-						sandbox.customEnterFromEventLoop([&] {
+-							(void)window; // don't destroy until finish
+-
+-							if (response) {
+-								if (done) {
+-									LOG(("Portal Autostart Error: "
+-										"Request denied"));
+-									done(false);
+-								}
+-							} else if (done) {
+-								done(enabled);
+-							}
+-
+-							request.disconnect(*signalId);
+-						});
+-					});
+-
+-					std::vector<std::string> commandline;
+-					commandline.push_back(executable.toStdString());
+-					if (Core::Launcher::Instance().customWorkingDir()) {
+-						commandline.push_back("-workdir");
+-						commandline.push_back(cWorkingDir().toStdString());
+-					}
+-					commandline.push_back("-autostart");
+-
+-					interface.call_request_background(
+-						base::Platform::XDP::ParentWindowID(parent
+-							? parent->windowHandle()
+-							: nullptr),
+-						GLib::Variant::new_array({
+-							GLib::Variant::new_dict_entry(
+-								GLib::Variant::new_string("handle_token"),
+-								GLib::Variant::new_variant(
+-									GLib::Variant::new_string(handleToken))),
+-							GLib::Variant::new_dict_entry(
+-								GLib::Variant::new_string("reason"),
+-								GLib::Variant::new_variant(
+-									GLib::Variant::new_string(
+-										tr::lng_settings_auto_start(tr::now)
+-											.toStdString()))),
+-							GLib::Variant::new_dict_entry(
+-								GLib::Variant::new_string("autostart"),
+-								GLib::Variant::new_variant(
+-									GLib::Variant::new_boolean(enabled))),
+-							GLib::Variant::new_dict_entry(
+-								GLib::Variant::new_string("commandline"),
+-								GLib::Variant::new_variant(
+-									GLib::Variant::new_strv(commandline))),
+-							GLib::Variant::new_dict_entry(
+-								GLib::Variant::new_string("dbus-activatable"),
+-								GLib::Variant::new_variant(
+-									GLib::Variant::new_boolean(false))),
+-						}),
+-						[=](GObject::Object, Gio::AsyncResult res) mutable {
+-							auto &sandbox = Core::Sandbox::Instance();
+-							sandbox.customEnterFromEventLoop([&] {
+-								const auto result =
+-									interface.call_request_background_finish(
+-										res);
+-
+-								if (!result) {
+-									if (done) {
+-										const auto &error = result.error();
+-										Gio::DBusErrorNS_::strip_remote_error(
+-											error);
+-										LOG(("Portal Autostart Error: %1").arg(
+-											error.message_().c_str()));
+-										done(false);
+-									}
+-
+-									request.disconnect(*signalId);
+-								}
+-							});
+-						});
+-				});
+-		});
++			return;
++		}
++		QTextStream stream(&file);
++		stream << "[Desktop Entry]\n";
++		stream << "Type=Application\n";
++		stream << "Name=Telegram Desktop\n";
++		stream << "Exec=" << executable << " -autostart\n";
++		stream << "Icon=org.telegram.desktop\n";
++		stream << "Terminal=false\n";
++		stream << "X-GNOME-Autostart-enabled=true\n";
++		stream << "DBusActivatable=false\n";
++	} else {
++		QFile::remove(path);
++	}
++	if (done) {
++		done(true);
++	}
+ }
+ 
+ bool GenerateDesktopFile(
+@@ -231,115 +104,52 @@
+ 	}
+ 
+ 	DEBUG_LOG(("App Info: placing .desktop file to %1").arg(targetPath));
+-	if (!QDir(targetPath).exists()) QDir().mkpath(targetPath);
++	if (!QDir(targetPath).exists()) {
++		QDir().mkpath(targetPath);
++	}
+ 
+-	const auto sourceFile = u":/misc/org.telegram.desktop.desktop"_q;
+ 	const auto targetFile = targetPath
+ 		+ QGuiApplication::desktopFileName()
+ 		+ u".desktop"_q;
+ 
+-	const auto sourceText = [&] {
+-		QFile source(sourceFile);
+-		if (source.open(QIODevice::ReadOnly)) {
+-			return source.readAll().toStdString();
+-		}
+-		return std::string();
+-	}();
+-
+-	if (sourceText.empty()) {
++	auto file = QFile(targetFile);
++	if (!file.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate)) {
+ 		if (!silent) {
+-			LOG(("App Error: Could not open '%1' for read").arg(sourceFile));
++			LOG(("App Error: Could not open '%1' for write").arg(targetFile));
+ 		}
+ 		return false;
+ 	}
+ 
+-	auto target = GLib::KeyFile::new_();
+-	const auto loaded = target.load_from_data(
+-		sourceText,
+-		-1,
+-		GLib::KeyFileFlags::KEEP_COMMENTS_
+-			| GLib::KeyFileFlags::KEEP_TRANSLATIONS_);
+-
+-	if (!loaded) {
+-		if (!silent) {
+-			LOG(("App Error: %1").arg(loaded.error().message_().c_str()));
+-		}
+-		return false;
+-	}
+-
+-	for (const auto &group : target.get_groups(nullptr)) {
+-		if (onlyMainGroup && group != "Desktop Entry") {
+-			const auto removed = target.remove_group(group);
+-			if (!removed) {
+-				if (!silent) {
+-					LOG(("App Error: %1").arg(
+-						removed.error().message_().c_str()));
+-				}
+-				return false;
+-			}
+-			continue;
+-		}
+-
+-		if (target.has_key(group, "TryExec", nullptr)) {
+-			target.set_string(
+-				group,
+-				"TryExec",
+-				KShell::joinArgs({ executable }).replace(
+-					'\\',
+-					qstr("\\\\")).toStdString());
+-		}
+-
+-		if (target.has_key(group, "Exec", nullptr)) {
+-			if (group == "Desktop Entry" && !args.isEmpty()) {
+-				QStringList exec;
+-				exec.append(executable);
+-				if (Core::Launcher::Instance().customWorkingDir()) {
+-					exec.append(u"-workdir"_q);
+-					exec.append(cWorkingDir());
+-				}
+-				exec.append(args);
+-				target.set_string(
+-					group,
+-					"Exec",
+-					KShell::joinArgs(exec).replace(
+-						'\\',
+-						qstr("\\\\")).toStdString());
+-			} else {
+-				auto exec = KShell::splitArgs(
+-					QString::fromStdString(
+-						target.get_string(group, "Exec", nullptr)
+-					).replace(
+-						qstr("\\\\"),
+-						qstr("\\")));
+-
+-				if (!exec.isEmpty()) {
+-					exec[0] = executable;
+-					if (Core::Launcher::Instance().customWorkingDir()) {
+-						exec.insert(1, u"-workdir"_q);
+-						exec.insert(2, cWorkingDir());
+-					}
+-					target.set_string(
+-						group,
+-						"Exec",
+-						KShell::joinArgs(exec).replace(
+-							'\\',
+-							qstr("\\\\")).toStdString());
+-				}
+-			}
+-		}
+-	}
+-
+-	if (!args.isEmpty()) {
+-		target.remove_key("Desktop Entry", "DBusActivatable");
+-	}
+-
+-	const auto saved = target.save_to_file(targetFile.toStdString());
+-	if (!saved) {
+-		if (!silent) {
+-			LOG(("App Error: %1").arg(saved.error().message_().c_str()));
+-		}
+-		return false;
++	QTextStream stream(&file);
++	stream << "[Desktop Entry]\n";
++	stream << "Version=1.0\n";
++	stream << "Name=Telegram Desktop\n";
++	stream << "Comment=Official desktop application for the Telegram messaging service\n";
++	stream << "TryExec=" << executable << '\n';
++	stream << "Exec=" << executable;
++	for (const auto &arg : args) {
++		stream << ' ' << KShell::quoteArg(arg);
++	}
++	stream << " -- %u\n";
++	stream << "Icon=org.telegram.desktop\n";
++	stream << "Terminal=false\n";
++	stream << "StartupWMClass=TelegramDesktop\n";
++	stream << "Type=Application\n";
++	stream << "Categories=Chat;Network;InstantMessaging;Qt;\n";
++	stream << "MimeType=x-scheme-handler/tg;x-scheme-handler/tonsite;\n";
++	stream << "Keywords=tg;chat;im;messaging;messenger;sms;tdesktop;\n";
++	stream << "Actions=quit;\n";
++	stream << "DBusActivatable=true\n";
++	stream << "SingleMainWindow=true\n";
++	stream << "X-GNOME-UsesNotifications=true\n";
++	stream << "X-GNOME-SingleWindow=true\n";
++	if (!onlyMainGroup) {
++		stream << "\n[Desktop Action quit]\n";
++		stream << "Exec=" << executable << " -quit\n";
++		stream << "Name=Quit Telegram\n";
++		stream << "Icon=application-exit\n";
+ 	}
++	file.close();
+ 
+ 	QFile::setPermissions(
+ 		targetFile,
+@@ -352,127 +162,17 @@
+ 		DEBUG_LOG(("App Info: removing old .desktop files"));
+ 		QFile::remove(u"%1telegram.desktop"_q.arg(targetPath));
+ 		QFile::remove(u"%1telegramdesktop.desktop"_q.arg(targetPath));
+-
+-		const auto appimagePath = u"file://%1%2"_q.arg(
+-			cExeDir(),
+-			cExeName()).toUtf8();
+-
+-		char md5Hash[33] = { 0 };
+-		hashMd5Hex(
+-			appimagePath.constData(),
+-			appimagePath.size(),
+-			md5Hash);
+-
+-		QFile::remove(u"%1appimagekit_%2-%3.desktop"_q.arg(
+-			targetPath,
+-			md5Hash,
+-			AppName.utf16().replace(' ', '_')));
+-
+-		const auto d = QFile::encodeName(QDir(cWorkingDir()).absolutePath());
+-		hashMd5Hex(d.constData(), d.size(), md5Hash);
+-
+-		if (!Core::Launcher::Instance().customWorkingDir()) {
+-			QFile::remove(u"%1org.telegram.desktop._%2.desktop"_q.arg(
+-				targetPath,
+-				md5Hash));
+-
+-			const auto exePath = QFile::encodeName(
+-				cExeDir() + cExeName());
+-			hashMd5Hex(exePath.constData(), exePath.size(), md5Hash);
+-		}
+-
+-		QFile::remove(u"%1org.telegram.desktop.%2.desktop"_q.arg(
+-			targetPath,
+-			md5Hash));
+ 	}
+ 
+ 	return true;
+ }
+ 
+-bool GenerateServiceFile(bool silent = false) {
+-	const auto executable = ExecutablePathForShortcuts();
+-	if (executable.isEmpty()) {
+-		return false;
+-	}
+-
+-	const auto targetPath = QStandardPaths::writableLocation(
+-		QStandardPaths::GenericDataLocation) + u"/dbus-1/services/"_q;
+-
+-	const auto targetFile = targetPath
+-		+ QGuiApplication::desktopFileName()
+-		+ u".service"_q;
+-
+-	DEBUG_LOG(("App Info: placing D-Bus service file to %1").arg(targetPath));
+-	if (!QDir(targetPath).exists()) QDir().mkpath(targetPath);
+-
+-	auto target = GLib::KeyFile::new_();
+-	constexpr auto group = "D-BUS Service";
+-
+-	target.set_string(
+-		group,
+-		"Name",
+-		QGuiApplication::desktopFileName().toStdString());
+-
+-	QStringList exec;
+-	exec.append(executable);
+-	if (Core::Launcher::Instance().customWorkingDir()) {
+-		exec.append(u"-workdir"_q);
+-		exec.append(cWorkingDir());
+-	}
+-	target.set_string(
+-		group,
+-		"Exec",
+-		KShell::joinArgs(exec).toStdString());
+-
+-	const auto saved = target.save_to_file(targetFile.toStdString());
+-	if (!saved) {
+-		if (!silent) {
+-			LOG(("App Error: %1").arg(saved.error().message_().c_str()));
+-		}
+-		return false;
+-	}
+-
+-	if (!Core::UpdaterDisabled()
+-			&& !Core::Launcher::Instance().customWorkingDir()) {
+-		DEBUG_LOG(("App Info: removing old D-Bus service files"));
+-
+-		char md5Hash[33] = { 0 };
+-		const auto d = QFile::encodeName(QDir(cWorkingDir()).absolutePath());
+-		hashMd5Hex(d.constData(), d.size(), md5Hash);
+-
+-		QFile::remove(u"%1org.telegram.desktop._%2.service"_q.arg(
+-			targetPath,
+-			md5Hash));
+-	}
+-
+-	XdgDBus::DBusProxy::new_for_bus(
+-		Gio::BusType::SESSION_,
+-		Gio::DBusProxyFlags::NONE_,
+-		base::Platform::DBus::kService,
+-		base::Platform::DBus::kObjectPath,
+-		[=](GObject::Object, Gio::AsyncResult res) {
+-			auto interface = XdgDBus::DBus(
+-				XdgDBus::DBusProxy::new_for_bus_finish(res, nullptr));
+-
+-			if (!interface) {
+-				return;
+-			}
+-
+-			interface.call_reload_config(nullptr);
+-		});
+-
+-	return true;
+-}
+-
+ void InstallLauncher() {
+ 	static const auto DisabledByEnv = !qEnvironmentVariableIsEmpty(
+ 		"DESKTOPINTEGRATION");
+ 
+ 	// don't update desktop file for alpha version or if updater is disabled
+-	if (cAlphaVersion()
+-			|| Core::UpdaterDisabled()
+-			|| KSandbox::isInside()
+-			|| DisabledByEnv) {
++	if (cAlphaVersion() || Core::UpdaterDisabled() || DisabledByEnv) {
+ 		return;
+ 	}
+ 
+@@ -480,103 +180,7 @@
+ 		QStandardPaths::ApplicationsLocation) + '/';
+ 
+ 	GenerateDesktopFile(applicationsPath);
+-	GenerateServiceFile();
+-
+-	const auto icons = QStandardPaths::writableLocation(
+-		QStandardPaths::GenericDataLocation) + u"/icons/"_q;
+-
+-	const auto appIcons = icons + u"/hicolor/256x256/apps/"_q;
+-	if (!QDir(appIcons).exists()) QDir().mkpath(appIcons);
+-
+-	const auto icon = appIcons + ApplicationIconName() + u".png"_q;
+-	QFile::remove(icon);
+-	QFile::remove(icons + u"telegram.png"_q);
+-	if (QFile::copy(u":/gui/art/logo_256.png"_q, icon)) {
+-		DEBUG_LOG(("App Info: Icon copied to '%1'").arg(icon));
+-	}
+-
+-	const auto symbolicIcons = icons + u"/hicolor/symbolic/apps/"_q;
+-	if (!QDir().exists(symbolicIcons)) QDir().mkpath(symbolicIcons);
+-
+-	const auto monochromeIcons = {
+-		QString(),
+-		u"attention"_q,
+-		u"mute"_q,
+-	};
+-
+-	for (const auto &icon : monochromeIcons) {
+-		QFile::copy(
+-			u":/gui/icons/tray/monochrome%1.svg"_q.arg(
+-				!icon.isEmpty() ? u"_"_q + icon : QString()),
+-			symbolicIcons
+-				+ ApplicationIconName()
+-				+ (!icon.isEmpty() ? u"-"_q + icon : QString())
+-				+ u"-symbolic.svg"_q);
+-	}
+-
+-	QProcess::execute("update-desktop-database", {
+-		applicationsPath
+-	});
+-}
+-
+-[[nodiscard]] QByteArray HashForSocketPath() {
+-	constexpr auto kHashForSocketPathLength = 24;
+-
+-	const auto binary = openssl::Sha256(
+-		bytes::make_span(Core::Launcher::Instance().instanceHash()));
+-	const auto base64 = QByteArray(
+-		reinterpret_cast<const char*>(binary.data()),
+-		binary.size()).toBase64(QByteArray::Base64UrlEncoding);
+-	return base64.mid(0, kHashForSocketPathLength);
+-}
+-
+-void AppInfoCheckScheme(
+-		const std::string &scheme,
+-		Fn<void(Gio::AppInfo, Fn<void()>)> callback,
+-		Fn<void()> fail) {
+-	// TODO: use get_default_for_uri_scheme_async once we can use GLib 2.74
+-	if (auto appInfo = Gio::AppInfo::get_default_for_uri_scheme(scheme)) {
+-		callback(appInfo, fail);
+-		return;
+-	}
+-	fail();
+-}
+-
+-void PortalCheckScheme(
+-		const std::string &scheme,
+-		Fn<void(Fn<void()>)> callback,
+-		Fn<void()> fail) {
+-	XdpOpenURI::OpenURIProxy::new_for_bus(
+-		Gio::BusType::SESSION_,
+-		Gio::DBusProxyFlags::NONE_,
+-		base::Platform::XDP::kService,
+-		base::Platform::XDP::kObjectPath,
+-		[=](GObject::Object, Gio::AsyncResult res) {
+-			auto interface = XdpOpenURI::OpenURI(
+-				XdpOpenURI::OpenURIProxy::new_for_bus_finish(res, nullptr));
+-
+-			if (!interface) {
+-				fail();
+-				return;
+-			}
+-
+-			interface.call_scheme_supported(
+-				scheme,
+-				GLib::Variant::new_array(
+-					GLib::VariantType::new_("{sv}"),
+-					{}),
+-				[=](GObject::Object, Gio::AsyncResult res) mutable {
+-					const auto result
+-						= interface.call_scheme_supported_finish(res);
+-
+-					if (!result || !std::get<1>(*result)) {
+-						fail();
+-						return;
+-					}
+-
+-					callback(fail);
+-				});
+-		});
++	/* generate icons etc. is handled by packaging on most distros */
+ }
+ 
+ } // namespace
+@@ -607,13 +211,18 @@
+ 
+ #if QT_VERSION < QT_VERSION_CHECK(6, 5, 0)
+ std::optional<bool> IsDarkMode() {
+-	auto result = base::Platform::XDP::ReadSetting(
++	const auto result = base::Platform::XDP::ReadSetting(
+ 		"org.freedesktop.appearance",
+ 		"color-scheme");
+-
+-	return result.has_value()
+-		? std::make_optional(result->get_uint32() == 1)
+-		: std::nullopt;
++	if (!result) {
++		return std::nullopt;
++	}
++	const auto value = result->toUInt();
++	// 0 = no preference, 1 = prefer dark, 2 = prefer light
++	if (value == 0) {
++		return std::nullopt;
++	}
++	return value == 1;
+ }
+ #endif // Qt < 6.5.0
+ 
+@@ -623,7 +232,7 @@
+ 
+ void AutostartToggle(bool enabled, Fn<void(bool)> done) {
+ 	if (KSandbox::isFlatpak()) {
+-		PortalAutostart(enabled, done);
++		PortalAutostart(enabled, std::move(done));
+ 		return;
+ 	}
+ 
+@@ -631,23 +240,21 @@
+ 		const auto autostart = QStandardPaths::writableLocation(
+ 			QStandardPaths::GenericConfigLocation)
+ 			+ u"/autostart/"_q;
+-
+ 		if (!enabled) {
+ 			return QFile::remove(
+ 				autostart
+ 					+ QGuiApplication::desktopFileName()
+ 					+ u".desktop"_q);
+ 		}
+-
+ 		return GenerateDesktopFile(
+ 			autostart,
+ 			{ u"-autostart"_q },
+ 			true,
+-			!done);
++			true);
+ 	}();
+ 
+ 	if (done) {
+-		done(enabled && success);
++		done(enabled ? success : true);
+ 	}
+ }
+ 
+@@ -660,13 +267,15 @@
+ }
+ 
+ bool SkipTaskbarSupported() {
++#ifndef DESKTOP_APP_DISABLE_X11_INTEGRATION
+ 	if (IsX11()) {
+ 		return base::Platform::XCB::IsSupportedByWM(
+ 			base::Platform::XCB::Connection(),
+ 			"_NET_WM_STATE_SKIP_TASKBAR");
+ 	}
+-
+-	return false;
++#endif // !DESKTOP_APP_DISABLE_X11_INTEGRATION
++	// Offer the option on Wayland; effect is compositor-dependent.
++	return IsWayland();
+ }
+ 
+ QString ExecutablePathForShortcuts() {
+@@ -687,7 +296,6 @@
+ 
+ QString psAppDataPath() {
+ 	// Previously we used ~/.TelegramDesktop, so look there first.
+-	// If we find data there, we should still use it.
+ 	auto home = QDir::homePath();
+ 	if (!home.isEmpty()) {
+ 		auto oldPath = home + u"/.TelegramDesktop/"_q;
+@@ -698,8 +306,8 @@
+ 			return oldPath;
+ 		}
+ 	}
+-
+-	return QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation) + '/';
++	return QStandardPaths::writableLocation(
++		QStandardPaths::AppLocalDataLocation) + '/';
+ }
+ 
+ void psDoCleanup() {
+@@ -757,14 +365,7 @@
+ 		"PULSE_PROP_application.icon_name",
+ 		ApplicationIconName().toUtf8());
+ 
+-	GLib::set_prgname(cExeName().toStdString());
+-	GLib::set_application_name(AppName.data());
+-
+-	Webview::WebKitGTK::SetSocketPath(u"%1/%2-%3-webview-{}"_q.arg(
+-		QDir::tempPath(),
+-		HashForSocketPath(),
+-		u"TD"_q).toStdString());
+-
++	// No GLib::set_prgname / WebKitGTK helper socket (QtWebEngine is in-process).
+ 	InstallLauncher();
+ }
+ 
+@@ -807,23 +408,10 @@
+ 		add("pavucontrol");
+ 		add("alsamixergui");
+ 		return ranges::any_of(options, [](const Command &command) {
+-			QProcess process;
+-			if (KSandbox::isInside()) {
+-				process.setProgram("which");
+-				process.setArguments({command.command});
+-				KSandbox::startHostProcess(process);
+-				process.waitForFinished();
+-				if (process.exitStatus() != QProcess::NormalExit
+-						|| process.exitCode() != 0) {
+-					return false;
+-				}
+-			}
+-			process.setProgram(command.command);
+-			process.setArguments(command.arguments);
+-			const auto hostContext = KSandbox::makeHostContext(process);
+-			process.setProgram(hostContext.program);
+-			process.setArguments(hostContext.arguments);
+-			return process.startDetached();
++			return !QStandardPaths::findExecutable(command.command).isEmpty()
++				&& QProcess::startDetached(
++					command.command,
++					command.arguments);
+ 		});
+ 	}
+ 	return true;
+@@ -853,31 +441,17 @@
+ 	static const auto Result = KSandbox::isSnap()
+ 		? u"snap.%1."_q.arg(qEnvironmentVariable("SNAP_INSTANCE_NAME"))
+ 		: QGuiApplication::desktopFileName().remove(
+-		u"._"_q + Core::Launcher::Instance().instanceHash());
++			u"._"_q + Core::Launcher::Instance().instanceHash());
+ 	return Result;
+ }
+ 
+ void LaunchMaps(const Data::LocationPoint &point, Fn<void()> fail) {
+-	const auto url = QUrl(
+-		u"geo:%1,%2"_q.arg(point.latAsString(), point.lonAsString()));
+-
+-	AppInfoCheckScheme(url.scheme().toStdString(), [=](
+-			Gio::AppInfo appInfo,
+-			Fn<void()> fail) {
+-		// TODO: use launch_uris_async once we can use GLib 2.60
+-		if (!appInfo.launch_uris(
+-				{ url.toString().toStdString() },
+-				base::Platform::AppLaunchContext(),
+-				nullptr)) {
+-			fail();
+-		}
+-	}, [=] {
+-		PortalCheckScheme(url.scheme().toStdString(), [=](Fn<void()> fail) {
+-			if (!QDesktopServices::openUrl(url)) {
+-				fail();
+-			}
+-		}, fail);
+-	});
++	const auto url = u"geo:%1,%2"_q.arg(
++		point.latAsString(),
++		point.lonAsString());
++	if (!QDesktopServices::openUrl(url) && fail) {
++		fail();
++	}
+ }
+ 
+ namespace ThirdParty {
+@@ -886,7 +460,6 @@
+ }
+ 
+ } // namespace ThirdParty
+-
+ } // namespace Platform
+ 
+ void psSendToMenu(bool send, bool silent) {
+diff -Nru a/Telegram/SourceFiles/platform/linux/tray_linux.cpp b/Telegram/SourceFiles/platform/linux/tray_linux.cpp
+--- a/Telegram/SourceFiles/platform/linux/tray_linux.cpp	2026-09-10 21:11:45.000000000 +0200
++++ b/Telegram/SourceFiles/platform/linux/tray_linux.cpp	2026-09-11 19:30:41.274229301 +0200
+@@ -22,12 +22,11 @@
+ #include <QtWidgets/QMenu>
+ #include <QtWidgets/QSystemTrayIcon>
+ 
+-#include <gio/gio.hpp>
++#include <QtDBus/QDBusServiceWatcher>
+ 
+ namespace Platform {
+ namespace {
+ 
+-using namespace gi::repository;
+ 
+ [[nodiscard]] QString PanelIconName(int counter, bool muted) {
+ 	return ApplicationIconName() + ((counter > 0)
+diff -Nru a/Telegram/SourceFiles/webauthn/cable_scanner_linux.cpp b/Telegram/SourceFiles/webauthn/cable_scanner_linux.cpp
+--- a/Telegram/SourceFiles/webauthn/cable_scanner_linux.cpp	2026-09-10 21:11:45.000000000 +0200
++++ b/Telegram/SourceFiles/webauthn/cable_scanner_linux.cpp	2026-09-11 19:30:41.274775438 +0200
+@@ -13,8 +13,15 @@
+ #include "base/debug_log.h"
+ #include "base/weak_ptr.h"
+ 
+-#include <crl/crl_on_main.h>
+-#include <bluez/bluez.hpp>
++#include <QtCore/QByteArray>
++#include <QtCore/QVariant>
++#include <QtDBus/QDBusArgument>
++#include <QtDBus/QDBusConnection>
++#include <QtDBus/QDBusInterface>
++#include <QtDBus/QDBusMessage>
++#include <QtDBus/QDBusObjectPath>
++#include <QtDBus/QDBusPendingCallWatcher>
++#include <QtDBus/QDBusVariant>
+ 
+ #include <set>
+ #include <vector>
+@@ -22,223 +29,379 @@
+ namespace Platform::WebAuthn::Cable {
+ namespace {
+ 
+-using namespace gi::repository;
+-namespace GObject = gi::repository::GObject;
+-
+ constexpr auto kBluezService = "org.bluez";
+ constexpr auto kBluezObjectPath = "/";
++constexpr auto kAdapterIface = "org.bluez.Adapter1";
++constexpr auto kDeviceIface = "org.bluez.Device1";
++constexpr auto kObjectManagerIface = "org.freedesktop.DBus.ObjectManager";
++constexpr auto kPropertiesIface = "org.freedesktop.DBus.Properties";
+ 
+ constexpr auto kGoogleCableUuid = "0000fde2-0000-1000-8000-00805f9b34fb";
+ constexpr auto kFidoCableUuid = "0000fff9-0000-1000-8000-00805f9b34fb";
+ 
+-[[nodiscard]] bool IsCableUuid(const gi::cstring_v uuid) {
+-	return !GLib::ascii_strcasecmp(uuid, kGoogleCableUuid)
+-		|| !GLib::ascii_strcasecmp(uuid, kFidoCableUuid);
++[[nodiscard]] bool IsCableUuid(const QString &uuid) {
++	return uuid.compare(QLatin1String(kGoogleCableUuid), Qt::CaseInsensitive) == 0
++		|| uuid.compare(QLatin1String(kFidoCableUuid), Qt::CaseInsensitive) == 0;
+ }
+ 
+-[[nodiscard]] QByteArray FixedArrayBytes(GLib::Variant value) {
+-	return QByteArray(
+-		static_cast<const char*>(value.get_data()),
+-		int(value.get_size()));
++[[nodiscard]] QByteArray VariantBytes(const QVariant &value) {
++	if (value.userType() == QMetaType::QByteArray) {
++		return value.toByteArray();
++	}
++	if (value.canConvert<QDBusVariant>()) {
++		return VariantBytes(value.value<QDBusVariant>().variant());
++	}
++	if (value.canConvert<QDBusArgument>()) {
++		auto arg = value.value<QDBusArgument>();
++		if (arg.currentType() == QDBusArgument::ArrayType) {
++			QByteArray bytes;
++			arg >> bytes;
++			return bytes;
++		}
++	}
++	return {};
+ }
+ 
+-[[nodiscard]] std::vector<QByteArray> CableServiceData(
+-		GLib::Variant serviceData) {
+-	auto result = std::vector<QByteArray>();
+-	if (!serviceData) {
+-		return result;
++[[nodiscard]] QVariantMap ReadAsv(QDBusArgument &arg) {
++	QVariantMap map;
++	arg.beginMap();
++	while (!arg.atEnd()) {
++		QString key;
++		QVariant val;
++		arg.beginMapEntry();
++		arg >> key >> val;
++		arg.endMapEntry();
++		map.insert(key, val);
++	}
++	arg.endMap();
++	return map;
++}
++
++[[nodiscard]] QVariantMap DemarshalAsv(const QVariant &value) {
++	if (value.metaType() == QMetaType::fromType<QVariantMap>()) {
++		return value.toMap();
++	}
++	if (value.canConvert<QDBusArgument>()) {
++		auto arg = value.value<QDBusArgument>();
++		if (arg.currentType() == QDBusArgument::MapType) {
++			return ReadAsv(arg);
++		}
+ 	}
+-	const auto count = serviceData.n_children();
+-	for (auto i = gsize(0); i != count; ++i) {
+-		auto entry = serviceData.get_child_value(i);
+-		if (!IsCableUuid(entry.get_child_value(0).get_string(nullptr))) {
++	return value.toMap();
++}
++
++[[nodiscard]] std::vector<QByteArray> CableServiceData(const QVariant &serviceData) {
++	auto result = std::vector<QByteArray>();
++	const auto map = DemarshalAsv(serviceData);
++	for (auto it = map.constBegin(); it != map.constEnd(); ++it) {
++		if (!IsCableUuid(it.key())) {
+ 			continue;
+ 		}
+-		auto value = entry.get_child_value(1).get_variant();
+-		if (value.is_of_type(GLib::VariantType::new_("ay"))
+-			&& value.get_size() >= kAdvertSize) {
+-			result.push_back(FixedArrayBytes(value));
++		const auto bytes = VariantBytes(it.value());
++		if (bytes.size() >= int(kAdvertSize)) {
++			result.push_back(bytes);
+ 		}
+ 	}
+ 	return result;
+ }
+ 
+-[[nodiscard]] GLib::Variant CableDiscoveryFilter() {
+-	return GLib::Variant::new_array({
+-		GLib::Variant::new_dict_entry(
+-			GLib::Variant::new_string("Transport"),
+-			GLib::Variant::new_variant(GLib::Variant::new_string("le"))),
+-		GLib::Variant::new_dict_entry(
+-			GLib::Variant::new_string("DuplicateData"),
+-			GLib::Variant::new_variant(GLib::Variant::new_boolean(true))),
+-	});
++[[nodiscard]] QVariantMap CableDiscoveryFilter() {
++	QVariantMap filter;
++	filter.insert(u"Transport"_q, QStringLiteral("le"));
++	filter.insert(u"DuplicateData"_q, true);
++	return filter;
+ }
+ 
+-class LinuxBleScanner final : public BleScanner, public base::has_weak_ptr {
++class LinuxBleScanner final
++	: public QObject
++	, public BleScanner
++	, public base::has_weak_ptr {
++	Q_OBJECT
++
+ public:
+-	~LinuxBleScanner();
++	LinuxBleScanner() = default;
++	~LinuxBleScanner() override {
++		stop();
++	}
+ 
+ 	bool start(
+-		std::function<void(QByteArray)> onAdvert,
+-		std::function<void(bool)> onAvailability) override;
+-	void stop() override;
+-
+-private:
+-	void subscribeToObjects();
+-	void handleObject(Gio::DBusObject object);
+-	void handleDevice(Bluez::Device1 device);
+-	void setDiscoveryFilter();
+-	void startDiscovery();
+-	void handleAvailability(bool available);
+-
+-	Bluez::ObjectManagerClient _manager;
+-	Bluez::Adapter1 _adapter;
+-	Gio::Cancellable _cancellable;
+-	std::set<QByteArray> _seen;
+-	bool _discovering = false;
+-	std::function<void(QByteArray)> _onAdvert;
+-	std::function<void(bool)> _onAvailability;
++			std::function<void(QByteArray)> onAdvert,
++			std::function<void(bool)> onAvailability) override {
++		stop();
++
++		_active = true;
++		_onAdvert = std::move(onAdvert);
++		_onAvailability = std::move(onAvailability);
++
++		auto bus = QDBusConnection::systemBus();
++		if (!bus.isConnected()) {
++			LOG(("Passkey Error: System D-Bus is not connected."));
++			handleAvailability(false);
++			return true;
++		}
+ 
+-};
++		bus.connect(
++			QString::fromLatin1(kBluezService),
++			QString::fromLatin1(kBluezObjectPath),
++			QString::fromLatin1(kObjectManagerIface),
++			u"InterfacesAdded"_q,
++			this,
++			SLOT(onInterfacesAdded(QDBusMessage)));
++		bus.connect(
++			QString::fromLatin1(kBluezService),
++			QString(),
++			QString::fromLatin1(kPropertiesIface),
++			u"PropertiesChanged"_q,
++			this,
++			SLOT(onPropertiesChanged(QDBusMessage)));
++
++		auto msg = QDBusMessage::createMethodCall(
++			QString::fromLatin1(kBluezService),
++			QString::fromLatin1(kBluezObjectPath),
++			QString::fromLatin1(kObjectManagerIface),
++			u"GetManagedObjects"_q);
++		auto *watcher = new QDBusPendingCallWatcher(bus.asyncCall(msg), this);
++		QObject::connect(
++			watcher,
++			&QDBusPendingCallWatcher::finished,
++			this,
++			[this](QDBusPendingCallWatcher *call) {
++				call->deleteLater();
++				if (!_active) {
++					return;
++				}
++				const auto reply = call->reply();
++				if (reply.type() != QDBusMessage::ReplyMessage
++					|| reply.arguments().isEmpty()) {
++					LOG(("Passkey Error: BlueZ object manager: %1."
++						).arg(reply.errorMessage()));
++					handleAvailability(false);
++					return;
++				}
++				parseManagedObjects(reply.arguments().constFirst());
++				if (_adapterPath.isEmpty()) {
++					LOG(("Passkey Error: No bluetooth adapter in BlueZ."));
++					handleAvailability(false);
++					return;
++				}
++				auto adapter = QDBusInterface(
++					QString::fromLatin1(kBluezService),
++					_adapterPath,
++					QString::fromLatin1(kAdapterIface),
++					QDBusConnection::systemBus());
++				const auto powered = adapter.property("Powered");
++				if (!powered.isValid() || !powered.toBool()) {
++					LOG(("Passkey Error: Bluetooth adapter is powered off."));
++					handleAvailability(false);
++					return;
++				}
++				setDiscoveryFilter();
++			});
++		return true;
++	}
+ 
+-LinuxBleScanner::~LinuxBleScanner() {
+-	stop();
+-}
++	void stop() override {
++		if (!_active && !_discovering && _adapterPath.isEmpty()) {
++			_onAdvert = nullptr;
++			_onAvailability = nullptr;
++			_seen.clear();
++			return;
++		}
++		_active = false;
++		auto bus = QDBusConnection::systemBus();
++		bus.disconnect(
++			QString::fromLatin1(kBluezService),
++			QString::fromLatin1(kBluezObjectPath),
++			QString::fromLatin1(kObjectManagerIface),
++			u"InterfacesAdded"_q,
++			this,
++			SLOT(onInterfacesAdded(QDBusMessage)));
++		bus.disconnect(
++			QString::fromLatin1(kBluezService),
++			QString(),
++			QString::fromLatin1(kPropertiesIface),
++			u"PropertiesChanged"_q,
++			this,
++			SLOT(onPropertiesChanged(QDBusMessage)));
++		if (base::take(_discovering) && !_adapterPath.isEmpty()) {
++			auto adapter = QDBusInterface(
++				QString::fromLatin1(kBluezService),
++				_adapterPath,
++				QString::fromLatin1(kAdapterIface),
++				bus);
++			adapter.asyncCall(u"StopDiscovery"_q);
++		}
++		_adapterPath.clear();
++		_onAdvert = nullptr;
++		_onAvailability = nullptr;
++		_seen.clear();
++	}
+ 
+-bool LinuxBleScanner::start(
+-		std::function<void(QByteArray)> onAdvert,
+-		std::function<void(bool)> onAvailability) {
+-	stop();
+-
+-	_cancellable = Gio::Cancellable::new_();
+-	_onAdvert = std::move(onAdvert);
+-	_onAvailability = std::move(onAvailability);
+-
+-	Bluez::ObjectManagerClient::new_for_bus(
+-		Gio::BusType::SYSTEM_,
+-		Gio::DBusObjectManagerClientFlags::NONE_,
+-		kBluezService,
+-		kBluezObjectPath,
+-		_cancellable,
+-		crl::guard(this, [=](GObject::Object, Gio::AsyncResult result) {
+-			if (!_cancellable) {
+-				return;
+-			}
+-			auto manager = Bluez::ObjectManagerClient::new_for_bus_finish(
+-				result);
+-			if (!manager) {
+-				Gio::DBusErrorNS_::strip_remote_error(manager.error());
+-				LOG(("Passkey Error: BlueZ object manager: %1."
+-					).arg(manager.error().message_().c_str()));
+-				handleAvailability(false);
+-				return;
+-			}
+-			_manager = *manager;
+-			subscribeToObjects();
+-			auto objects = Gio::DBusObjectManager(_manager).get_objects();
+-			for (auto object : objects) {
+-				handleObject(object);
+-			}
+-			if (!_adapter) {
+-				LOG(("Passkey Error: No bluetooth adapter in BlueZ."));
+-				handleAvailability(false);
+-				return;
+-			} else if (!_adapter.get_powered()) {
+-				LOG(("Passkey Error: Bluetooth adapter is powered off."));
+-				handleAvailability(false);
+-				return;
+-			}
+-			setDiscoveryFilter();
+-		}));
+-	return true;
+-}
++private Q_SLOTS:
++	void onInterfacesAdded(const QDBusMessage &message) {
++		if (!_active || message.arguments().size() < 2) {
++			return;
++		}
++		const auto path = message.arguments().at(0).value<QDBusObjectPath>().path();
++		handleInterfaces(path, message.arguments().at(1));
++	}
+ 
+-void LinuxBleScanner::subscribeToObjects() {
+-	Gio::DBusObjectManager(_manager).signal_object_added().connect(
+-		crl::guard(this, [=](
+-				Gio::DBusObjectManager,
+-				Gio::DBusObject object) {
+-			handleObject(object);
+-		}));
+-}
++	void onPropertiesChanged(const QDBusMessage &message) {
++		if (!_active || message.arguments().size() < 2) {
++			return;
++		}
++		if (message.arguments().at(0).toString() != QLatin1String(kDeviceIface)) {
++			return;
++		}
++		const auto changed = DemarshalAsv(message.arguments().at(1));
++		const auto serviceData = changed.constFind(u"ServiceData"_q);
++		if (serviceData == changed.cend()) {
++			return;
++		}
++		handleServiceData(*serviceData);
++	}
+ 
+-void LinuxBleScanner::handleObject(Gio::DBusObject object) {
+-	auto typed = gi::object_cast<Bluez::Object>(object);
+-	if (!typed) {
+-		return;
+-	} else if (auto device = typed.get_device1()) {
+-		device.property_service_data().signal_notify().connect(
+-			crl::guard(this, [=](auto changed, auto) {
+-				if (auto device = gi::object_cast<Bluez::Device1>(changed)) {
+-					handleDevice(device);
+-				}
+-			}));
+-		handleDevice(device);
+-	} else if (!_adapter) {
+-		_adapter = typed.get_adapter1();
++private:
++	void parseInterfacesMap(const QString &path, QDBusArgument &arg) {
++		arg.beginMap();
++		while (!arg.atEnd()) {
++			QString iface;
++			arg.beginMapEntry();
++			arg >> iface;
++			QVariantMap props;
++			if (arg.currentType() == QDBusArgument::MapType) {
++				props = ReadAsv(arg);
++			} else {
++				QVariant propsVar;
++				arg >> propsVar;
++				props = DemarshalAsv(propsVar);
++			}
++			arg.endMapEntry();
++			handleInterface(path, iface, props);
++		}
++		arg.endMap();
+ 	}
+-}
+ 
+-void LinuxBleScanner::handleDevice(Bluez::Device1 device) {
+-	for (auto &blob : CableServiceData(device.get_service_data())) {
+-		if (_seen.emplace(blob).second && _onAdvert) {
+-			_onAdvert(blob);
++	void parseManagedObjects(const QVariant &value) {
++		if (!value.canConvert<QDBusArgument>()) {
++			return;
+ 		}
++		auto arg = value.value<QDBusArgument>();
++		arg.beginMap();
++		while (!arg.atEnd()) {
++			QDBusObjectPath path;
++			arg.beginMapEntry();
++			arg >> path;
++			if (arg.currentType() == QDBusArgument::MapType) {
++				parseInterfacesMap(path.path(), arg);
++			}
++			arg.endMapEntry();
++		}
++		arg.endMap();
+ 	}
+-}
+ 
+-void LinuxBleScanner::setDiscoveryFilter() {
+-	_adapter.call_set_discovery_filter(
+-		CableDiscoveryFilter(),
+-		_cancellable,
+-		crl::guard(this, [=](GObject::Object, Gio::AsyncResult) {
+-			if (!_cancellable) {
++	void handleInterfaces(const QString &path, const QVariant &ifacesVar) {
++		if (ifacesVar.canConvert<QDBusArgument>()) {
++			auto arg = ifacesVar.value<QDBusArgument>();
++			if (arg.currentType() == QDBusArgument::MapType) {
++				parseInterfacesMap(path, arg);
+ 				return;
+ 			}
+-			startDiscovery();
+-		}));
+-}
++		}
++		const auto map = ifacesVar.toMap();
++		for (auto it = map.constBegin(); it != map.constEnd(); ++it) {
++			handleInterface(path, it.key(), DemarshalAsv(it.value()));
++		}
++	}
+ 
+-void LinuxBleScanner::startDiscovery() {
+-	_adapter.call_start_discovery(
+-		_cancellable,
+-		crl::guard(this, [=](GObject::Object, Gio::AsyncResult result) {
+-			if (!_cancellable) {
+-				return;
++	void handleInterface(
++			const QString &path,
++			const QString &iface,
++			const QVariantMap &props) {
++		if (iface == QLatin1String(kDeviceIface)) {
++			const auto serviceData = props.constFind(u"ServiceData"_q);
++			if (serviceData != props.cend()) {
++				handleServiceData(*serviceData);
+ 			}
+-			auto started = _adapter.call_start_discovery_finish(result);
+-			if (!started) {
+-				Gio::DBusErrorNS_::strip_remote_error(started.error());
+-				LOG(("Passkey Error: BlueZ StartDiscovery: %1."
+-					).arg(started.error().message_().c_str()));
+-				handleAvailability(false);
+-				return;
++		} else if (iface == QLatin1String(kAdapterIface)
++			&& _adapterPath.isEmpty()) {
++			_adapterPath = path;
++		}
++	}
++
++	void handleServiceData(const QVariant &serviceData) {
++		for (auto &blob : CableServiceData(serviceData)) {
++			if (_seen.emplace(blob).second && _onAdvert) {
++				_onAdvert(blob);
+ 			}
+-			_discovering = true;
+-			handleAvailability(true);
+-		}));
+-}
++		}
++	}
+ 
+-void LinuxBleScanner::handleAvailability(bool available) {
+-	if (const auto onAvailability = base::take(_onAvailability)) {
+-		onAvailability(available);
++	void setDiscoveryFilter() {
++		auto adapter = QDBusInterface(
++			QString::fromLatin1(kBluezService),
++			_adapterPath,
++			QString::fromLatin1(kAdapterIface),
++			QDBusConnection::systemBus());
++		auto *watcher = new QDBusPendingCallWatcher(
++			adapter.asyncCall(u"SetDiscoveryFilter"_q, CableDiscoveryFilter()),
++			this);
++		QObject::connect(
++			watcher,
++			&QDBusPendingCallWatcher::finished,
++			this,
++			[this](QDBusPendingCallWatcher *call) {
++				call->deleteLater();
++				if (!_active) {
++					return;
++				}
++				startDiscovery();
++			});
+ 	}
+-}
+ 
+-void LinuxBleScanner::stop() {
+-	if (!_cancellable) {
+-		return;
++	void startDiscovery() {
++		auto adapter = QDBusInterface(
++			QString::fromLatin1(kBluezService),
++			_adapterPath,
++			QString::fromLatin1(kAdapterIface),
++			QDBusConnection::systemBus());
++		auto *watcher = new QDBusPendingCallWatcher(
++			adapter.asyncCall(u"StartDiscovery"_q),
++			this);
++		QObject::connect(
++			watcher,
++			&QDBusPendingCallWatcher::finished,
++			this,
++			[this](QDBusPendingCallWatcher *call) {
++				const auto reply = call->reply();
++				call->deleteLater();
++				if (!_active) {
++					return;
++				}
++				if (reply.type() != QDBusMessage::ReplyMessage) {
++					LOG(("Passkey Error: BlueZ StartDiscovery: %1."
++						).arg(reply.errorMessage()));
++					handleAvailability(false);
++					return;
++				}
++				_discovering = true;
++				handleAvailability(true);
++			});
+ 	}
+-	base::take(_cancellable).cancel();
+-	if (base::take(_discovering)) {
+-		_adapter.call_stop_discovery([](GObject::Object, Gio::AsyncResult) {});
++
++	void handleAvailability(bool available) {
++		if (const auto onAvailability = base::take(_onAvailability)) {
++			onAvailability(available);
++		}
+ 	}
+-	_manager = nullptr;
+-	_adapter = nullptr;
+-	_onAdvert = nullptr;
+-	_onAvailability = nullptr;
+-	_seen.clear();
+-}
++
++	QString _adapterPath;
++	bool _active = false;
++	bool _discovering = false;
++	std::set<QByteArray> _seen;
++	std::function<void(QByteArray)> _onAdvert;
++	std::function<void(bool)> _onAvailability;
++};
+ 
+ } // namespace
+ 
+diff -Nru a/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp b/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp
+--- a/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp	2026-09-06 15:51:18.000000000 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp	2026-09-11 19:30:41.275364196 +0200
+@@ -7,17 +7,18 @@
+ #include "base/platform/linux/base_file_utilities_linux.h"
+ 
+ #include "base/platform/base_platform_file_utilities.h"
+-#include "base/platform/linux/base_linux_xdp_utilities.h"
+-#include "base/platform/linux/base_linux_xdg_activation_token.h"
+ #include "base/algorithm.h"
+ 
+ #include <QtCore/QFile>
+ #include <QtCore/QFileInfo>
++#include <QtCore/QProcess>
+ #include <QtCore/QStandardPaths>
++#include <QtCore/QUrl>
+ #include <QtGui/QDesktopServices>
+-
+-#include <xdpopenuri/xdpopenuri.hpp>
+-#include <xdgfilemanager1/xdgfilemanager1.hpp>
++#include <QtDBus/QDBusConnection>
++#include <QtDBus/QDBusInterface>
++#include <QtDBus/QDBusMessage>
++#include <QtDBus/QDBusReply>
+ 
+ #include <sys/types.h>
+ #include <sys/stat.h>
+@@ -29,110 +30,64 @@
+ namespace base::Platform {
+ namespace {
+ 
+-using namespace gi::repository;
+-namespace GObject = gi::repository::GObject;
+-
+-void PortalShowInFolder(const QString &filepath, Fn<void()> fail) {
+-	XdpOpenURI::OpenURIProxy::new_for_bus(
+-		Gio::BusType::SESSION_,
+-		Gio::DBusProxyFlags::NONE_,
+-		XDP::kService,
+-		XDP::kObjectPath,
+-		[=](GObject::Object, Gio::AsyncResult res) {
+-			auto interface = XdpOpenURI::OpenURI(
+-				XdpOpenURI::OpenURIProxy::new_for_bus_finish(res, nullptr));
+-
+-			if (!interface) {
+-				fail();
+-				return;
+-			}
+-
+-			const auto fd = open(
+-				QFile::encodeName(filepath).constData(),
+-				O_RDONLY | O_CLOEXEC);
+-
+-			if (fd == -1) {
+-				fail();
+-				return;
+-			}
++bool FileManager1ShowItems(const QString &filepath) {
++	auto iface = QDBusInterface(
++		u"org.freedesktop.FileManager1"_q,
++		u"/org/freedesktop/FileManager1"_q,
++		u"org.freedesktop.FileManager1"_q,
++		QDBusConnection::sessionBus());
++	if (!iface.isValid()) {
++		return false;
++	}
++	const auto uri = QUrl::fromLocalFile(
++		QFileInfo(filepath).absoluteFilePath()).toString();
++	// ShowItems(as uris, s startupId)
++	QDBusReply<void> reply = iface.call(
++		u"ShowItems"_q,
++		QStringList{ uri },
++		QString());
++	return reply.isValid();
++}
+ 
+-			RunWithXdgActivationToken([=](
+-					const QString &activationToken) mutable {
+-				interface.call_open_directory(
+-					XDP::ParentWindowID(),
+-					GLib::Variant::new_handle(0),
+-					GLib::Variant::new_array({
+-						GLib::Variant::new_dict_entry(
+-							GLib::Variant::new_string("activation_token"),
+-							GLib::Variant::new_variant(
+-								GLib::Variant::new_string(
+-									activationToken.toStdString()))),
+-					}),
+-					Gio::UnixFDList::new_from_array(&fd, 1),
+-					{},
+-					[=](GObject::Object, Gio::AsyncResult res) mutable {
+-						if (!interface.call_open_directory_finish(res)) {
+-							fail();
+-						}
+-					});
+-			});
+-		});
+-}
+-
+-void DBusShowInFolder(const QString &filepath, Fn<void()> fail) {
+-	XdgFileManager1::FileManager1Proxy::new_for_bus(
+-		Gio::BusType::SESSION_,
+-		Gio::DBusProxyFlags::NONE_,
+-		"org.freedesktop.FileManager1",
+-		"/org/freedesktop/FileManager1",
+-		[=](GObject::Object, Gio::AsyncResult res) {
+-			auto interface = XdgFileManager1::FileManager1(
+-				XdgFileManager1::FileManager1Proxy::new_for_bus_finish(
+-					res,
+-					nullptr));
+-
+-			if (!interface) {
+-				fail();
+-				return;
+-			}
++bool DolphinSelect(const QString &filepath) {
++	// Plasma: dolphin --select
++	if (QStandardPaths::findExecutable(u"dolphin"_q).isEmpty()) {
++		return false;
++	}
++	return QProcess::startDetached(
++		u"dolphin"_q,
++		{ u"--select"_q, QFileInfo(filepath).absoluteFilePath() });
++}
+ 
+-			RunWithXdgActivationToken([=](const QString &startupId) mutable {
+-				const auto callbackWrap = gi::unwrap(
+-					Gio::AsyncReadyCallback(
+-						[=](GObject::Object, Gio::AsyncResult res) mutable {
+-							if (!interface.call_show_items_finish(res)) {
+-								fail();
+-							}
+-						}
+-					),
+-					gi::scope_async);
+-
+-				xdg_file_manager1_file_manager1_call_show_items(
+-					interface.gobj_(),
+-					(std::array<const char*, 2>{
+-						GLib::filename_to_uri(
+-							filepath.toStdString(),
+-							nullptr
+-						).c_str(),
+-						nullptr,
+-					}).data(),
+-					startupId.toStdString().c_str(),
+-					nullptr,
+-					&callbackWrap->wrapper,
+-					callbackWrap);
+-			});
+-		});
++bool PCmanFmShow(const QString &filepath) {
++	// LXQt: pcmanfm-qt / pcmanfm
++	for (const auto &bin : { u"pcmanfm-qt"_q, u"pcmanfm"_q }) {
++		if (QStandardPaths::findExecutable(bin).isEmpty()) {
++			continue;
++		}
++		// Open containing folder; --show-select not universal.
++		return QProcess::startDetached(
++			bin,
++			{ QFileInfo(filepath).absolutePath() });
++	}
++	return false;
+ }
+ 
+ } // namespace
+ 
+ void ShowInFolder(const QString &filepath) {
+-	DBusShowInFolder(filepath, [=] {
+-		PortalShowInFolder(filepath, [=] {
+-			QDesktopServices::openUrl(
+-				QUrl::fromLocalFile(QFileInfo(filepath).absolutePath()));
+-		});
+-	});
++	if (FileManager1ShowItems(filepath)) {
++		return;
++	}
++	if (DolphinSelect(filepath)) {
++		return;
++	}
++	if (PCmanFmShow(filepath)) {
++		return;
++	}
++	const auto info = QFileInfo(filepath);
++	QDesktopServices::openUrl(
++		QUrl::fromLocalFile(info.isDir() ? filepath : info.absolutePath()));
+ }
+ 
+ QString CurrentExecutablePath(int argc, char *argv[]) {
+@@ -140,8 +95,6 @@
+ 	if (exeLink.exists() && exeLink.isSymLink()) {
+ 		return exeLink.canonicalFilePath();
+ 	}
+-
+-	// Fallback to the first command line argument.
+ 	if (argc) {
+ 		const auto argv0 = QFile::decodeName(argv[0]);
+ 		if (!argv0.isEmpty() && !argv0.contains(QLatin1Char('/'))) {
+@@ -152,7 +105,6 @@
+ 		}
+ 		return QFileInfo(argv0).absoluteFilePath();
+ 	}
+-
+ 	return QString();
+ }
+ 
+@@ -167,7 +119,6 @@
+ 	return name;
+ }
+ 
+-// From http://stackoverflow.com/questions/2256945/removing-a-non-empty-directory-programmatically-in-c-or-c
+ bool DeleteDirectory(QString path) {
+ 	if (path.endsWith('/')) {
+ 		path.chop(1);
+@@ -177,13 +128,10 @@
+ 	if (!d) {
+ 		return false;
+ 	}
+-
+ 	while (struct dirent *p = readdir(d)) {
+-		// Skip the names "." and ".." as we don't want to recurse on them.
+ 		if (!strcmp(p->d_name, ".") || !strcmp(p->d_name, "..")) {
+ 			continue;
+ 		}
+-
+ 		const auto fname = path + '/' + p->d_name;
+ 		const auto encoded = QFile::encodeName(fname);
+ 		struct stat statbuf;
+diff -Nru a/Telegram/lib_base/base/platform/linux/base_global_shortcuts_linux.cpp b/Telegram/lib_base/base/platform/linux/base_global_shortcuts_linux.cpp
+--- a/Telegram/lib_base/base/platform/linux/base_global_shortcuts_linux.cpp	2026-09-06 15:51:18.000000000 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_global_shortcuts_linux.cpp	2026-09-11 19:30:41.275502307 +0200
+@@ -15,6 +15,15 @@
+ 
+ #include <QKeySequence>
+ #include <QSocketNotifier>
++#include <QObject>
++#include <QEvent>
++#include <QKeyEvent>
++#include <QGuiApplication>
++#include <QAbstractNativeEventFilter>
++
++#include <QtDBus/QDBusConnection>
++#include <QtDBus/QDBusInterface>
++#include <QtDBus/QDBusConnectionInterface>
+ 
+ #include <xkbcommon/xkbcommon-keysyms.h>
+ 
+@@ -358,10 +367,135 @@
+ 
+ } // namespace
+ 
++
++class WaylandKeyFilter final : public QObject {
++public:
++	explicit WaylandKeyFilter(
++		Fn<void(GlobalShortcutKeyGeneric, bool)> process)
++	: _process(std::move(process)) {
++		qApp->installEventFilter(this);
++	}
++
++	~WaylandKeyFilter() override {
++		if (qApp) {
++			qApp->removeEventFilter(this);
++		}
++	}
++
++protected:
++	bool eventFilter(QObject *watched, QEvent *event) override {
++		Q_UNUSED(watched);
++		if (!_process) {
++			return false;
++		}
++		const auto type = event->type();
++		if (type != QEvent::KeyPress && type != QEvent::KeyRelease) {
++			return false;
++		}
++		// Only treat as global-shortcut candidates when no text widget is
++		// actively consuming input; still useful for shortcut recording UIs
++		// and for Plasma when the main window is focused.
++		const auto *keyEvent = static_cast<QKeyEvent*>(event);
++		if (keyEvent->isAutoRepeat()) {
++			return false;
++		}
++		const auto key = keyEvent->key();
++		if (key == Qt::Key_unknown
++			|| key == Qt::Key_Shift
++			|| key == Qt::Key_Control
++			|| key == Qt::Key_Alt
++			|| key == Qt::Key_Meta
++			|| key == Qt::Key_AltGr) {
++			// Skip pure modifiers; the combo key carries modifiers in native.
++			return false;
++		}
++		// Map Qt key to a stable descriptor: store Qt::Key in the low 32 bits.
++		// KeyName() already knows how to pretty-print many xkb keysyms; for Qt
++		// keys we fall through to a hex display which is fine for matching.
++		const auto descriptor = GlobalShortcutKeyGeneric(uint64(key));
++		_process(descriptor, type == QEvent::KeyPress);
++		return false;
++	}
++
++private:
++	Fn<void(GlobalShortcutKeyGeneric, bool)> _process;
++};
++
++std::unique_ptr<WaylandKeyFilter> _waylandFilter;
++
++[[nodiscard]] bool IsKDE() {
++	static const auto Result = [] {
++		if (qEnvironmentVariableIsSet("KDE_FULL_SESSION")
++			|| qEnvironmentVariableIsSet("KDE_SESSION_VERSION")) {
++			return true;
++		}
++		auto bus = QDBusConnection::sessionBus();
++		if (!bus.isConnected()) {
++			return false;
++		}
++		auto reply = bus.interface()->isServiceRegistered("org.kde.kglobalaccel");
++		return reply.isValid() && reply.value();
++	}();
++	return Result;
++}
++
++[[nodiscard]] bool IsLXQt() {
++	static const auto Result = [] {
++		if (qEnvironmentVariableIsSet("LXQT_SESSION_CONFIG")
++			|| qEnvironmentVariable("XDG_CURRENT_DESKTOP")
++				.contains(u"LXQt"_q, Qt::CaseInsensitive)) {
++			return true;
++		}
++		return false;
++	}();
++	return Result;
++}
++
++void RegisterKGlobalAccelComponent() {
++	auto bus = QDBusConnection::sessionBus();
++	if (!bus.isConnected()) {
++		return;
++	}
++	// Plasma: announce ourselves so users can bind global shortcuts in
++	// System Settings > Shortcuts > Telegram Desktop.
++	QDBusInterface kglobal(
++		u"org.kde.kglobalaccel"_q,
++		u"/kglobalaccel"_q,
++		u"org.kde.KGlobalAccel"_q,
++		bus);
++	if (!kglobal.isValid()) {
++		// Older signature on some Plasma versions.
++		QDBusInterface legacy(
++			u"org.kde.kglobalaccel"_q,
++			u"/kglobalaccel"_q,
++			u"org.kde.kglobalaccel"_q,
++			bus);
++		if (legacy.isValid()) {
++			legacy.call(
++				u"registerComponent"_q,
++				u"org.telegram.desktop"_q,
++				u"Telegram Desktop"_q);
++		}
++		return;
++	}
++	// DoNotInhibit flag not needed; just ensure the component is known.
++	kglobal.call(
++		u"doRegister"_q,
++		u"org.telegram.desktop"_q,
++		u""_q,
++		u"Telegram Desktop"_q);
++}
++
+ bool Available() {
+ 	if (::Platform::IsX11()) {
+ 		EnsureX11ShortcutManager();
+-		return _x11Manager->available();
++		return _x11Manager && _x11Manager->available();
++	}
++
++	// Plasma / LXQt on Wayland: allow configuring shortcuts. Capture is
++	// application-scoped via event filter; KGlobalAccel handles DE-level binds.
++	if (::Platform::IsWayland() && (IsKDE() || IsLXQt())) {
++		return true;
+ 	}
+ 
+ 	return false;
+diff -Nru a/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp b/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp
+--- a/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp	2026-09-06 15:51:18.000000000 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp	2026-09-11 19:30:41.275703870 +0200
+@@ -11,39 +11,38 @@
+ 
+ #include <sys/uio.h>
+ 
++#include <QtDBus/QDBusInterface>
++#include <QtDBus/QDBusReply>
++
+ // Declarations from the xcb-screensaver headers (X11 license), so that
+ // there is no build-time dependency on it.
+ extern "C" {
+ 
+ typedef struct xcb_screensaver_query_info_request_t {
+-    uint8_t        major_opcode;
+-    uint8_t        minor_opcode;
+-    uint16_t       length;
+-    xcb_drawable_t drawable;
++	uint8_t        major_opcode;
++	uint8_t        minor_opcode;
++	uint16_t       length;
++	xcb_drawable_t drawable;
+ } xcb_screensaver_query_info_request_t;
+ 
+ typedef struct xcb_screensaver_query_info_reply_t {
+-    uint8_t      response_type;
+-    uint8_t      state;
+-    uint16_t     sequence;
+-    uint32_t     length;
+-    xcb_window_t saver_window;
+-    uint32_t     ms_until_server;
+-    uint32_t     ms_since_user_input;
+-    uint32_t     event_mask;
+-    uint8_t      kind;
+-    uint8_t      pad0[7];
++	uint8_t      response_type;
++	uint8_t      state;
++	uint16_t     sequence;
++	uint32_t     length;
++	xcb_window_t saver_window;
++	uint32_t     ms_until_server;
++	uint32_t     ms_since_user_input;
++	uint32_t     event_mask;
++	uint8_t      kind;
++	uint8_t      pad0[7];
+ } xcb_screensaver_query_info_reply_t;
+ 
+ } // extern "C"
+ 
+-#include <mutteridlemonitor/mutteridlemonitor.hpp>
+-
+ namespace base::Platform {
+ namespace {
+ 
+-using namespace gi::repository;
+-
+ using namespace XCB::Library;
+ 
+ std::optional<crl::time> XCBLastUserInputTime() {
+diff -Nru a/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h b/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h
+--- a/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h	2026-09-06 15:51:18.000000000 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h	2026-09-11 19:30:41.275930713 +0200
+@@ -9,7 +9,7 @@
+ #include "base/expected.h"
+ #include "base/weak_ptr.h"
+ 
+-typedef struct _GDBusConnection GDBusConnection;
++#include <QtDBus/QDBusConnection>
+ 
+ namespace base::Platform::DBus {
+ 
+diff -Nru a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp
+--- a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp	2026-09-06 15:51:18.000000000 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp	2026-09-11 19:30:41.276083355 +0200
+@@ -8,8 +8,11 @@
+ 
+ #include "base/platform/base_platform_info.h"
+ 
+-#include <xdpsettings/xdpsettings.hpp>
+-
++#include <QtCore/QVariant>
++#include <QtDBus/QDBusConnection>
++#include <QtDBus/QDBusInterface>
++#include <QtDBus/QDBusReply>
++#include <QtDBus/QDBusVariant>
+ #include <QtGui/QGuiApplication>
+ #include <QtGui/QWindow>
+ 
+@@ -18,20 +21,14 @@
+ #include <private/qguiapplication_p.h>
+ #if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
+ #include <private/qdesktopunixservices_p.h>
+-#else // Qt >= 6.9.0
++#else
+ #include <private/qgenericunixservices_p.h>
+-#endif // Qt < 6.9.0
+-#endif // Qt >= 6.5.0
++#endif
++#endif
+ 
+ #include <sstream>
+ 
+ namespace base::Platform::XDP {
+-namespace {
+-
+-using namespace gi::repository;
+-namespace GObject = gi::repository::GObject;
+-
+-} // namespace
+ 
+ std::string ParentWindowID() {
+ 	return ParentWindowID(QGuiApplication::focusWindow());
+@@ -45,12 +42,12 @@
+ #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
+ #if QT_VERSION < QT_VERSION_CHECK(6, 9, 0)
+ 	using QDesktopUnixServices = QGenericUnixServices;
+-#endif // Qt < 6.9.0
++#endif
+ 	if (const auto services = dynamic_cast<QDesktopUnixServices*>(
+ 			QGuiApplicationPrivate::platformIntegration()->services())) {
+ 		return services->portalWindowIdentifier(window).toStdString();
+ 	}
+-#endif // Qt >= 6.5.0
++#endif
+ 
+ 	if (::Platform::IsX11()) {
+ 		std::stringstream result;
+diff -Nru a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h
+--- a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h	2026-09-06 15:51:18.000000000 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h	2026-09-11 19:30:41.276270157 +0200
+@@ -9,11 +9,7 @@
+ #include "base/expected.h"
+ #include "base/weak_ptr.h"
+ 
+-#include <glib/glib.hpp>
+-
+-#if __has_include(<glibmm.h>)
+-#include <glibmm.h>
+-#endif // __has_include(<glibmm.h>)
++#include <QtCore/QVariant>
+ 
+ class QWindow;
+ 
+@@ -27,50 +23,28 @@
+ std::string ParentWindowID();
+ std::string ParentWindowID(QWindow *window);
+ 
+-gi::result<gi::repository::GLib::Variant> ReadSetting(
++base::expected<QVariant, QString> ReadSetting(
+ 	const std::string &group,
+ 	const std::string &key);
+ 
+-#if __has_include(<glibmm.h>)
+-template <typename T>
+-gi::result<T> ReadSetting(
+-		const std::string &group,
+-		const std::string &key) {
+-	try {
+-		auto value = ReadSetting(group, key);
+-		if (value) {
+-			return Glib::wrap(value->gobj_copy_()).get_dynamic<T>();
+-		}
+-		return make_unexpected(std::move(value.error()));
+-	} catch (std::invalid_argument &e) {
+-		return make_unexpected(
+-			std::make_unique<std::invalid_argument>(std::move(e)));
+-	} catch (std::bad_cast &e) {
+-		return make_unexpected(std::make_unique<std::bad_cast>(std::move(e)));
+-	} catch (...) {
+-		return make_unexpected(std::make_unique<std::exception>());
+-	}
+-}
+-#endif
+-
+ class SettingWatcher : public has_weak_ptr {
+ public:
+ 	SettingWatcher(
+ 		Fn<void(
+ 			const std::string &,
+ 			const std::string &,
+-			gi::repository::GLib::Variant)> callback);
++			QVariant)> callback);
+ 
+ 	SettingWatcher(
+ 		const std::string &group,
+ 		const std::string &key,
+-		Fn<void(gi::repository::GLib::Variant)> callback)
++		Fn<void(QVariant)> callback)
+ 	: SettingWatcher([=](
+ 			const std::string &group2,
+ 			const std::string &key2,
+-			gi::repository::GLib::Variant value) {
++			QVariant value) {
+ 		if (group == group2 && key == key2) {
+-			callback(value);
++			callback(std::move(value));
+ 		}
+ 	}) {
+ 	}
+diff -Nru a/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp b/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp
+--- a/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp	2026-09-06 15:51:18.000000000 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp	2026-09-11 19:30:41.276676002 +0200
+@@ -4,170 +4,66 @@
+ // For license and copyright information please follow this link:
+ // https://github.com/desktop-app/legal/blob/master/LEGAL
+ //
+-#include "base/platform/linux/base_power_save_blocker_linux.h"
+-
+-#include "base/platform/base_platform_info.h"
+-#include "base/platform/linux/base_linux_xcb_utilities.h"
+-#include "base/platform/linux/base_linux_xdp_utilities.h"
+-#include "base/timer_rpl.h"
+-#include "base/weak_ptr.h"
+-#include "base/random.h"
++#include "base/platform/base_platform_power_save_blocker.h"
+ 
++#include <QtCore/QString>
++#include <QtCore/QPointer>
++#include <QtCore/QMutex>
+ #include <QtGui/QWindow>
+-
+-#include <xdpinhibit/xdpinhibit.hpp>
+-#include <xdprequest/xdprequest.hpp>
++#include <QtDBus/QDBusInterface>
++#include <QtDBus/QDBusReply>
+ 
+ namespace base::Platform {
+ namespace {
+ 
+-using namespace gi::repository;
+-namespace GObject = gi::repository::GObject;
+-
+-using namespace XCB::Library;
+-
+-constexpr auto kResetScreenSaverTimeout = 10 * crl::time(1000);
+-
+-// Use the basic reset API
+-// due to https://gitlab.freedesktop.org/xorg/xserver/-/issues/363
+-void XCBPreventDisplaySleep(bool prevent) {
+-	static rpl::lifetime lifetime;
+-	if (!prevent) {
+-		lifetime.destroy();
+-		return;
+-	} else if (lifetime) {
+-		return;
+-	}
++struct CookieEntry {
++	uint screensaver = 0;
++	uint xdp = 0;
++};
+ 
+-	timer_each(
+-		kResetScreenSaverTimeout
+-	) | rpl::map([connection = XCB::Connection()] {
+-		return connection;
+-	}) | rpl::filter([](xcb_connection_t *connection) {
+-		return connection && !xcb_connection_has_error(connection);
+-	}) | rpl::on_next([](xcb_connection_t *connection) {
+-		free(
+-			xcb_request_check(
+-				connection,
+-				xcb_force_screen_saver_checked(
+-					connection,
+-					XCB_SCREEN_SAVER_RESET)));
+-	}, lifetime);
++QMutex &CookiesMutex() {
++	static QMutex mutex;
++	return mutex;
+ }
+ 
+-/* https://flatpak.github.io/xdg-desktop-portal/#gdbus-org.freedesktop.portal.Inhibit
+- * 1: Logout
+- * 2: User Switch
+- * 4: Suspend
+- * 8: Idle
+- */
+-class PortalInhibit final : public has_weak_ptr {
+-public:
+-	PortalInhibit(uint flags = 0, const QString &description = {}) {
+-		XdpInhibit::InhibitProxy::new_for_bus(
+-			Gio::BusType::SESSION_,
+-			Gio::DBusProxyFlags::NONE_,
+-			XDP::kService,
+-			XDP::kObjectPath,
+-			crl::guard(this, [=](GObject::Object, Gio::AsyncResult res) {
+-				auto proxy = XdpInhibit::InhibitProxy::new_for_bus_finish(
+-					res,
+-					nullptr);
+-
+-				if (!proxy) {
+-					return;
+-				}
+-
+-				const auto handleToken = "desktop_app"
+-					+ std::to_string(RandomValue<uint>());
+-
+-				auto uniqueName = std::string(
+-					proxy.get_connection().get_unique_name());
+-
+-				uniqueName.erase(0, 1);
+-				uniqueName.replace(uniqueName.find('.'), 1, 1, '_');
+-
+-				XdpRequest::RequestProxy::new_(
+-					proxy.get_connection(),
+-					Gio::DBusProxyFlags::NONE_,
+-					XDP::kService,
+-					XDP::kObjectPath
+-						+ std::string("/request/")
+-						+ uniqueName
+-						+ '/'
+-						+ handleToken,
+-					nullptr,
+-					crl::guard(this, [=](
+-							GObject::Object,
+-							Gio::AsyncResult res) mutable {
+-						_request = XdpRequest::RequestProxy::new_finish(
+-							res,
+-							nullptr);
+-
+-						auto request = _request; // take a ref
+-						const auto weak = make_weak(this);
+-						const auto signalId = std::make_shared<ulong>();
+-						*signalId = _request.signal_response().connect([=](
+-								XdpRequest::Request,
+-								guint,
+-								GLib::Variant) mutable {
+-							if (!weak) {
+-								request.call_close(nullptr);
+-							}
+-							request.disconnect(*signalId);
+-						});
+-
+-						XdpInhibit::Inhibit(proxy).call_inhibit(
+-							XDP::ParentWindowID(),
+-							flags,
+-							GLib::Variant::new_array({
+-								GLib::Variant::new_dict_entry(
+-									GLib::Variant::new_string("handle_token"),
+-									GLib::Variant::new_variant(
+-										GLib::Variant::new_string(
+-											handleToken))),
+-								GLib::Variant::new_dict_entry(
+-									GLib::Variant::new_string("reason"),
+-									GLib::Variant::new_variant(
+-										GLib::Variant::new_string(
+-											description.toStdString()))),
+-							}),
+-							nullptr);
+-					}));
+-			}));
+-	}
+-
+-	~PortalInhibit() {
+-		if (!_request) {
+-			return;
+-		}
+-
+-		_request.call_close(nullptr);
+-	}
+-
+-private:
+-	XdpRequest::Request _request;
++// One cookie per PowerSaveBlockType (simple nesting via refcount).
++struct Slot {
++	int refs = 0;
++	uint screensaverCookie = 0;
+ };
+ 
+-void PortalPreventDisplaySleep(
+-		bool prevent,
+-		const QString &description = {}) {
+-	static std::optional<PortalInhibit> instance;
+-	if (prevent && !instance) {
+-		instance.emplace(8 /* Idle */, description);
+-	} else if (!prevent && instance) {
+-		instance.reset();
++Slot &SlotFor(PowerSaveBlockType type) {
++	static Slot slots[kPowerSaveBlockTypeCount];
++	return slots[PowerSaveBlockTypeIndex(type)];
++}
++
++uint InhibitScreensaver(const QString &reason) {
++	auto iface = QDBusInterface(
++		u"org.freedesktop.ScreenSaver"_q,
++		u"/org/freedesktop/ScreenSaver"_q,
++		u"org.freedesktop.ScreenSaver"_q,
++		QDBusConnection::sessionBus());
++	if (!iface.isValid()) {
++		return 0;
+ 	}
++	QDBusReply<uint> reply = iface.call(
++		u"Inhibit"_q,
++		u"Telegram Desktop"_q,
++		reason);
++	return reply.isValid() ? reply.value() : 0;
+ }
+ 
+-void PortalPreventAppSuspension(
+-		bool prevent,
+-		const QString &description = {}) {
+-	static std::optional<PortalInhibit> instance;
+-	if (prevent && !instance) {
+-		instance.emplace(4 /* Suspend */, description);
+-	} else if (!prevent && instance) {
+-		instance.reset();
++void UnInhibitScreensaver(uint cookie) {
++	if (!cookie) {
++		return;
++	}
++	auto iface = QDBusInterface(
++		u"org.freedesktop.ScreenSaver"_q,
++		u"/org/freedesktop/ScreenSaver"_q,
++		u"org.freedesktop.ScreenSaver"_q,
++		QDBusConnection::sessionBus());
++	if (iface.isValid()) {
++		iface.call(u"UnInhibit"_q, cookie);
+ 	}
+ }
+ 
+diff -Nru a/Telegram/lib_base/base/platform/linux/base_screen_reader_state_linux.cpp b/Telegram/lib_base/base/platform/linux/base_screen_reader_state_linux.cpp
+--- a/Telegram/lib_base/base/platform/linux/base_screen_reader_state_linux.cpp	2026-09-06 15:51:18.000000000 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_screen_reader_state_linux.cpp	2026-09-11 19:30:41.277045797 +0200
+@@ -8,24 +8,15 @@
+ 
+ #include "base/platform/linux/base_linux_dbus_utilities.h"
+ #include "base/platform/base_platform_info.h"
+-#include "base/integration.h"
+ 
+ #include <QtCore/qtenvironmentvariables.h>
+-
+-#include <atspi/atspi.hpp>
+-
+-#include <memory>
+-#include <string>
+-#include <utility>
++#include <QtDBus/QDBusConnection>
++#include <QtDBus/QDBusInterface>
++#include <QtGui/QAccessible>
+ 
+ namespace base::Platform {
+ namespace {
+ 
+-using namespace gi::repository;
+-namespace GObject = gi::repository::GObject;
+-
+-constexpr auto kA11yBusName = "org.a11y.Bus";
+-constexpr auto kA11yObjectPath = "/org/a11y/bus";
+ constexpr auto kAlwaysOnEnvironmentVariable
+ 	= "QT_LINUX_ACCESSIBILITY_ALWAYS_ON";
+ 
+@@ -33,103 +24,53 @@
+ 	return qEnvironmentVariableIsSet(kAlwaysOnEnvironmentVariable);
+ }
+ 
+-[[nodiscard]] bool UseX11ScreenReaderDetection() {
+-	return ::Platform::IsX11();
+-}
+-
+-[[nodiscard]] Gio::DBusProxyFlags StatusProxyFlags() {
+-	return Gio::DBusProxyFlags::DO_NOT_AUTO_START_
+-		| Gio::DBusProxyFlags::DO_NOT_AUTO_START_AT_CONSTRUCTION_;
+-}
+-
+-[[nodiscard]] AtSpi::Status CreateStatusProxy(
+-		const Gio::DBusConnection &connection) {
+-	if (!connection) {
+-		return {};
+-	}
+-	auto result = gi::result<AtSpi::Status>(
+-		AtSpi::StatusProxy::new_sync(
+-			connection,
+-			StatusProxyFlags(),
+-			kA11yBusName,
+-			kA11yObjectPath,
+-			nullptr));
+-	return result ? *result : AtSpi::Status();
+-}
+-
+-[[nodiscard]] Gio::DBusConnection CreateSessionBusConnection() {
+-	return Gio::bus_get_sync(
+-		Gio::BusType::SESSION_,
+-		nullptr);
+-}
+-
+-[[nodiscard]] bool NameHasOwner(
+-		const Gio::DBusConnection &connection,
+-		const std::string &name) {
+-	if (!connection) {
+-		return false;
+-	}
+-	const auto result = DBus::NameHasOwner(connection.gobj_(), name);
+-	return result ? *result : false;
+-}
+-
+-// ScreenReaderState is an app-level "real screen reader" signal.
+-// AT_SPI_BUS_ADDRESS and the X11 AT_SPI_BUS atom only identify an AT-SPI bus,
+-// so they are intentionally ignored here. QT_LINUX_ACCESSIBILITY_ALWAYS_ON
+-// is the only environment force-on override because its meaning is explicit.
+-[[nodiscard]] bool ReadScreenReaderEnabled(
+-		const AtSpi::Status &status) {
+-	return status && status.property_screen_reader_enabled().get();
+-}
+-
+-void Enqueue(FnMut<void()> update) {
+-	if (Integration::Exists()) {
+-		Integration::Instance().enterFromEventLoop(std::move(update));
+-	} else {
+-		update();
++[[nodiscard]] bool ReadDBusScreenReaderEnabled() {
++	for (const auto &[service, path] : {
++		std::pair{ u"org.a11y.Bus"_q, u"/org/a11y/bus"_q },
++		std::pair{ u"org.a11y.Status"_q, u"/org/a11y/status"_q },
++	}) {
++		QDBusInterface iface(
++			service,
++			path,
++			u"org.a11y.Status"_q,
++			QDBusConnection::sessionBus());
++		if (!iface.isValid()) {
++			continue;
++		}
++		const auto v = iface.property("ScreenReaderEnabled");
++		if (v.isValid()) {
++			return v.toBool();
++		}
+ 	}
++	return false;
+ }
+ 
+ } // namespace
+ 
+ struct LinuxScreenReaderState::Private {
+-	Gio::DBusConnection connection;
+-	AtSpi::Status status;
+-	std::unique_ptr<DBus::ServiceWatcher> serviceWatcher;
++	std::unique_ptr<base::Platform::DBus::ServiceWatcher> serviceWatcher;
+ };
+ 
+ LinuxScreenReaderState::LinuxScreenReaderState()
+ : _private(std::make_unique<Private>())
+-, _useX11ScreenReaderDetection(UseX11ScreenReaderDetection())
++, _useX11ScreenReaderDetection(::Platform::IsX11())
+ , _isActive(
+ 	_useX11ScreenReaderDetection ? AlwaysOn() : QAccessible::isActive()) {
+ 	if (!_useX11ScreenReaderDetection) {
+ 		QAccessible::installActivationObserver(this);
+ 		return;
+-	} else if (AlwaysOn()) {
+-		return;
+ 	}
+-
+-	_private->connection = CreateSessionBusConnection();
+-	if (!_private->connection) {
++	if (AlwaysOn()) {
++		_isActive = true;
+ 		return;
+ 	}
+ 
+ 	_private->serviceWatcher = std::make_unique<DBus::ServiceWatcher>(
+-		_private->connection.gobj_(),
+-		kA11yBusName,
+-		[weak = make_weak(this)](
+-				const std::string &,
+-				const std::string &,
+-				const std::string &) {
+-			Enqueue([weak] {
+-				if (weak) {
+-					weak->refreshStatusProxy();
+-					weak->updateActive();
+-				}
+-			});
++		"org.a11y.Bus",
++		[this](const std::string &, const std::string &, const std::string &) {
++			refreshStatusProxy();
++			updateActive();
+ 		});
+-
+ 	refreshStatusProxy();
+ 	updateActive();
+ }
+@@ -147,28 +88,7 @@
+ }
+ 
+ void LinuxScreenReaderState::refreshStatusProxy() {
+-	_private->status = {};
+-	if (!_useX11ScreenReaderDetection
+-		|| AlwaysOn()
+-		|| !NameHasOwner(_private->connection, kA11yBusName)) {
+-		return;
+-	}
+-
+-	_private->status = CreateStatusProxy(_private->connection);
+-	if (!_private->status) {
+-		return;
+-	}
+-
+-	_private->status.property_screen_reader_enabled(
+-	).signal_notify().connect([weak = make_weak(this)](
+-			auto,
+-			GObject::ParamSpec) {
+-		Enqueue([weak] {
+-			if (weak) {
+-				weak->updateActive();
+-			}
+-		});
+-	});
++	// No persistent proxy; ReadDBusScreenReaderEnabled() queries on demand.
+ }
+ 
+ void LinuxScreenReaderState::updateActive() {
+diff -Nru a/Telegram/lib_ui/ui/platform/linux/ui_font_settings_linux.cpp b/Telegram/lib_ui/ui/platform/linux/ui_font_settings_linux.cpp
+--- a/Telegram/lib_ui/ui/platform/linux/ui_font_settings_linux.cpp	2026-09-10 12:29:25.000000000 +0200
++++ b/Telegram/lib_ui/ui/platform/linux/ui_font_settings_linux.cpp	2026-09-11 19:30:41.277279850 +0200
+@@ -128,7 +128,7 @@
+ 	const auto string = [](const char *group, const char *key) {
+ 		auto value = base::Platform::XDP::ReadSetting(group, key);
+ 		return value.has_value()
+-			? QString::fromStdString(value->get_string(nullptr))
++			? value->toString()
+ 			: QString();
+ 	};
+ 	const auto read = [&](const char *group,
+diff -Nru a/Telegram/lib_webview/CMakeLists.txt b/Telegram/lib_webview/CMakeLists.txt
+--- a/Telegram/lib_webview/CMakeLists.txt	2026-09-04 18:58:37.000000000 +0200
++++ b/Telegram/lib_webview/CMakeLists.txt	2026-09-11 19:30:41.277425621 +0200
+@@ -27,14 +27,6 @@
+ 
+     webview/platform/linux/webview_linux.h
+     webview/platform/linux/webview_linux.cpp
+-    webview/platform/linux/webview_linux_compositor.cpp
+-    webview/platform/linux/webview_linux_compositor.h
+-    webview/platform/linux/webview_linux_http_server.cpp
+-    webview/platform/linux/webview_linux_http_server.h
+-    webview/platform/linux/webview_linux_webkitgtk_library.cpp
+-    webview/platform/linux/webview_linux_webkitgtk_library.h
+-    webview/platform/linux/webview_linux_webkitgtk.cpp
+-    webview/platform/linux/webview_linux_webkitgtk.h
+ 
+     webview/platform/win/webview_win.cpp
+     webview/platform/win/webview_win.h
+diff -Nru a/Telegram/lib_webview/webview/platform/linux/webview_linux.cpp b/Telegram/lib_webview/webview/platform/linux/webview_linux.cpp
+--- a/Telegram/lib_webview/webview/platform/linux/webview_linux.cpp	2026-09-04 18:58:37.000000000 +0200
++++ b/Telegram/lib_webview/webview/platform/linux/webview_linux.cpp	2026-09-11 19:30:41.277538033 +0200
+@@ -7,16 +7,788 @@
+ #include "webview/platform/linux/webview_linux.h"
+ 
+ #include "base/random.h"
+-#include "webview/platform/linux/webview_linux_webkitgtk.h"
++#include "base/unique_qptr.h"
++#include "base/weak_ptr.h"
++#include "webview/webview_data_stream.h"
++
++#include <QtCore/QBuffer>
++#include <QtCore/QDir>
++#include <QtCore/QIODevice>
++#include <QtCore/QPointer>
++#include <QtCore/QStandardPaths>
++#include <QtCore/QUrl>
++#include <QtCore/QUrlQuery>
++#include <QtGui/QDesktopServices>
++#include <QtGui/QPalette>
++#include <QtWidgets/QWidget>
++
++#include <QtWebEngineCore/QWebEngineFullScreenRequest>
++#include <QtWebEngineCore/QWebEngineHistory>
++#include <QtWebEngineCore/QWebEnginePage>
++#include <QtWebEngineCore/QWebEngineProfile>
++#include <QtWebEngineCore/QWebEngineScript>
++#include <QtWebEngineCore/QWebEngineScriptCollection>
++#include <QtWebEngineCore/QWebEngineSettings>
++#include <QtWebEngineCore/QWebEngineCookieStore>
++#include <QtWebEngineCore/QWebEngineUrlRequestJob>
++#include <QtWebEngineCore/QWebEngineUrlScheme>
++#include <QtWebEngineCore/QWebEngineUrlSchemeHandler>
++#include <QtWebEngineWidgets/QWebEngineView>
++
++#include <cstdio>
++
++#include <crl/crl.h>
++#include <rpl/rpl.h>
+ 
+ namespace Webview {
++namespace {
++
++constexpr auto kStoragePrefix = "webview-";
++constexpr auto kDataScheme = "tdesktop-webview-data";
++constexpr auto kMessageScheme = "tdesktop-webview-msg";
++constexpr auto kMessagePath = "/message";
++// WEB proxy frames can be a full 1 MiB payload as base64 plus a type byte.
++constexpr auto kMaxMessageBytes = 2 * 1024 * 1024;
++
++[[nodiscard]] QString StoragePath(const std::string &token) {
++	if (token.empty()) {
++		return {};
++	}
++	return QStandardPaths::writableLocation(QStandardPaths::CacheLocation)
++		+ u'/'
++		+ kStoragePrefix
++		+ QString::fromStdString(token);
++}
++
++[[nodiscard]] bool AllowedRestrictedUrl(
++		const QUrl &url,
++		const std::string &origin) {
++	const auto expected = QUrl(
++		QString::fromStdString(origin),
++		QUrl::StrictMode);
++	return url.isValid()
++		&& expected.isValid()
++		&& expected.scheme() == u"https"_q
++		&& expected.userInfo().isEmpty()
++		&& expected.port(443) == 443
++		&& (url.scheme() == u"https"_q || url.scheme() == u"wss"_q)
++		&& url.host() == expected.host()
++		&& url.port(443) == 443
++		&& url.userInfo().isEmpty();
++}
++
++[[nodiscard]] QByteArray ReadDevice(QIODevice *device, int maxBytes) {
++	if (!device) {
++		return {};
++	}
++	if (!device->isOpen()) {
++		device->open(QIODevice::ReadOnly);
++	}
++	QByteArray result;
++	char buf[64 * 1024];
++	while (result.size() < maxBytes) {
++		const auto want = std::min<int>(int(sizeof(buf)), maxBytes - result.size());
++		const auto got = device->read(buf, want);
++		if (got <= 0) {
++			break;
++		}
++		result.append(buf, int(got));
++	}
++	return result;
++}
++
++class Handler final : public QWebEngineUrlSchemeHandler {
++public:
++	explicit Handler(Fn<DataResult(DataRequest)> handler);
++
++	void requestStarted(QWebEngineUrlRequestJob *job) override;
++
++private:
++	const Fn<DataResult(DataRequest)> _handler;
++};
++
++Handler::Handler(Fn<DataResult(DataRequest)> handler)
++: _handler(std::move(handler)) {
++}
++
++void Handler::requestStarted(QWebEngineUrlRequestJob *job) {
++	if (!_handler) {
++		job->fail(QWebEngineUrlRequestJob::UrlInvalid);
++		return;
++	}
++
++	const auto guard = QPointer<QWebEngineUrlRequestJob>(job);
++	const auto finish = [guard](DataResponse response, std::int64_t offset, std::int64_t limit) {
++		crl::on_main([guard, response = std::move(response), offset, limit]() mutable {
++			const auto job = guard.data();
++			if (!job) {
++				return;
++			}
++			if (!response.stream) {
++				job->fail(QWebEngineUrlRequestJob::RequestFailed);
++				return;
++			}
++			auto &stream = *response.stream;
++			const auto mime = QByteArray::fromStdString(stream.mime());
++			if (offset > 0) {
++				stream.seek(SEEK_SET, offset);
++			}
++			const auto maxBytes = (limit > 0)
++				? limit
++				: std::max<std::int64_t>(stream.size() - std::max<std::int64_t>(offset, 0), 0);
++			// Cap individual reply to 64 MiB to avoid runaway allocations.
++			const auto want = std::min<std::int64_t>(
++				maxBytes > 0 ? maxBytes : stream.size(),
++				64 * 1024 * 1024);
++			QByteArray body;
++			if (want > 0) {
++				body.resize(int(want));
++				auto filled = std::int64_t(0);
++				while (filled < want) {
++					const auto got = stream.read(body.data() + filled, want - filled);
++					if (got <= 0) {
++						break;
++					}
++					filled += got;
++				}
++				body.resize(int(filled));
++			} else {
++				// Unknown size: read in chunks.
++				QByteArray chunk(64 * 1024, Qt::Uninitialized);
++				while (true) {
++					const auto got = stream.read(chunk.data(), chunk.size());
++					if (got <= 0) {
++						break;
++					}
++					body.append(chunk.constData(), int(got));
++					if (body.size() >= 64 * 1024 * 1024) {
++						break;
++					}
++				}
++			}
++			auto *buffer = new QBuffer(job);
++			buffer->setData(body);
++			buffer->open(QIODevice::ReadOnly);
++			job->reply(mime, buffer);
++		});
++	};
++
++	std::int64_t offset = 0;
++	std::int64_t limit = -1;
++	auto request = DataRequest{
++		.id = job->requestUrl().path().mid(1).toStdString(),
++		.offset = 0,
++		.limit = -1,
++	};
++	const auto range = job->requestHeaders().value("Range");
++	if (!range.isEmpty()) {
++		ParseRangeHeaderFor(request, range.toStdString());
++	}
++	offset = request.offset;
++	limit = request.limit;
++	request.done = [finish, offset, limit](DataResponse response) {
++		finish(std::move(response), offset, limit);
++	};
++
++	const auto result = _handler(std::move(request));
++	if (result == DataResult::Failed) {
++		job->fail(QWebEngineUrlRequestJob::RequestFailed);
++	}
++	// DataResult::Done: handler already invoked request.done synchronously.
++	// DataResult::Pending: request.done will be invoked later.
++}
++
++class MessageHandler final : public QWebEngineUrlSchemeHandler {
++public:
++	explicit MessageHandler(Fn<void(std::string, std::string)> handler)
++	: _handler(std::move(handler)) {
++	}
++
++	void requestStarted(QWebEngineUrlRequestJob *job) override {
++		if (!_handler) {
++			job->fail(QWebEngineUrlRequestJob::UrlInvalid);
++			return;
++		}
++		const auto url = job->requestUrl();
++		auto source = QUrlQuery(url).queryItemValue(
++			u"src"_q,
++			QUrl::FullyDecoded).toStdString();
++		QByteArray body;
++		if (job->requestMethod() == "POST") {
++			body = ReadDevice(job->requestBody(), kMaxMessageBytes);
++		} else {
++			body = QUrlQuery(url).queryItemValue(
++				u"data"_q,
++				QUrl::FullyDecoded).toUtf8();
++		}
++		if (body.size() > kMaxMessageBytes) {
++			body.resize(kMaxMessageBytes);
++		}
++		if (_handler) {
++			_handler(std::string(body.constData(), body.size()), std::move(source));
++		}
++		auto *buffer = new QBuffer(job);
++		buffer->setData(QByteArray());
++		buffer->open(QIODevice::ReadOnly);
++		job->reply("text/plain", buffer);
++	}
++
++private:
++	const Fn<void(std::string, std::string)> _handler;
++};
++
++class Page final : public QWebEnginePage {
++public:
++	using QWebEnginePage::QWebEnginePage;
++
++	bool acceptNavigationRequest(
++		const QUrl &url,
++		NavigationType type,
++		bool isMainFrame) override;
++
++	QWebEnginePage *createWindow(WebWindowType) override {
++		return nullptr;
++	}
++
++	void setMessageHandler(Fn<void(std::string, std::string)> handler) {
++		_messageHandler = std::move(handler);
++	}
++	void setNavigationStartHandler(Fn<bool(std::string, bool)> handler) {
++		_navStartHandler = std::move(handler);
++	}
++	void setNavigationDoneHandler(Fn<void(bool)> handler) {
++		_navDoneHandler = std::move(handler);
++	}
++	void setInteractionHandler(Fn<void()> handler) {
++		_interactionHandler = std::move(handler);
++	}
++	void setRestrictedOrigin(std::string origin) {
++		_restrictedOrigin = std::move(origin);
++	}
++
++protected:
++	void javaScriptAlert(const QUrl &origin, const QString &msg) override;
++	bool javaScriptConfirm(const QUrl &origin, const QString &msg) override;
++	bool javaScriptPrompt(
++		const QUrl &origin,
++		const QString &msg,
++		const QString &defaultValue,
++		QString *result) override;
++	void javaScriptConsoleMessage(
++		JavaScriptConsoleMessageLevel level,
++		const QString &message,
++		int lineNumber,
++		const QString &sourceID) override;
++
++private:
++	Fn<void(std::string, std::string)> _messageHandler;
++	Fn<bool(std::string, bool)> _navStartHandler;
++	Fn<void(bool)> _navDoneHandler;
++	Fn<void()> _interactionHandler;
++	std::string _restrictedOrigin;
++};
++
++bool Page::acceptNavigationRequest(
++		const QUrl &url,
++		NavigationType type,
++		bool isMainFrame) {
++	if (_interactionHandler) {
++		_interactionHandler();
++	}
++	const auto scheme = url.scheme();
++	if (scheme == kMessageScheme) {
++		if (_messageHandler && url.path().startsWith(kMessagePath)) {
++			auto data = QUrlQuery(url).queryItemValue(
++				u"data"_q,
++				QUrl::FullyDecoded).toStdString();
++			auto source = QUrlQuery(url).queryItemValue(
++				u"src"_q,
++				QUrl::FullyDecoded).toStdString();
++			if (source.empty()) {
++				source = this->url().toString().toStdString();
++			}
++			_messageHandler(std::move(data), std::move(source));
++		}
++		return false;
++	}
++	if (!_restrictedOrigin.empty()
++		&& scheme != kDataScheme
++		&& !AllowedRestrictedUrl(url, _restrictedOrigin)) {
++		return false;
++	}
++	if (_navStartHandler) {
++		const auto external = (type == NavigationTypeRedirect);
++		if (!_navStartHandler(url.toString().toStdString(), external)) {
++			return false;
++		}
++	}
++	return QWebEnginePage::acceptNavigationRequest(url, type, isMainFrame);
++}
++
++void Page::javaScriptAlert(const QUrl &origin, const QString &msg) {
++	if (!_restrictedOrigin.empty()) {
++		return;
++	}
++	if (_interactionHandler) {
++		_interactionHandler();
++	}
++	QWebEnginePage::javaScriptAlert(origin, msg);
++}
++
++bool Page::javaScriptConfirm(const QUrl &origin, const QString &msg) {
++	if (!_restrictedOrigin.empty()) {
++		return false;
++	}
++	if (_interactionHandler) {
++		_interactionHandler();
++	}
++	return QWebEnginePage::javaScriptConfirm(origin, msg);
++}
++
++bool Page::javaScriptPrompt(
++		const QUrl &origin,
++		const QString &msg,
++		const QString &defaultValue,
++		QString *result) {
++	if (!_restrictedOrigin.empty()) {
++		return false;
++	}
++	if (_interactionHandler) {
++		_interactionHandler();
++	}
++	return QWebEnginePage::javaScriptPrompt(origin, msg, defaultValue, result);
++}
++
++void Page::javaScriptConsoleMessage(
++		JavaScriptConsoleMessageLevel,
++		const QString &,
++		int,
++		const QString &) {
++}
++
++class QtWebEngineInterface final : public Interface {
++public:
++	explicit QtWebEngineInterface(Config config);
++	~QtWebEngineInterface();
++
++	void navigate(std::string url) override;
++	void navigateToData(std::string id) override;
++	void loadHtml(std::string html, std::string baseUrl) override;
++	void reload() override;
++	void init(std::string js) override;
++	void initAllFrames(std::string js) override;
++	void eval(std::string js) override;
++	void focus() override;
++	void setInteractionHandler(Fn<void()> handler) override;
++	void setOpaqueBg(QColor opaqueBg) override;
++	void setFullscreen(bool fullscreen) override;
++
++	[[nodiscard]] QWidget *widget() override;
++	[[nodiscard]] PopupAnchor popupAnchor() override;
++
++	void refreshNavigationHistoryState() override;
++	[[nodiscard]] auto navigationHistoryState()
++		-> rpl::producer<NavigationHistoryState> override;
++
++private:
++	void setupProfile(const Config &config);
++	void injectMessageBridge();
++	void updateBgColor();
++	void connectViewSignals();
++	void addUserScript(std::string js, bool allFrames);
++
++	base::unique_qptr<QWebEngineView> _view;
++	QWebEngineProfile *_profile = nullptr;
++	Page *_page = nullptr;
++	Handler *_handler = nullptr;
++	MessageHandler *_messageHandler = nullptr;
++
++	Config _config;
++	QColor _bg;
++	rpl::event_stream<NavigationHistoryState> _navHistory;
++	bool _ownsProfile = false;
++};
++
++[[nodiscard]] bool RegisterSchemes() {
++	static const bool done = [] {
++		auto data = QWebEngineUrlScheme(kDataScheme);
++		data.setSyntax(QWebEngineUrlScheme::Syntax::Path);
++		data.setFlags(
++			QWebEngineUrlScheme::SecureScheme
++			| QWebEngineUrlScheme::LocalScheme
++			| QWebEngineUrlScheme::LocalAccessAllowed
++			| QWebEngineUrlScheme::ContentSecurityPolicyIgnored
++			| QWebEngineUrlScheme::CorsEnabled);
++		QWebEngineUrlScheme::registerScheme(data);
++
++		auto msg = QWebEngineUrlScheme(kMessageScheme);
++		msg.setSyntax(QWebEngineUrlScheme::Syntax::Path);
++		msg.setFlags(
++			QWebEngineUrlScheme::SecureScheme
++			| QWebEngineUrlScheme::LocalAccessAllowed
++			| QWebEngineUrlScheme::ContentSecurityPolicyIgnored
++			| QWebEngineUrlScheme::CorsEnabled);
++		QWebEngineUrlScheme::registerScheme(msg);
++		return true;
++	}();
++	return done;
++}
++
++QtWebEngineInterface::QtWebEngineInterface(Config config)
++: _config(std::move(config)) {
++	RegisterSchemes();
++
++	_view = base::make_unique_q<QWebEngineView>(_config.parent);
++	if (_config.mode == WindowMode::Hidden) {
++		const auto size = _config.initialSize.isValid()
++			? _config.initialSize
++			: QSize(64, 64);
++		_view->resize(size);
++		_view->setAttribute(Qt::WA_DontShowOnScreen, true);
++	}
++	setupProfile(_config);
++
++	_page = new Page(_profile, _view.get());
++	_page->setRestrictedOrigin(_config.restrictedOrigin);
++	_view->setPage(_page);
++
++	_page->setMessageHandler([=](std::string text, std::string source) {
++		if (_config.messageHandler) {
++			_config.messageHandler({
++				.text = std::move(text),
++				.sourceUrl = std::move(source),
++			});
++		}
++	});
++	_page->setNavigationStartHandler(_config.navigationStartHandler);
++	_page->setNavigationDoneHandler(_config.navigationDoneHandler);
++
++	if (_config.dataRequestHandler) {
++		_handler = new Handler(_config.dataRequestHandler);
++		_profile->installUrlSchemeHandler(
++			QByteArray(kDataScheme),
++			_handler);
++	}
++	_messageHandler = new MessageHandler([=](std::string text, std::string source) {
++		if (_config.messageHandler) {
++			if (source.empty() && _page) {
++				source = _page->url().toString().toStdString();
++			}
++			_config.messageHandler({
++				.text = std::move(text),
++				.sourceUrl = std::move(source),
++			});
++		}
++	});
++	_profile->installUrlSchemeHandler(
++		QByteArray(kMessageScheme),
++		_messageHandler);
++
++	auto settings = _page->settings();
++	settings->setAttribute(QWebEngineSettings::JavascriptEnabled, true);
++	settings->setAttribute(QWebEngineSettings::PluginsEnabled, false);
++	const auto restricted = !_config.restrictedOrigin.empty();
++	settings->setAttribute(
++		QWebEngineSettings::FullScreenSupportEnabled,
++		!restricted);
++	settings->setAttribute(
++		QWebEngineSettings::LocalContentCanAccessRemoteUrls,
++		!restricted);
++	settings->setAttribute(
++		QWebEngineSettings::LocalContentCanAccessFileUrls,
++		!restricted);
++	settings->setAttribute(
++		QWebEngineSettings::JavascriptCanAccessClipboard,
++		!restricted);
++	settings->setAttribute(
++		QWebEngineSettings::JavascriptCanOpenWindows,
++		!restricted);
++	settings->setAttribute(
++		QWebEngineSettings::LocalStorageEnabled,
++		!restricted);
++	if (restricted) {
++		settings->setAttribute(QWebEngineSettings::WebGLEnabled, false);
++		settings->setAttribute(QWebEngineSettings::WebRTCPublicInterfacesOnly, true);
++		settings->setAttribute(QWebEngineSettings::ScreenCaptureEnabled, false);
++		settings->setAttribute(QWebEngineSettings::PlaybackRequiresUserGesture, true);
++		settings->setAttribute(QWebEngineSettings::DnsPrefetchEnabled, false);
++	}
++
++	_bg = _config.opaqueBg.isValid() ? _config.opaqueBg : Qt::white;
++	updateBgColor();
++
++	_view->setContextMenuPolicy(
++		restricted ? Qt::PreventContextMenu : Qt::NoContextMenu);
++	connectViewSignals();
++	injectMessageBridge();
++}
++
++QtWebEngineInterface::~QtWebEngineInterface() {
++	if (_handler && _profile) {
++		_profile->removeUrlSchemeHandler(_handler);
++		delete _handler;
++		_handler = nullptr;
++	}
++	if (_messageHandler && _profile) {
++		_profile->removeUrlSchemeHandler(_messageHandler);
++		delete _messageHandler;
++		_messageHandler = nullptr;
++	}
++	if (_ownsProfile && _profile) {
++		// profile parented to view or deleted with view
++	}
++}
++
++void QtWebEngineInterface::setupProfile(const Config &config) {
++	if (!config.restrictedOrigin.empty()) {
++		_profile = new QWebEngineProfile(_view.get());
++		_ownsProfile = true;
++		_profile->setPersistentCookiesPolicy(
++			QWebEngineProfile::NoPersistentCookies);
++		_profile->setHttpCacheType(QWebEngineProfile::MemoryHttpCache);
++		if (auto *store = _profile->cookieStore()) {
++			store->setCookieFilter([](const QWebEngineCookieStore::FilterRequest &) {
++				return false;
++			});
++		}
++		return;
++	}
++	const auto path = !config.userDataPath.empty()
++		? QString::fromStdString(config.userDataPath)
++		: StoragePath(config.userDataToken);
++	if (!path.isEmpty()) {
++		_profile = new QWebEngineProfile(
++			QString::fromStdString(
++				config.userDataToken.empty() ? "webview" : config.userDataToken),
++			_view.get());
++		_profile->setPersistentStoragePath(path);
++		_profile->setCachePath(path + u"/cache"_q);
++		_profile->setPersistentCookiesPolicy(
++			QWebEngineProfile::AllowPersistentCookies);
++		_profile->setHttpCacheType(QWebEngineProfile::DiskHttpCache);
++		_ownsProfile = true;
++		if (config.allowThirdPartyCookies) {
++			if (auto *store = _profile->cookieStore()) {
++				store->setCookieFilter([](const QWebEngineCookieStore::FilterRequest &) {
++					return true;
++				});
++			}
++		}
++		return;
++	}
++	_profile = QWebEngineProfile::defaultProfile();
++	_ownsProfile = false;
++	if (config.allowThirdPartyCookies) {
++		if (auto *store = _profile->cookieStore()) {
++			store->setCookieFilter([](const QWebEngineCookieStore::FilterRequest &) {
++				return true;
++			});
++		}
++	}
++}
++
++void QtWebEngineInterface::connectViewSignals() {
++	QObject::connect(
++		_page,
++		&QWebEnginePage::loadFinished,
++		_view.get(),
++		[=](bool ok) {
++			if (_config.navigationDoneHandler) {
++				_config.navigationDoneHandler(ok);
++			}
++			refreshNavigationHistoryState();
++		});
++	QObject::connect(
++		_page,
++		&QWebEnginePage::fullScreenRequested,
++		_view.get(),
++		[=](QWebEngineFullScreenRequest request) {
++			if (!_config.restrictedOrigin.empty()) {
++				request.reject();
++				return;
++			}
++			request.accept();
++			if (_view) {
++				if (request.toggleOn()) {
++					_view->showFullScreen();
++				} else {
++					_view->showNormal();
++				}
++			}
++		});
++	QObject::connect(
++		_page,
++		&QWebEnginePage::titleChanged,
++		_view.get(),
++		[=](const QString &) { refreshNavigationHistoryState(); });
++	QObject::connect(
++		_page,
++		&QWebEnginePage::urlChanged,
++		_view.get(),
++		[=](const QUrl &) { refreshNavigationHistoryState(); });
++}
++
++void QtWebEngineInterface::injectMessageBridge() {
++	const auto scriptSource = uR"(
++(function() {
++if (window.TelegramDesktop && window.TelegramDesktop.__td_injected) return;
++window.TelegramDesktop = window.TelegramDesktop || {};
++window.TelegramDesktop.__td_injected = true;
++window.TelegramDesktop.postMessage = function(obj) {
++	try {
++		var s = (typeof obj === 'string') ? obj : JSON.stringify(obj);
++		if (s.length > )" + QString::number(kMaxMessageBytes) + uR"() s = s.substring(0, )" + QString::number(kMaxMessageBytes) + uR"();
++		var src = encodeURIComponent(String(location.href || ''));
++		if (typeof fetch === 'function') {
++			fetch(')" + kMessageScheme + uR"(:)" + kMessagePath + uR"(?src=' + src, {
++				method: 'POST',
++				body: s,
++				credentials: 'omit',
++				mode: 'no-cors'
++			}).catch(function(){});
++			return;
++		}
++		location.href = ')" + kMessageScheme + uR"(:)" + kMessagePath + uR"(?src=' + src + '&data=' + encodeURIComponent(s);
++	} catch(e) {}
++};
++if (typeof window.external === 'undefined') { window.external = {}; }
++window.external.invoke = window.TelegramDesktop.postMessage;
++})();
++)"_q;
++
++	auto script = QWebEngineScript();
++	script.setSourceCode(scriptSource);
++	script.setInjectionPoint(QWebEngineScript::DocumentCreation);
++	script.setWorldId(QWebEngineScript::MainWorld);
++	script.setRunsOnSubFrames(true);
++	_page->scripts().insert(script);
++}
++
++void QtWebEngineInterface::updateBgColor() {
++	if (_view) {
++		auto palette = _view->palette();
++		palette.setColor(QPalette::Base, _bg);
++		_view->setPalette(palette);
++		_page->setBackgroundColor(_bg);
++	}
++}
++
++void QtWebEngineInterface::navigate(std::string url) {
++	_view->load(QUrl(QString::fromStdString(url)));
++}
++
++void QtWebEngineInterface::navigateToData(std::string id) {
++	const auto override = QString::fromStdString(_config.dataProtocolOverride);
++	const auto base = override.isEmpty()
++		? (QString(kDataScheme) + u"://"_q)
++		: override;
++	_view->load(QUrl(base + QString::fromStdString(id)));
++}
++
++void QtWebEngineInterface::loadHtml(std::string html, std::string baseUrl) {
++	_view->setHtml(
++		QString::fromStdString(html),
++		QUrl(QString::fromStdString(baseUrl)));
++}
++
++void QtWebEngineInterface::reload() {
++	_view->reload();
++}
++
++void QtWebEngineInterface::addUserScript(std::string js, bool allFrames) {
++	auto script = QWebEngineScript();
++	script.setSourceCode(QString::fromStdString(js));
++	script.setInjectionPoint(QWebEngineScript::DocumentCreation);
++	script.setWorldId(QWebEngineScript::MainWorld);
++	script.setRunsOnSubFrames(allFrames);
++	_page->scripts().insert(script);
++}
++
++void QtWebEngineInterface::init(std::string js) {
++	addUserScript(js, false);
++	eval(std::move(js));
++}
++
++void QtWebEngineInterface::initAllFrames(std::string js) {
++	addUserScript(std::move(js), true);
++}
++
++void QtWebEngineInterface::eval(std::string js) {
++	_page->runJavaScript(QString::fromStdString(js));
++}
++
++void QtWebEngineInterface::focus() {
++	if (_view && _config.mode != WindowMode::Hidden) {
++		_view->setFocus();
++	}
++}
++
++void QtWebEngineInterface::setInteractionHandler(Fn<void()> handler) {
++	if (_page) {
++		_page->setInteractionHandler(std::move(handler));
++	}
++}
++
++void QtWebEngineInterface::setOpaqueBg(QColor opaqueBg) {
++	_bg = opaqueBg.isValid() ? opaqueBg : Qt::white;
++	updateBgColor();
++}
++
++void QtWebEngineInterface::setFullscreen(bool fullscreen) {
++	if (!_view || _config.mode == WindowMode::Hidden) {
++		return;
++	}
++	if (fullscreen) {
++		_view->showFullScreen();
++	} else {
++		_view->showNormal();
++	}
++}
++
++QWidget *QtWebEngineInterface::widget() {
++	return _view.get();
++}
++
++PopupAnchor QtWebEngineInterface::popupAnchor() {
++	return {};
++}
++
++void QtWebEngineInterface::refreshNavigationHistoryState() {
++	if (!_page) {
++		return;
++	}
++	auto *h = _page->history();
++	const auto canBack = h && h->canGoBack();
++	const auto canForward = h && h->canGoForward();
++	const auto current = h
++		? h->currentItem().url().toString().toStdString()
++		: std::string();
++	const auto title = _page->title().toStdString();
++	_navHistory.fire({
++		.url = std::move(current),
++		.title = title,
++		.canGoBack = canBack,
++		.canGoForward = canForward,
++	});
++}
++
++auto QtWebEngineInterface::navigationHistoryState()
++-> rpl::producer<NavigationHistoryState> {
++	return _navHistory.events();
++}
++
++} // namespace
+ 
+ Available Availability() {
+-	return WebKitGTK::Availability();
++	return Available{
++		.customSchemeRequests = true,
++		.customRangeRequests = true,
++		.customReferer = true,
++	};
+ }
+ 
+ bool HiddenSupported() {
+-	return WebKitGTK::HiddenSupported();
++	return true;
+ }
+ 
+ bool SupportsEmbedAfterCreate() {
+@@ -28,7 +800,7 @@
+ }
+ 
+ std::unique_ptr<Interface> CreateInstance(Config config) {
+-	return WebKitGTK::CreateInstance(std::move(config));
++	return std::make_unique<QtWebEngineInterface>(std::move(config));
+ }
+ 
+ std::string GenerateStorageToken() {
+diff -Nru a/cmake/external/glib/CMakeLists.txt b/cmake/external/glib/CMakeLists.txt
+--- a/cmake/external/glib/CMakeLists.txt	2026-09-07 15:30:04.000000000 +0200
++++ b/cmake/external/glib/CMakeLists.txt	2026-09-11 19:30:41.278412644 +0200
+@@ -4,6 +4,8 @@
+ # For license and copyright information please follow this link:
+ # https://github.com/desktop-app/legal/blob/master/LEGAL
+ 
++# glibmm / cppgir / gobject-introspection removed.
++# Plain glib C is kept for transitive deps (webrtc/pipewire etc) and system libs.
+ add_library(external_glib INTERFACE IMPORTED GLOBAL)
+ add_library(desktop-app::external_glib ALIAS external_glib)
+ 
+diff -Nru a/cmake/external/qt/package.cmake b/cmake/external/qt/package.cmake
+--- a/cmake/external/qt/package.cmake	2026-09-07 15:30:04.000000000 +0200
++++ b/cmake/external/qt/package.cmake	2026-09-11 19:30:41.278567036 +0200
+@@ -80,7 +80,7 @@
+ endif()
+ 
+ if (LINUX)
+-    find_package(Qt${QT_VERSION_MAJOR} OPTIONAL_COMPONENTS DBus WaylandCompositor QUIET)
++    find_package(Qt${QT_VERSION_MAJOR} OPTIONAL_COMPONENTS DBus WaylandCompositor WebEngineWidgets Positioning QUIET)
+ endif()
+ 
+ set_property(GLOBAL PROPERTY AUTOGEN_SOURCE_GROUP "(gen)")
