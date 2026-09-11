@@ -1,5 +1,6 @@
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
+diff -Nru a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt	2026-09-10 21:11:45.000000000 +0200
++++ b/CMakeLists.txt	2026-09-11 23:03:48.714425133 +0200
 @@ -58,7 +58,6 @@
  include(cmake/external/qt/package.cmake)
  
@@ -10,7 +11,7 @@
  
 diff -Nru a/Telegram/CMakeLists.txt b/Telegram/CMakeLists.txt
 --- a/Telegram/CMakeLists.txt	2026-09-10 21:11:45.000000000 +0200
-+++ b/Telegram/CMakeLists.txt	2026-09-11 19:30:41.269188209 +0200
++++ b/Telegram/CMakeLists.txt	2026-09-11 23:03:48.714555124 +0200
 @@ -74,6 +74,7 @@
      tdesktop::td_tde2e
      tdesktop::td_ui
@@ -21,7 +22,7 @@ diff -Nru a/Telegram/CMakeLists.txt b/Telegram/CMakeLists.txt
      desktop-app::lib_crl
 diff -Nru a/Telegram/SourceFiles/core/update_checker.cpp b/Telegram/SourceFiles/core/update_checker.cpp
 --- a/Telegram/SourceFiles/core/update_checker.cpp	2026-09-10 21:11:45.000000000 +0200
-+++ b/Telegram/SourceFiles/core/update_checker.cpp	2026-09-11 19:30:41.269631465 +0200
++++ b/Telegram/SourceFiles/core/update_checker.cpp	2026-09-11 23:03:48.714695296 +0200
 @@ -41,11 +41,15 @@
  
  #include <ksandbox.h>
@@ -105,7 +106,7 @@ diff -Nru a/Telegram/SourceFiles/core/update_checker.cpp b/Telegram/SourceFiles/
  : Checker(testing)
 diff -Nru a/Telegram/SourceFiles/media/system_media_controls_manager.cpp b/Telegram/SourceFiles/media/system_media_controls_manager.cpp
 --- a/Telegram/SourceFiles/media/system_media_controls_manager.cpp	2026-09-10 21:11:45.000000000 +0200
-+++ b/Telegram/SourceFiles/media/system_media_controls_manager.cpp	2026-09-11 19:30:41.269775117 +0200
++++ b/Telegram/SourceFiles/media/system_media_controls_manager.cpp	2026-09-11 23:03:48.714804817 +0200
 @@ -9,6 +9,7 @@
  
  #include "base/platform/base_platform_system_media_controls.h"
@@ -134,7 +135,7 @@ diff -Nru a/Telegram/SourceFiles/media/system_media_controls_manager.cpp b/Teleg
  
 diff -Nru a/Telegram/SourceFiles/platform/linux/integration_linux.cpp b/Telegram/SourceFiles/platform/linux/integration_linux.cpp
 --- a/Telegram/SourceFiles/platform/linux/integration_linux.cpp	2026-09-10 21:11:45.000000000 +0200
-+++ b/Telegram/SourceFiles/platform/linux/integration_linux.cpp	2026-09-11 19:30:41.270294683 +0200
++++ b/Telegram/SourceFiles/platform/linux/integration_linux.cpp	2026-09-11 23:03:48.714891778 +0200
 @@ -12,16 +12,16 @@
  #include "base/platform/linux/base_linux_xdp_utilities.h"
  #include "core/sandbox.h"
@@ -381,7 +382,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/integration_linux.cpp b/Telegram
  	_memoryTrim = QObject::connect(
 diff -Nru a/Telegram/SourceFiles/platform/linux/launcher_linux.cpp b/Telegram/SourceFiles/platform/linux/launcher_linux.cpp
 --- a/Telegram/SourceFiles/platform/linux/launcher_linux.cpp	2026-09-10 21:11:45.000000000 +0200
-+++ b/Telegram/SourceFiles/platform/linux/launcher_linux.cpp	2026-09-11 19:30:41.270424065 +0200
++++ b/Telegram/SourceFiles/platform/linux/launcher_linux.cpp	2026-09-11 23:03:48.714930738 +0200
 @@ -9,18 +9,17 @@
  
  #include "core/crash_reports.h"
@@ -420,7 +421,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/launcher_linux.cpp b/Telegram/So
  
 diff -Nru a/Telegram/SourceFiles/platform/linux/main_window_linux.cpp b/Telegram/SourceFiles/platform/linux/main_window_linux.cpp
 --- a/Telegram/SourceFiles/platform/linux/main_window_linux.cpp	2026-09-10 21:11:45.000000000 +0200
-+++ b/Telegram/SourceFiles/platform/linux/main_window_linux.cpp	2026-09-11 19:30:41.270524366 +0200
++++ b/Telegram/SourceFiles/platform/linux/main_window_linux.cpp	2026-09-11 23:03:48.714977939 +0200
 @@ -38,7 +38,8 @@
  #include <QtWidgets/QLineEdit>
  #include <QtWidgets/QTextEdit>
@@ -433,7 +434,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/main_window_linux.cpp b/Telegram
  namespace {
 diff -Nru a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp b/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp
 --- a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp	2026-09-10 21:11:45.000000000 +0200
-+++ b/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp	2026-09-11 19:30:41.272473260 +0200
++++ b/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp	2026-09-11 23:03:48.715148721 +0200
 @@ -1,4 +1,3 @@
 -
  /*
@@ -1692,7 +1693,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp 
  Manager::Manager(not_null<Window::Notifications::System*> system)
 diff -Nru a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/SourceFiles/platform/linux/specific_linux.cpp
 --- a/Telegram/SourceFiles/platform/linux/specific_linux.cpp	2026-09-10 21:11:45.000000000 +0200
-+++ b/Telegram/SourceFiles/platform/linux/specific_linux.cpp	2026-09-11 19:30:41.274107910 +0200
++++ b/Telegram/SourceFiles/platform/linux/specific_linux.cpp	2026-09-11 23:03:48.715364093 +0200
 @@ -11,37 +11,38 @@
  #include "base/random.h"
  #include "base/platform/base_platform_info.h"
@@ -2528,7 +2529,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/So
  void psSendToMenu(bool send, bool silent) {
 diff -Nru a/Telegram/SourceFiles/platform/linux/tray_linux.cpp b/Telegram/SourceFiles/platform/linux/tray_linux.cpp
 --- a/Telegram/SourceFiles/platform/linux/tray_linux.cpp	2026-09-10 21:11:45.000000000 +0200
-+++ b/Telegram/SourceFiles/platform/linux/tray_linux.cpp	2026-09-11 19:30:41.274229301 +0200
++++ b/Telegram/SourceFiles/platform/linux/tray_linux.cpp	2026-09-11 23:03:48.715472674 +0200
 @@ -22,12 +22,11 @@
  #include <QtWidgets/QMenu>
  #include <QtWidgets/QSystemTrayIcon>
@@ -2545,7 +2546,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/tray_linux.cpp b/Telegram/Source
  	return ApplicationIconName() + ((counter > 0)
 diff -Nru a/Telegram/SourceFiles/webauthn/cable_scanner_linux.cpp b/Telegram/SourceFiles/webauthn/cable_scanner_linux.cpp
 --- a/Telegram/SourceFiles/webauthn/cable_scanner_linux.cpp	2026-09-10 21:11:45.000000000 +0200
-+++ b/Telegram/SourceFiles/webauthn/cable_scanner_linux.cpp	2026-09-11 19:30:41.274775438 +0200
++++ b/Telegram/SourceFiles/webauthn/cable_scanner_linux.cpp	2026-09-11 23:03:48.715576996 +0200
 @@ -13,8 +13,15 @@
  #include "base/debug_log.h"
  #include "base/weak_ptr.h"
@@ -3118,9 +3119,23 @@ diff -Nru a/Telegram/SourceFiles/webauthn/cable_scanner_linux.cpp b/Telegram/Sou
  
  } // namespace
  
+--- a/Telegram/ThirdParty/hunspell/tests/suggestiontest/Makefile.orig	2026-08-13 13:45:06.000000000 +0200
++++ b/Telegram/ThirdParty/hunspell/tests/suggestiontest/Makefile.orig	1970-01-01 01:00:00.000000000 +0100
+@@ -1,11 +0,0 @@
+-all:
+-	./prepare
+-	./test
+-
+-single:
+-	./prepare2
+-	./test
+-
+-clean:
+-	rm *.[1-5] result.*
+-
 diff -Nru a/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp b/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp
 --- a/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp	2026-09-06 15:51:18.000000000 +0200
-+++ b/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp	2026-09-11 19:30:41.275364196 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp	2026-09-11 23:03:48.715660456 +0200
 @@ -7,17 +7,18 @@
  #include "base/platform/linux/base_file_utilities_linux.h"
  
@@ -3348,7 +3363,7 @@ diff -Nru a/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp 
  		struct stat statbuf;
 diff -Nru a/Telegram/lib_base/base/platform/linux/base_global_shortcuts_linux.cpp b/Telegram/lib_base/base/platform/linux/base_global_shortcuts_linux.cpp
 --- a/Telegram/lib_base/base/platform/linux/base_global_shortcuts_linux.cpp	2026-09-06 15:51:18.000000000 +0200
-+++ b/Telegram/lib_base/base/platform/linux/base_global_shortcuts_linux.cpp	2026-09-11 19:30:41.275502307 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_global_shortcuts_linux.cpp	2026-09-11 23:03:48.715722897 +0200
 @@ -15,6 +15,15 @@
  
  #include <QKeySequence>
@@ -3504,7 +3519,7 @@ diff -Nru a/Telegram/lib_base/base/platform/linux/base_global_shortcuts_linux.cp
  	return false;
 diff -Nru a/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp b/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp
 --- a/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp	2026-09-06 15:51:18.000000000 +0200
-+++ b/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp	2026-09-11 19:30:41.275703870 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp	2026-09-11 23:03:48.715775408 +0200
 @@ -11,39 +11,38 @@
  
  #include <sys/uio.h>
@@ -3564,7 +3579,7 @@ diff -Nru a/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp b/Te
  std::optional<crl::time> XCBLastUserInputTime() {
 diff -Nru a/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h b/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h
 --- a/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h	2026-09-06 15:51:18.000000000 +0200
-+++ b/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h	2026-09-11 19:30:41.275930713 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h	2026-09-11 23:03:48.715799688 +0200
 @@ -9,7 +9,7 @@
  #include "base/expected.h"
  #include "base/weak_ptr.h"
@@ -3576,7 +3591,7 @@ diff -Nru a/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h b/
  
 diff -Nru a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp
 --- a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp	2026-09-06 15:51:18.000000000 +0200
-+++ b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp	2026-09-11 19:30:41.276083355 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp	2026-09-11 23:03:48.715832988 +0200
 @@ -8,8 +8,11 @@
  
  #include "base/platform/base_platform_info.h"
@@ -3632,7 +3647,7 @@ diff -Nru a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp b
  		std::stringstream result;
 diff -Nru a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h
 --- a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h	2026-09-06 15:51:18.000000000 +0200
-+++ b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h	2026-09-11 19:30:41.276270157 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h	2026-09-11 23:03:48.715869229 +0200
 @@ -9,11 +9,7 @@
  #include "base/expected.h"
  #include "base/weak_ptr.h"
@@ -3704,7 +3719,7 @@ diff -Nru a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h b/T
  	}
 diff -Nru a/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp b/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp
 --- a/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp	2026-09-06 15:51:18.000000000 +0200
-+++ b/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp	2026-09-11 19:30:41.276676002 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp	2026-09-11 23:03:48.715926489 +0200
 @@ -4,170 +4,66 @@
  // For license and copyright information please follow this link:
  // https://github.com/desktop-app/legal/blob/master/LEGAL
@@ -3924,7 +3939,7 @@ diff -Nru a/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.
  
 diff -Nru a/Telegram/lib_base/base/platform/linux/base_screen_reader_state_linux.cpp b/Telegram/lib_base/base/platform/linux/base_screen_reader_state_linux.cpp
 --- a/Telegram/lib_base/base/platform/linux/base_screen_reader_state_linux.cpp	2026-09-06 15:51:18.000000000 +0200
-+++ b/Telegram/lib_base/base/platform/linux/base_screen_reader_state_linux.cpp	2026-09-11 19:30:41.277045797 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_screen_reader_state_linux.cpp	2026-09-11 23:03:48.715980760 +0200
 @@ -8,24 +8,15 @@
  
  #include "base/platform/linux/base_linux_dbus_utilities.h"
@@ -4115,7 +4130,7 @@ diff -Nru a/Telegram/lib_base/base/platform/linux/base_screen_reader_state_linux
  void LinuxScreenReaderState::updateActive() {
 diff -Nru a/Telegram/lib_ui/ui/platform/linux/ui_font_settings_linux.cpp b/Telegram/lib_ui/ui/platform/linux/ui_font_settings_linux.cpp
 --- a/Telegram/lib_ui/ui/platform/linux/ui_font_settings_linux.cpp	2026-09-10 12:29:25.000000000 +0200
-+++ b/Telegram/lib_ui/ui/platform/linux/ui_font_settings_linux.cpp	2026-09-11 19:30:41.277279850 +0200
++++ b/Telegram/lib_ui/ui/platform/linux/ui_font_settings_linux.cpp	2026-09-11 23:03:48.716014990 +0200
 @@ -128,7 +128,7 @@
  	const auto string = [](const char *group, const char *key) {
  		auto value = base::Platform::XDP::ReadSetting(group, key);
@@ -4127,7 +4142,7 @@ diff -Nru a/Telegram/lib_ui/ui/platform/linux/ui_font_settings_linux.cpp b/Teleg
  	const auto read = [&](const char *group,
 diff -Nru a/Telegram/lib_webview/CMakeLists.txt b/Telegram/lib_webview/CMakeLists.txt
 --- a/Telegram/lib_webview/CMakeLists.txt	2026-09-04 18:58:37.000000000 +0200
-+++ b/Telegram/lib_webview/CMakeLists.txt	2026-09-11 19:30:41.277425621 +0200
++++ b/Telegram/lib_webview/CMakeLists.txt	2026-09-11 23:03:48.716045981 +0200
 @@ -27,14 +27,6 @@
  
      webview/platform/linux/webview_linux.h
@@ -4145,7 +4160,7 @@ diff -Nru a/Telegram/lib_webview/CMakeLists.txt b/Telegram/lib_webview/CMakeList
      webview/platform/win/webview_win.h
 diff -Nru a/Telegram/lib_webview/webview/platform/linux/webview_linux.cpp b/Telegram/lib_webview/webview/platform/linux/webview_linux.cpp
 --- a/Telegram/lib_webview/webview/platform/linux/webview_linux.cpp	2026-09-04 18:58:37.000000000 +0200
-+++ b/Telegram/lib_webview/webview/platform/linux/webview_linux.cpp	2026-09-11 19:30:41.277538033 +0200
++++ b/Telegram/lib_webview/webview/platform/linux/webview_linux.cpp	2026-09-11 23:03:48.716162362 +0200
 @@ -7,16 +7,788 @@
  #include "webview/platform/linux/webview_linux.h"
  
@@ -4949,7 +4964,7 @@ diff -Nru a/Telegram/lib_webview/webview/platform/linux/webview_linux.cpp b/Tele
  std::string GenerateStorageToken() {
 diff -Nru a/cmake/external/glib/CMakeLists.txt b/cmake/external/glib/CMakeLists.txt
 --- a/cmake/external/glib/CMakeLists.txt	2026-09-07 15:30:04.000000000 +0200
-+++ b/cmake/external/glib/CMakeLists.txt	2026-09-11 19:30:41.278412644 +0200
++++ b/cmake/external/glib/CMakeLists.txt	2026-09-11 23:03:48.716215822 +0200
 @@ -4,6 +4,8 @@
  # For license and copyright information please follow this link:
  # https://github.com/desktop-app/legal/blob/master/LEGAL
@@ -4961,7 +4976,7 @@ diff -Nru a/cmake/external/glib/CMakeLists.txt b/cmake/external/glib/CMakeLists.
  
 diff -Nru a/cmake/external/qt/package.cmake b/cmake/external/qt/package.cmake
 --- a/cmake/external/qt/package.cmake	2026-09-07 15:30:04.000000000 +0200
-+++ b/cmake/external/qt/package.cmake	2026-09-11 19:30:41.278567036 +0200
++++ b/cmake/external/qt/package.cmake	2026-09-11 23:03:48.716243863 +0200
 @@ -80,7 +80,7 @@
  endif()
  
