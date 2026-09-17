@@ -123,6 +123,7 @@ BuildRequires: pkgconfig(gio-2.0)
 BuildRequires: pkgconfig(gio-unix-2.0)
 BuildRequires: pkgconfig(glibmm-2.68)
 BuildRequires: pkgconfig(giomm-2.68)
+BuildRequires: pkgconfig(gobject-introspection-1.0)
 %if %{with pango}
 BuildRequires: pkgconfig(pangocairo)
 BuildRequires: pkgconfig(pangoft2)
