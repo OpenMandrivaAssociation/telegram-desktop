@@ -1,0 +1,87 @@
+--- a/Telegram/SourceFiles/platform/linux/launcher_linux.cpp	2026-09-18 00:56:03.302876841 +0200
++++ b/Telegram/SourceFiles/platform/linux/launcher_linux.cpp	2026-09-18 00:55:52.181683114 +0200
+@@ -12,6 +12,7 @@
+ 
+ #include <QtWidgets/QApplication>
+ #include <QtCore/QProcess>
++#include <QtCore/QStandardPaths>
+ #include <QtCore/QStringList>
+ 
+ #include <ksandbox.h>
+@@ -62,9 +63,10 @@
+ 			: launching;
+ 		argumentsList.push_back(argv0.toStdString());
+ 	} else if (cWriteProtected()) {
+-		argumentsList.push_back(GLib::find_program_in_path("run0")
+-			? "run0"
+-			: "pkexec");
++		argumentsList.push_back(
++			QStandardPaths::findExecutable(u"run0"_q).isEmpty()
++				? "pkexec"
++				: "run0");
+ 		argumentsList.push_back(
+ 			cWorkingDir().toStdString() + "tupdates/temp/Updater");
+ 	} else {
+@@ -112,31 +114,38 @@
+ 	Logs::closeMain();
+ 	CrashReports::Finish();
+ 
+-	int waitStatus = 0;
++	const auto toQStringList = [](const std::vector<std::string> &list) {
++		QStringList result;
++		result.reserve(int(list.size()));
++		for (const auto &item : list) {
++			result.push_back(QString::fromStdString(item));
++		}
++		return result;
++	};
++
+ 	if (justRelaunch) {
+-		return GLib::spawn_async(
+-			initialWorkingDir().toStdString(),
+-			argumentsList,
+-			{},
+-			KSandbox::isFlatpak() && _updating
+-				? GLib::SpawnFlags::SEARCH_PATH_
+-				: GLib::SpawnFlags::FILE_AND_ARGV_ZERO_,
+-			nullptr,
+-			nullptr,
+-			nullptr);
+-	} else if (!GLib::spawn_sync(
+-			argumentsList,
+-			{},
+-			// if the spawn is sync, working directory is not set
+-			// and GLib::SpawnFlags::LEAVE_DESCRIPTORS_OPEN_ is set,
+-			// it goes through an optimized code path
+-			GLib::SpawnFlags::SEARCH_PATH_
+-				| GLib::SpawnFlags::LEAVE_DESCRIPTORS_OPEN_,
+-			nullptr,
+-			nullptr,
+-			nullptr,
+-			&waitStatus,
+-			nullptr) || !g_spawn_check_exit_status(waitStatus, nullptr)) {
++		const auto searchPath = KSandbox::isFlatpak() && _updating;
++		auto args = toQStringList(argumentsList);
++		if (args.isEmpty()) {
++			return false;
++		}
++		const auto program = args.takeFirst();
++		// FILE_AND_ARGV_ZERO: drop the explicit argv[0] copy.
++		if (!searchPath && !args.isEmpty()) {
++			args.removeFirst();
++		}
++		return QProcess::startDetached(
++			program,
++			args,
++			initialWorkingDir());
++	}
++
++	auto args = toQStringList(argumentsList);
++	if (args.isEmpty()) {
++		return false;
++	}
++	const auto program = args.takeFirst();
++	if (QProcess::execute(program, args) != 0) {
+ 		return false;
+ 	}
+ 	return launchUpdater(UpdaterLaunch::JustRelaunch);
