@@ -190,6 +190,7 @@ tdesktop-3.3.2-system-minizip.patch
 tdesktop-7.2.8-qtify-integration.patch
 tdesktop-7.2.9-complete-qtify.patch
 tdesktop-7.2.9-qtify-nokeywords.patch
+tdesktop-7.2.9-qtify-moc.patch
 
 %description
 Telegram is a non-profit cloud-based instant messaging service.

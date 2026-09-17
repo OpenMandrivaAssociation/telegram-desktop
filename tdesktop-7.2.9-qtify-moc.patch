@@ -1,0 +1,103 @@
+diff -Nru td-pa2/Telegram/SourceFiles/platform/linux/integration_linux.cpp td-pb2/Telegram/SourceFiles/platform/linux/integration_linux.cpp
+--- a/Telegram/SourceFiles/platform/linux/integration_linux.cpp	2026-09-17 23:19:28.302408051 +0200
++++ b/Telegram/SourceFiles/platform/linux/integration_linux.cpp	2026-09-17 23:19:28.307416964 +0200
+@@ -165,79 +165,12 @@
+ }
+ 
+ void LinuxIntegration::init() {
+-	XdpInhibit::InhibitProxy::new_for_bus(
+-		Gio::BusType::SESSION_,
+-		Gio::DBusProxyFlags::NONE_,
+-		base::Platform::XDP::kService,
+-		base::Platform::XDP::kObjectPath,
+-		crl::guard(this, [=](GObject::Object, Gio::AsyncResult res) {
+-			_inhibitProxy = XdpInhibit::InhibitProxy::new_for_bus_finish(
+-				res,
+-				nullptr);
+-
+-			initInhibit();
+-		}));
+-}
+-
+-void LinuxIntegration::initInhibit() {
+-	if (!_inhibitProxy) {
+-		return;
+-	}
+-
+-	std::string uniqueName = _inhibitProxy.get_connection().get_unique_name();
+-	uniqueName.erase(0, 1);
+-	uniqueName.replace(uniqueName.find('.'), 1, 1, '_');
+-
+-	const auto handleToken = "tdesktop"
+-		+ std::to_string(base::RandomValue<uint>());
+-
+-	const auto sessionHandleToken = "tdesktop"
+-		+ std::to_string(base::RandomValue<uint>());
+-
+-	const auto sessionHandle = base::Platform::XDP::kObjectPath
+-		+ std::string("/session/")
+-		+ uniqueName
+-		+ '/'
+-		+ sessionHandleToken;
+-
+-	inhibit().signal_state_changed().connect([
+-		mySessionHandle = sessionHandle
+-	](
+-			XdpInhibit::Inhibit,
+-			const std::string &sessionHandle,
+-			GLib::Variant state) {
+-		if (sessionHandle != mySessionHandle) {
+-			return;
+-		}
+-
+-		Core::App().setScreenIsLocked(
+-			GLib::VariantDict::new_(
+-				state
+-			).lookup_value(
+-				"screensaver-active"
+-			).get_boolean()
+-		);
+-	});
+-
+-	inhibit().call_create_monitor(
+-		"",
+-		GLib::Variant::new_array({
+-			GLib::Variant::new_dict_entry(
+-				GLib::Variant::new_string("handle_token"),
+-				GLib::Variant::new_variant(
+-					GLib::Variant::new_string(handleToken))),
+-			GLib::Variant::new_dict_entry(
+-				GLib::Variant::new_string("session_handle_token"),
+-				GLib::Variant::new_variant(
+-					GLib::Variant::new_string(sessionHandleToken))),
+-		}),
+-		nullptr);
+ }
+ 
+-} // namespace
+-
+ std::unique_ptr<Integration> CreateIntegration() {
+ 	return std::make_unique<LinuxIntegration>();
+ }
+ 
+ } // namespace Platform
++
++#include "integration_linux.moc"
+diff -Nru td-pa2/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp td-pb2/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp
+--- a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp	2026-09-17 23:19:28.324089302 +0200
++++ b/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp	2026-09-17 23:19:28.328109151 +0200
+@@ -553,3 +553,5 @@
+ 
+ } // namespace Notifications
+ } // namespace Platform
++
++#include "notifications_manager_linux.moc"
+diff -Nru td-pa2/Telegram/SourceFiles/webauthn/cable_scanner_linux.cpp td-pb2/Telegram/SourceFiles/webauthn/cable_scanner_linux.cpp
+--- a/Telegram/SourceFiles/webauthn/cable_scanner_linux.cpp	2026-09-17 23:19:28.343880058 +0200
++++ b/Telegram/SourceFiles/webauthn/cable_scanner_linux.cpp	2026-09-17 23:19:28.348830350 +0200
+@@ -410,3 +410,5 @@
+ }
+ 
+ } // namespace Platform::WebAuthn::Cable
++
++#include "cable_scanner_linux.moc"
