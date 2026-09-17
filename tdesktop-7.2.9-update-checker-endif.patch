@@ -1,10 +1,10 @@
---- a/Telegram/SourceFiles/core/update_checker.cpp
-+++ b/Telegram/SourceFiles/core/update_checker.cpp
-@@ -1751,6 +1751,7 @@ FlatpakLoader::~FlatpakLoader() {
- 		_monitor.disconnect(_progressSignal);
+--- a/Telegram/SourceFiles/core/update_checker.cpp	2026-09-18 00:17:43.004252877 +0200
++++ b/Telegram/SourceFiles/core/update_checker.cpp	2026-09-18 00:18:16.710281918 +0200
+@@ -1741,6 +1741,7 @@
  	}
  }
  #endif // !Q_OS_WIN && !Q_OS_MAC
 +#endif
  
  } // namespace
+ 
