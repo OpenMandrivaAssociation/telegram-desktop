@@ -188,6 +188,7 @@ tdesktop-2.3.2-no-underlinking.patch
 tdesktop-4.11.3-zlib-ng.patch
 tdesktop-3.3.2-system-minizip.patch
 tdesktop-7.2.8-qtify-integration.patch
+tdesktop-7.2.9-complete-qtify.patch
 
 %description
 Telegram is a non-profit cloud-based instant messaging service.

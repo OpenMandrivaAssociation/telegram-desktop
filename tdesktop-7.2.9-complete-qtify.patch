@@ -1,0 +1,632 @@
+diff -Nru a/Telegram/SourceFiles/platform/linux/tray_linux.cpp b/Telegram/SourceFiles/platform/linux/tray_linux.cpp
+--- a/Telegram/SourceFiles/platform/linux/tray_linux.cpp	2026-09-17 22:47:28.798653444 +0200
++++ b/Telegram/SourceFiles/platform/linux/tray_linux.cpp	2026-09-17 22:47:28.800073911 +0200
+@@ -255,23 +255,19 @@
+ }
+ 
+ Tray::Tray() {
+-	auto connection = Gio::bus_get_sync(Gio::BusType::SESSION_, nullptr);
+-	if (connection) {
+-		_sniWatcher = std::make_unique<base::Platform::DBus::ServiceWatcher>(
+-			connection.gobj_(),
+-			"org.kde.StatusNotifierWatcher",
+-			[=](
+-					const std::string &service,
+-					const std::string &oldOwner,
+-					const std::string &newOwner) {
+-				Core::Sandbox::Instance().customEnterFromEventLoop([&] {
+-					if (hasIcon()) {
+-						destroyIcon();
+-						createIcon();
+-					}
+-				});
++	_sniWatcher = std::make_unique<base::Platform::DBus::ServiceWatcher>(
++		"org.kde.StatusNotifierWatcher",
++		[=](
++				const std::string &service,
++				const std::string &oldOwner,
++				const std::string &newOwner) {
++			Core::Sandbox::Instance().customEnterFromEventLoop([&] {
++				if (hasIcon()) {
++					destroyIcon();
++					createIcon();
++				}
+ 			});
+-	}
++		});
+ }
+ 
+ void Tray::createIcon() {
+diff -Nru a/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.cpp b/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.cpp
+--- a/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.cpp	2026-09-17 22:47:28.757424134 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.cpp	2026-09-17 22:47:28.758822430 +0200
+@@ -6,145 +6,107 @@
+ //
+ #include "base/platform/linux/base_linux_dbus_utilities.h"
+ 
+-#include <xdgdbus/xdgdbus.hpp>
++#include <QtDBus/QDBusConnection>
++#include <QtDBus/QDBusInterface>
++#include <QtDBus/QDBusReply>
++#include <QtDBus/QDBusServiceWatcher>
++
++#include <stdexcept>
+ 
+ namespace base::Platform::DBus {
+ namespace {
+ 
+-using namespace gi::repository;
+-namespace GObject = gi::repository::GObject;
+-
+-gi::result<XdgDBus::DBus> MakeInterface(const GDBusConnection *connection) {
+-	return XdgDBus::DBusProxy::new_sync(
+-		gi::wrap(connection, gi::transfer_none),
+-		Gio::DBusProxyFlags::NONE_,
+-		kService,
+-		kObjectPath,
+-		nullptr);
++[[nodiscard]] QDBusInterface SessionBusInterface() {
++	return QDBusInterface(
++		QString::fromLatin1(kService),
++		QString::fromLatin1(kObjectPath),
++		QString::fromLatin1(kInterface),
++		QDBusConnection::sessionBus());
+ }
+ 
+-auto MakeUnexpected(GLib::Error &&error) {
+-	return make_unexpected(std::make_unique<GLib::Error>(std::move(error)));
++[[nodiscard]] auto MakeUnexpected(const QString &message) {
++	return make_unexpected(
++		std::make_unique<std::runtime_error>(message.toStdString()));
+ }
+ 
+ } // namespace
+ 
+-Result<bool> NameHasOwner(
+-		const GDBusConnection *connection,
+-		const std::string &name) {
+-	auto interface = MakeInterface(connection);
+-	if (!interface) {
+-		return MakeUnexpected(std::move(interface.error()));
+-	}
+-
+-	auto result = interface->call_name_has_owner_sync(name);
+-	if (!result) {
+-		return MakeUnexpected(std::move(result.error()));
+-	}
+-
+-	return std::get<1>(*result);
+-}
+-
+-Result<std::vector<std::string>> ListActivatableNames(
+-		const GDBusConnection *connection) {
+-	auto interface = MakeInterface(connection);
+-	if (!interface) {
+-		return MakeUnexpected(std::move(interface.error()));
+-	}
+-
+-	auto result = interface->call_list_activatable_names_sync();
+-	if (!result) {
+-		return MakeUnexpected(std::move(result.error()));
+-	}
+-
+-	return std::get<1>(*result) | ranges::to<std::vector<std::string>>;
+-}
+-
+-Result<StartReply> StartServiceByName(
+-		const GDBusConnection *connection,
+-		const std::string &name) {
+-	auto interface = MakeInterface(connection);
+-	if (!interface) {
+-		return MakeUnexpected(std::move(interface.error()));
+-	}
+-
+-	auto result = interface->call_start_service_by_name_sync(name, 0);
+-	if (!result) {
+-		return MakeUnexpected(std::move(result.error()));
++Result<bool> NameHasOwner(const std::string &name) {
++	auto iface = SessionBusInterface();
++	if (!iface.isValid()) {
++		return MakeUnexpected(iface.lastError().message());
++	}
++	QDBusReply<bool> reply = iface.call(
++		QStringLiteral("NameHasOwner"),
++		QString::fromStdString(name));
++	if (!reply.isValid()) {
++		return MakeUnexpected(reply.error().message());
++	}
++	return reply.value();
++}
++
++Result<std::vector<std::string>> ListActivatableNames() {
++	auto iface = SessionBusInterface();
++	if (!iface.isValid()) {
++		return MakeUnexpected(iface.lastError().message());
++	}
++	QDBusReply<QStringList> reply = iface.call(
++		QStringLiteral("ListActivatableNames"));
++	if (!reply.isValid()) {
++		return MakeUnexpected(reply.error().message());
++	}
++	std::vector<std::string> names;
++	names.reserve(reply.value().size());
++	for (const auto &name : reply.value()) {
++		names.push_back(name.toStdString());
++	}
++	return names;
++}
++
++Result<StartReply> StartServiceByName(const std::string &name) {
++	auto iface = SessionBusInterface();
++	if (!iface.isValid()) {
++		return MakeUnexpected(iface.lastError().message());
++	}
++	QDBusReply<uint> reply = iface.call(
++		QStringLiteral("StartServiceByName"),
++		QString::fromStdString(name),
++		uint(0));
++	if (!reply.isValid()) {
++		return MakeUnexpected(reply.error().message());
+ 	}
+-
+-	return StartReply(std::get<1>(*result));
+-}
+-
+-void StartServiceByNameAsync(
+-		const GDBusConnection *connection,
+-		const std::string &name,
+-		Fn<void(Fn<Result<StartReply>()>)> callback) {
+-	auto interface = MakeInterface(connection);
+-	if (!interface) {
+-		const auto error = std::make_shared<GLib::Error>(
+-			std::move(interface.error()));
+-
+-		callback([=]() -> Result<StartReply> {
+-			return MakeUnexpected(std::move(*error));
+-		});
+-
+-		return;
+-	}
+-
+-	interface->call_start_service_by_name(name, 0, [
+-		=,
+-		interface = *interface
+-	](GObject::Object source_object, Gio::AsyncResult res) mutable {
+-		callback([=]() mutable -> Result<StartReply> {
+-			auto result = interface.call_start_service_by_name_finish(res);
+-			if (!result) {
+-				return MakeUnexpected(std::move(result.error()));
+-			}
+-
+-			return StartReply(std::get<1>(*result));
+-		});
+-	});
++	return StartReply(reply.value());
+ }
+ 
+ struct ServiceWatcher::Private {
+-	XdgDBus::DBus interface;
++	QDBusServiceWatcher watcher;
+ };
+ 
+ ServiceWatcher::ServiceWatcher(
+-	const GDBusConnection *connection,
+ 	const std::string &service,
+ 	Fn<void(
+ 		const std::string &,
+ 		const std::string &,
+ 		const std::string &)> callback)
+ : _private(std::make_unique<Private>()) {
+-	XdgDBus::DBusProxy::new_(
+-		gi::wrap(connection, gi::transfer_none),
+-		Gio::DBusProxyFlags::NONE_,
+-		kService,
+-		kObjectPath,
+-		nullptr,
+-		crl::guard(this, [=](GObject::Object, Gio::AsyncResult res) {
+-			_private->interface = XdgDBus::DBus(
+-				XdgDBus::DBusProxy::new_finish(res, nullptr));
+-
+-			if (!_private->interface) {
+-				return;
++	_private->watcher.setConnection(QDBusConnection::sessionBus());
++	_private->watcher.setWatchMode(QDBusServiceWatcher::WatchForOwnerChange);
++	_private->watcher.addWatchedService(QString::fromStdString(service));
++	QObject::connect(
++		&_private->watcher,
++		&QDBusServiceWatcher::serviceOwnerChanged,
++		&_private->watcher,
++		[callback](
++				const QString &name,
++				const QString &oldOwner,
++				const QString &newOwner) {
++			if (callback) {
++				callback(
++					name.toStdString(),
++					oldOwner.toStdString(),
++					newOwner.toStdString());
+ 			}
+-
+-			_private->interface.signal_name_owner_changed().connect([=](
+-					XdgDBus::DBus,
+-					std::string name,
+-					std::string oldOwner,
+-					std::string newOwner) {
+-				if (name != service) {
+-					return;
+-				}
+-
+-				callback(name, oldOwner, newOwner);
+-			});
+-		}));
++		});
+ }
+ 
+ ServiceWatcher::~ServiceWatcher() = default;
+diff -Nru a/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h b/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h
+--- a/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h	2026-09-17 22:47:28.748891712 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h	2026-09-17 22:47:28.750377210 +0200
+@@ -11,6 +11,9 @@
+ 
+ #include <QtDBus/QDBusConnection>
+ 
++#include <string>
++#include <vector>
++
+ namespace base::Platform::DBus {
+ 
+ inline constexpr auto kService = "org.freedesktop.DBus";
+@@ -25,26 +28,13 @@
+ 	AlreadyRunning,
+ };
+ 
+-Result<bool> NameHasOwner(
+-	const GDBusConnection *connection,
+-	const std::string &name);
+-
+-Result<std::vector<std::string>> ListActivatableNames(
+-	const GDBusConnection *connection);
+-
+-Result<StartReply> StartServiceByName(
+-	const GDBusConnection *connection,
+-	const std::string &name);
+-
+-void StartServiceByNameAsync(
+-	const GDBusConnection *connection,
+-	const std::string &name,
+-	Fn<void(Fn<Result<StartReply>()>)> callback);
++Result<bool> NameHasOwner(const std::string &name);
++Result<std::vector<std::string>> ListActivatableNames();
++Result<StartReply> StartServiceByName(const std::string &name);
+ 
+ class ServiceWatcher : public has_weak_ptr {
+ public:
+ 	ServiceWatcher(
+-		const GDBusConnection *connection,
+ 		const std::string &service,
+ 		Fn<void(
+ 			const std::string &,
+diff -Nru a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp
+--- a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp	2026-09-17 22:47:28.776211177 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp	2026-09-17 22:47:28.778213511 +0200
+@@ -11,6 +11,7 @@
+ #include <QtCore/QVariant>
+ #include <QtDBus/QDBusConnection>
+ #include <QtDBus/QDBusInterface>
++#include <QtDBus/QDBusMessage>
+ #include <QtDBus/QDBusReply>
+ #include <QtDBus/QDBusVariant>
+ #include <QtGui/QGuiApplication>
+@@ -29,6 +30,24 @@
+ #include <sstream>
+ 
+ namespace base::Platform::XDP {
++namespace {
++
++[[nodiscard]] QVariant Unwrap(QVariant value) {
++	while (value.canConvert<QDBusVariant>()) {
++		value = qvariant_cast<QDBusVariant>(value).variant();
++	}
++	return value;
++}
++
++[[nodiscard]] QDBusInterface SettingsInterface() {
++	return QDBusInterface(
++		QString::fromLatin1(kService),
++		QString::fromLatin1(kObjectPath),
++		QString::fromLatin1(kSettingsInterface),
++		QDBusConnection::sessionBus());
++}
++
++} // namespace
+ 
+ std::string ParentWindowID() {
+ 	return ParentWindowID(QGuiApplication::focusWindow());
+@@ -58,60 +77,49 @@
+ 	return {};
+ }
+ 
+-gi::result<GLib::Variant> ReadSetting(
++base::expected<QVariant, QString> ReadSetting(
+ 		const std::string &group,
+ 		const std::string &key) {
+-	auto interface = gi::result<XdpSettings::Settings>(
+-		XdpSettings::SettingsProxy::new_for_bus_sync(
+-			Gio::BusType::SESSION_,
+-			Gio::DBusProxyFlags::NONE_,
+-			kService,
+-			kObjectPath));
+-
+-	if (!interface) {
+-		return make_unexpected(std::move(interface.error()));
++	auto iface = SettingsInterface();
++	if (!iface.isValid()) {
++		return make_unexpected(iface.lastError().message());
+ 	}
+-
+-	auto result = interface->call_read_one_sync(group, key);
+-	if (!result) {
+-		return make_unexpected(std::move(result.error()));
++	const auto groupArg = QString::fromStdString(group);
++	const auto keyArg = QString::fromStdString(key);
++	auto msg = iface.call(QStringLiteral("ReadOne"), groupArg, keyArg);
++	if (msg.type() == QDBusMessage::ErrorMessage) {
++		msg = iface.call(QStringLiteral("Read"), groupArg, keyArg);
+ 	}
+-
+-	return std::get<1>(*result).get_variant();
++	if (msg.type() == QDBusMessage::ErrorMessage) {
++		return make_unexpected(msg.errorMessage());
++	}
++	const auto args = msg.arguments();
++	if (args.isEmpty()) {
++		return make_unexpected(QStringLiteral("empty portal reply"));
++	}
++	return Unwrap(args.first());
+ }
+ 
+ class SettingWatcher::Private {
+ public:
+-	XdpSettings::Settings interface;
++	std::unique_ptr<SettingChangedReceiver> receiver;
+ };
+ 
+ SettingWatcher::SettingWatcher(
+ 		Fn<void(
+ 			const std::string &,
+ 			const std::string &,
+-			GLib::Variant)> callback)
++			QVariant)> callback)
+ : _private(std::make_unique<Private>()) {
+-	XdpSettings::SettingsProxy::new_for_bus(
+-		Gio::BusType::SESSION_,
+-		Gio::DBusProxyFlags::NONE_,
+-		kService,
+-		kObjectPath,
+-		crl::guard(this, [=](GObject::Object, Gio::AsyncResult res) {
+-			_private->interface = XdpSettings::Settings(
+-				XdpSettings::SettingsProxy::new_for_bus_finish(res, nullptr));
+-
+-			if (!_private->interface) {
+-				return;
+-			}
+-
+-			_private->interface.signal_setting_changed().connect([=](
+-					XdpSettings::Settings,
+-					std::string group,
+-					std::string key,
+-					GLib::Variant value) {
+-				callback(group, key, value.get_variant());
+-			});
+-		}));
++	_private->receiver = std::make_unique<SettingChangedReceiver>(
++		std::move(callback));
++	QDBusConnection::sessionBus().connect(
++		QString::fromLatin1(kService),
++		QString::fromLatin1(kObjectPath),
++		QString::fromLatin1(kSettingsInterface),
++		QStringLiteral("SettingChanged"),
++		_private->receiver.get(),
++		SLOT(settingChanged(QString,QString,QDBusVariant)));
+ }
+ 
+ SettingWatcher::~SettingWatcher() = default;
+diff -Nru a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h
+--- a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h	2026-09-17 22:47:28.766511602 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h	2026-09-17 22:47:28.768526076 +0200
+@@ -9,7 +9,10 @@
+ #include "base/expected.h"
+ #include "base/weak_ptr.h"
+ 
++#include <QtCore/QObject>
++#include <QtCore/QString>
+ #include <QtCore/QVariant>
++#include <QtDBus/QDBusVariant>
+ 
+ class QWindow;
+ 
+@@ -53,80 +56,45 @@
+ 		const std::string &group,
+ 		const std::string &key,
+ 		Fn<void()> callback)
+-	: SettingWatcher(group, key, [=](gi::repository::GLib::Variant) {
++	: SettingWatcher(group, key, [=](QVariant) {
+ 		callback();
+ 	}) {
+ 	}
+ 
+-#if __has_include(<glibmm.h>)
+-	template <typename ...Args>
+-	SettingWatcher(
+-		Fn<void(
+-			const std::string &,
+-			const std::string &,
+-			Args...)> callback)
+-	: SettingWatcher([=](
+-			const std::string &group,
+-			const std::string &key,
+-			gi::repository::GLib::Variant value) {
+-		if constexpr (sizeof...(Args) == 0) {
+-			callback(group, key);
+-			return;
+-		}
+-		try {
+-			using Tuple = std::tuple<std::decay_t<Args>...>;
+-			if constexpr (sizeof...(Args) == 1) {
+-				using Arg0 = std::tuple_element_t<0, Tuple>;
+-				callback(
+-					group,
+-					key,
+-					Glib::wrap(value.gobj_copy_()).get_dynamic<Arg0>());
+-			} else {
+-				std::apply(
+-					callback,
+-					std::tuple_cat(
+-						std::forward_as_tuple(group, key),
+-						Glib::wrap(value.gobj_copy_()).get_dynamic<Tuple>()));
+-			}
+-		} catch (...) {
+-		}
+-	}) {
+-	}
++	~SettingWatcher();
+ 
+-	template <typename Callback>
+-	SettingWatcher(Callback callback)
+-	: SettingWatcher(std::function(callback)) {
+-	}
++private:
++	class Private;
++	const std::unique_ptr<Private> _private;
++};
+ 
+-	template <typename ...Args>
+-	SettingWatcher(
+-		const std::string &group,
+-		const std::string &key,
+-		Fn<void(Args...)> callback)
+-	: SettingWatcher([=](
+-			const std::string &group2,
+-			const std::string &key2,
+-			Args &&...value) {
+-		if (group == group2 && key == key2) {
+-			callback(std::forward<decltype(value)>(value)...);
+-		}
+-	}) {
+-	}
++class SettingChangedReceiver : public QObject {
++	Q_OBJECT
+ 
+-	template <typename Callback>
+-	SettingWatcher(
+-		const std::string &group,
+-		const std::string &key,
+-		Callback callback)
+-	: SettingWatcher(group, key, std::function(callback)) {
++public:
++	explicit SettingChangedReceiver(
++		Fn<void(const std::string &, const std::string &, QVariant)> callback,
++		QObject *parent = nullptr)
++	: QObject(parent)
++	, _callback(std::move(callback)) {
+ 	}
+-#endif // __has_include(<glibmm.h>)
+ 
+-	~SettingWatcher();
++public slots:
++	void settingChanged(
++			const QString &group,
++			const QString &key,
++			const QDBusVariant &value) {
++		auto unpacked = value.variant();
++		while (unpacked.canConvert<QDBusVariant>()) {
++			unpacked = qvariant_cast<QDBusVariant>(unpacked).variant();
++		}
++		if (_callback) {
++			_callback(group.toStdString(), key.toStdString(), unpacked);
++		}
++	}
+ 
+ private:
+-	class Private;
+-	const std::unique_ptr<Private> _private;
++	Fn<void(const std::string &, const std::string &, QVariant)> _callback;
+ };
+ 
+ } // namespace base::Platform::XDP
+diff -Nru a/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp b/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp
+--- a/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp	2026-09-17 22:47:28.784369264 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_power_save_blocker_linux.cpp	2026-09-17 22:47:28.786116665 +0200
+@@ -74,28 +74,19 @@
+ 		const QString &description,
+ 		QPointer<QWindow> window) {
+ 	crl::on_main([=] {
+-		switch (type) {
+-		case PowerSaveBlockType::PreventAppSuspension:
+-			PortalPreventAppSuspension(true, description);
+-			break;
+-		case PowerSaveBlockType::PreventDisplaySleep:
+-			XCBPreventDisplaySleep(true);
+-			PortalPreventDisplaySleep(true, description);
+-			break;
++		auto &slot = SlotFor(type);
++		if (slot.refs++ == 0) {
++			slot.screensaverCookie = InhibitScreensaver(description);
+ 		}
+ 	});
+ }
+ 
+ void UnblockPowerSave(PowerSaveBlockType type, QPointer<QWindow> window) {
+ 	crl::on_main([=] {
+-		switch (type) {
+-		case PowerSaveBlockType::PreventAppSuspension:
+-			PortalPreventAppSuspension(false);
+-			break;
+-		case PowerSaveBlockType::PreventDisplaySleep:
+-			XCBPreventDisplaySleep(false);
+-			PortalPreventDisplaySleep(false);
+-			break;
++		auto &slot = SlotFor(type);
++		if (slot.refs > 0 && --slot.refs == 0) {
++			UnInhibitScreensaver(slot.screensaverCookie);
++			slot.screensaverCookie = 0;
+ 		}
+ 	});
+ }
+diff -Nru a/Telegram/lib_base/base/platform/linux/base_screen_reader_state_linux.cpp b/Telegram/lib_base/base/platform/linux/base_screen_reader_state_linux.cpp
+--- a/Telegram/lib_base/base/platform/linux/base_screen_reader_state_linux.cpp	2026-09-17 22:47:28.792742784 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_screen_reader_state_linux.cpp	2026-09-17 22:47:28.793951318 +0200
+@@ -97,7 +97,7 @@
+ 	} else if (AlwaysOn()) {
+ 		_isActive = true;
+ 	} else {
+-		_isActive = ReadScreenReaderEnabled(_private->status);
++		_isActive = ReadDBusScreenReaderEnabled();
+ 	}
+ }
+ 
+diff -Nru a/Telegram/lib_ui/ui/platform/linux/ui_font_settings_linux.cpp b/Telegram/lib_ui/ui/platform/linux/ui_font_settings_linux.cpp
+--- a/Telegram/lib_ui/ui/platform/linux/ui_font_settings_linux.cpp	2026-09-17 22:47:28.809879498 +0200
++++ b/Telegram/lib_ui/ui/platform/linux/ui_font_settings_linux.cpp	2026-09-17 22:47:28.810986511 +0200
+@@ -218,7 +218,7 @@
+ 		result->watcher.emplace([=](
+ 				const std::string &group,
+ 				const std::string &key,
+-				gi::repository::GLib::Variant) {
++				QVariant) {
+ 			if (IsFontKey(group, key)) {
+ 				changed();
+ 			}
+diff -Nru a/Telegram/lib_ui/ui/platform/linux/ui_window_title_linux.cpp b/Telegram/lib_ui/ui/platform/linux/ui_window_title_linux.cpp
+--- a/Telegram/lib_ui/ui/platform/linux/ui_window_title_linux.cpp	2026-09-17 22:47:28.804836068 +0200
++++ b/Telegram/lib_ui/ui/platform/linux/ui_window_title_linux.cpp	2026-09-17 22:47:28.805758649 +0200
+@@ -109,8 +109,7 @@
+ 			return std::nullopt;
+ 		}
+ 
+-		return convert(
+-			QString::fromStdString(decorationLayout->get_string(nullptr)));
++		return convert(decorationLayout->toString());
+ 	}();
+ 
+ 	if (portalResult.has_value()) {
