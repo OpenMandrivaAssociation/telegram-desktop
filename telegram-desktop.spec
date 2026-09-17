@@ -184,8 +184,6 @@ tdesktop-4.6.5-workaround-assert-on-startup.patch
 tdesktop-2.3.2-no-underlinking.patch
 tdesktop-4.11.3-zlib-ng.patch
 tdesktop-3.3.2-system-minizip.patch
-tdesktop-4.15.6-compile.patch
-tdesktop-6.3.0-compile.patch
 tdesktop-7.2.8-qtify-integration.patch
 
 %description
