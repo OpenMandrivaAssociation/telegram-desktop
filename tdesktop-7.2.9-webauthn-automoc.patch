@@ -1,0 +1,10 @@
+--- a/Telegram/cmake/td_webauthn.cmake
++++ b/Telegram/cmake/td_webauthn.cmake
+@@ -7,6 +7,7 @@
+ add_library(td_webauthn OBJECT)
+ init_non_host_target(td_webauthn)
+ add_library(tdesktop::td_webauthn ALIAS td_webauthn)
++set_target_properties(td_webauthn PROPERTIES AUTOMOC TRUE)
+ 
+ nice_target_sources(td_webauthn ${src_loc}
+ PRIVATE
