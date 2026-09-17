@@ -1,0 +1,59 @@
+diff -Nru td-pa/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp td-pb/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp
+--- a/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp	2026-09-17 22:59:36.568990644 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_last_input_linux.cpp	2026-09-17 22:59:36.570671637 +0200
+@@ -11,6 +11,7 @@
+ 
+ #include <sys/uio.h>
+ 
++#include <QtDBus/QDBusConnection>
+ #include <QtDBus/QDBusInterface>
+ #include <QtDBus/QDBusReply>
+ 
+@@ -104,26 +105,23 @@
+ 		return std::nullopt;
+ 	}
+ 
+-	auto interface = MutterIdleMonitor::IdleMonitor(
+-		MutterIdleMonitor::IdleMonitorProxy::new_for_bus_sync(
+-			Gio::BusType::SESSION_,
+-			Gio::DBusProxyFlags::DO_NOT_AUTO_START_AT_CONSTRUCTION_,
+-			"org.gnome.Mutter.IdleMonitor",
+-			"/org/gnome/Mutter/IdleMonitor/Core",
+-			nullptr));
+-
+-	if (!interface) {
++	QDBusInterface iface(
++		QStringLiteral("org.gnome.Mutter.IdleMonitor"),
++		QStringLiteral("/org/gnome/Mutter/IdleMonitor/Core"),
++		QStringLiteral("org.gnome.Mutter.IdleMonitor"),
++		QDBusConnection::sessionBus());
++	if (!iface.isValid()) {
+ 		NotSupported = true;
+ 		return std::nullopt;
+ 	}
+ 
+-	const auto result = interface.call_get_idletime_sync();
+-	if (!result) {
++	QDBusReply<qulonglong> reply = iface.call(QStringLiteral("GetIdletime"));
++	if (!reply.isValid()) {
+ 		NotSupported = true;
+ 		return std::nullopt;
+ 	}
+ 
+-	return (crl::now() - static_cast<crl::time>(std::get<1>(*result)));
++	return (crl::now() - static_cast<crl::time>(reply.value()));
+ }
+ 
+ } // namespace
+diff -Nru td-pa/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h td-pb/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h
+--- a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h	2026-09-17 22:59:36.568966574 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h	2026-09-17 22:59:36.570649267 +0200
+@@ -79,7 +79,7 @@
+ 	, _callback(std::move(callback)) {
+ 	}
+ 
+-public slots:
++public Q_SLOTS:
+ 	void settingChanged(
+ 			const QString &group,
+ 			const QString &key,
