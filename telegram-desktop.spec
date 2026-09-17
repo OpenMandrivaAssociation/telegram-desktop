@@ -121,6 +121,8 @@ BuildRequires: cmake(RapidJSON)
 BuildRequires: pkgconfig(libfido2)
 BuildRequires: pkgconfig(gio-2.0)
 BuildRequires: pkgconfig(gio-unix-2.0)
+BuildRequires: pkgconfig(glibmm-2.68)
+BuildRequires: pkgconfig(giomm-2.68)
 %if %{with pango}
 BuildRequires: pkgconfig(pangocairo)
 BuildRequires: pkgconfig(pangoft2)
