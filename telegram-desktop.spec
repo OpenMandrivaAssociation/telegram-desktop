@@ -192,6 +192,7 @@ tdesktop-7.2.9-complete-qtify.patch
 tdesktop-7.2.9-qtify-nokeywords.patch
 tdesktop-7.2.9-qtify-moc.patch
 tdesktop-7.2.9-webauthn-automoc.patch
+tdesktop-7.2.9-update-checker-endif.patch
 
 %description
 Telegram is a non-profit cloud-based instant messaging service.
