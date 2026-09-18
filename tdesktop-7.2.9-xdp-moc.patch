@@ -1,0 +1,93 @@
+diff -Nru xdp-a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp xdp/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp
+--- a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp	2026-09-18 02:36:02.586408266 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp	2026-09-18 02:35:45.884719391 +0200
+@@ -100,6 +100,35 @@
+ 	return Unwrap(args.first());
+ }
+ 
++class SettingChangedReceiver : public QObject {
++	Q_OBJECT
++
++public:
++	explicit SettingChangedReceiver(
++		Fn<void(const std::string &, const std::string &, QVariant)> callback,
++		QObject *parent = nullptr)
++	: QObject(parent)
++	, _callback(std::move(callback)) {
++	}
++
++public Q_SLOTS:
++	void settingChanged(
++			const QString &group,
++			const QString &key,
++			const QDBusVariant &value) {
++		auto unpacked = value.variant();
++		while (unpacked.canConvert<QDBusVariant>()) {
++			unpacked = qvariant_cast<QDBusVariant>(unpacked).variant();
++		}
++		if (_callback) {
++			_callback(group.toStdString(), key.toStdString(), unpacked);
++		}
++	}
++
++private:
++	Fn<void(const std::string &, const std::string &, QVariant)> _callback;
++};
++
+ class SettingWatcher::Private {
+ public:
+ 	std::unique_ptr<SettingChangedReceiver> receiver;
+@@ -125,3 +154,5 @@
+ SettingWatcher::~SettingWatcher() = default;
+ 
+ } // namespace base::Platform::XDP
++
++#include "base_linux_xdp_utilities.moc"
+diff -Nru xdp-a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h xdp/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h
+--- a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h	2026-09-18 02:36:02.587433409 +0200
++++ b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h	2026-09-18 02:35:45.884719391 +0200
+@@ -9,10 +9,7 @@
+ #include "base/expected.h"
+ #include "base/weak_ptr.h"
+ 
+-#include <QtCore/QObject>
+-#include <QtCore/QString>
+ #include <QtCore/QVariant>
+-#include <QtDBus/QDBusVariant>
+ 
+ class QWindow;
+ 
+@@ -68,33 +65,4 @@
+ 	const std::unique_ptr<Private> _private;
+ };
+ 
+-class SettingChangedReceiver : public QObject {
+-	Q_OBJECT
+-
+-public:
+-	explicit SettingChangedReceiver(
+-		Fn<void(const std::string &, const std::string &, QVariant)> callback,
+-		QObject *parent = nullptr)
+-	: QObject(parent)
+-	, _callback(std::move(callback)) {
+-	}
+-
+-public Q_SLOTS:
+-	void settingChanged(
+-			const QString &group,
+-			const QString &key,
+-			const QDBusVariant &value) {
+-		auto unpacked = value.variant();
+-		while (unpacked.canConvert<QDBusVariant>()) {
+-			unpacked = qvariant_cast<QDBusVariant>(unpacked).variant();
+-		}
+-		if (_callback) {
+-			_callback(group.toStdString(), key.toStdString(), unpacked);
+-		}
+-	}
+-
+-private:
+-	Fn<void(const std::string &, const std::string &, QVariant)> _callback;
+-};
+-
+ } // namespace base::Platform::XDP
