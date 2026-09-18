@@ -258,6 +258,8 @@ touch build/changelog.txt
 %global _lto_cflags %{_lto_cflags} -ffat-lto-objects
 CFLAGS="%{optflags} -fPIC -g1 -Wl,-v -fuse-ld=mold"
 
+# clang + these TUs peak well over 2GB each; unbounded -j OOMs znver1/x86
+%global _smp_ncpus_max 4
 %ninja_build -C build
 
 %install
