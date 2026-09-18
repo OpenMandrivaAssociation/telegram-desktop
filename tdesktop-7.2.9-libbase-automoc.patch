@@ -1,5 +1,5 @@
---- a/Telegram/lib_base/CMakeLists.txt
-+++ b/Telegram/lib_base/CMakeLists.txt
+--- a/Telegram/lib_base/CMakeLists.txt	2026-09-18 02:46:28.390037007 +0200
++++ b/Telegram/lib_base/CMakeLists.txt	2026-09-18 02:46:28.407180585 +0200
 @@ -7,6 +7,7 @@
  add_library(lib_base STATIC)
  add_library(desktop-app::lib_base ALIAS lib_base)
@@ -7,3 +7,4 @@
 +set_target_properties(lib_base PROPERTIES AUTOMOC TRUE)
  
  add_library(lib_base_crash_report_writer STATIC)
+ add_library(desktop-app::lib_base_crash_report_writer ALIAS lib_base_crash_report_writer)
