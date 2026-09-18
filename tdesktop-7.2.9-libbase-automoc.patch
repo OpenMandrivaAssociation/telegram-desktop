@@ -1,6 +1,7 @@
 --- a/Telegram/lib_base/CMakeLists.txt
 +++ b/Telegram/lib_base/CMakeLists.txt
-@@ -8,6 +8,7 @@
+@@ -7,6 +7,7 @@
+ add_library(lib_base STATIC)
  add_library(desktop-app::lib_base ALIAS lib_base)
  init_target(lib_base)
 +set_target_properties(lib_base PROPERTIES AUTOMOC TRUE)
