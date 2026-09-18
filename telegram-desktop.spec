@@ -196,6 +196,7 @@ tdesktop-7.2.9-update-checker-endif.patch
 tdesktop-7.2.9-launcher-qt.patch
 tdesktop-7.2.9-xdp-moc.patch
 tdesktop-7.2.9-libbase-automoc.patch
+tdesktop-7.2.9-webengine-link.patch
 
 %description
 Telegram is a non-profit cloud-based instant messaging service.
@@ -219,7 +220,6 @@ export PATH=%{_libdir}/qt6/bin:$PATH
 # tg_owt public headers include gio/gio.h; pass glib flags at cmake time (not spec parse time)
 export CXXFLAGS="${CXXFLAGS:-%{optflags}} $(pkg-config --cflags gio-2.0)"
 export CFLAGS="${CFLAGS:-%{optflags}} $(pkg-config --cflags gio-2.0)"
-export LDFLAGS="${LDFLAGS:-} -Wl,--no-as-needed -lQt6WebEngineWidgets -lQt6WebEngineCore"
 %cmake -G Ninja \
 	-DCMAKE_CXX_STANDARD=20 \
 	-DCMAKE_BUILD_TYPE=Release \

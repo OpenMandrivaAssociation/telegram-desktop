@@ -1,0 +1,11 @@
+--- a/Telegram/CMakeLists.txt	2026-09-18 02:54:38.825625881 +0200
++++ b/Telegram/CMakeLists.txt	2026-09-18 02:54:38.851625296 +0200
+@@ -92,6 +92,8 @@
+     desktop-app::external_kcoreaddons
+     desktop-app::external_qt_static_plugins
+     desktop-app::external_qt
++    Qt6::WebEngineWidgets
++    Qt6::WebEngineCore
+     desktop-app::external_qr_code_generator
+     desktop-app::external_crash_reports
+     desktop-app::external_auto_updates
