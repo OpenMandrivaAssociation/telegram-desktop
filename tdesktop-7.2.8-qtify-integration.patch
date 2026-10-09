@@ -21,26 +21,22 @@ diff -Nru a/Telegram/CMakeLists.txt b/Telegram/CMakeLists.txt
      desktop-app::lib_base
      desktop-app::lib_crl
 diff -Nru a/Telegram/SourceFiles/core/update_checker.cpp b/Telegram/SourceFiles/core/update_checker.cpp
---- a/Telegram/SourceFiles/core/update_checker.cpp	2026-09-10 21:11:45.000000000 +0200
-+++ b/Telegram/SourceFiles/core/update_checker.cpp	2026-09-11 23:03:48.714695296 +0200
-@@ -41,11 +41,15 @@
- 
+--- a/Telegram/SourceFiles/core/update_checker.cpp
++++ b/Telegram/SourceFiles/core/update_checker.cpp
+@@ -43,10 +43,9 @@
  #include <ksandbox.h>
  
-+#if 0
-+// Entire Linux Flatpak auto-update gi path disabled (headers and types removed).
  #if !defined Q_OS_WIN && !defined Q_OS_MAC
- #include "base/platform/linux/base_linux_xdp_utilities.h"
- 
+-#include "base/platform/linux/base_linux_xdp_utilities.h"
+ #include "platform/linux/update_install_linux.h"
+-
 -#include <flatpakportal/flatpakportal.hpp>
-+// flatpakportal/flatpakportal.hpp removed (cppgir / glibmm / portal gi code gone).
-+// Flatpak builds now use the generic relaunch / external updater path.
++// Flatpak portal / cppgir auto-update is disabled. Distro packages update
++// through the package manager. The out-of-line FlatpakChecker below is #if 0.
  #endif // !Q_OS_WIN && !Q_OS_MAC
-+#endif
  
  extern "C" {
- #include <openssl/rsa.h>
-@@ -104,8 +108,7 @@
+@@ -103,8 +102,7 @@
  using Loader = MTP::AbstractDedicatedLoader;
  
  #if !defined Q_OS_WIN && !defined Q_OS_MAC
@@ -50,7 +46,7 @@ diff -Nru a/Telegram/SourceFiles/core/update_checker.cpp b/Telegram/SourceFiles/
  #endif // !Q_OS_WIN && !Q_OS_MAC
  
  struct BIODeleter {
-@@ -263,36 +266,22 @@
+@@ -262,36 +260,22 @@
  };
  
  #if !defined Q_OS_WIN && !defined Q_OS_MAC
@@ -96,7 +92,7 @@ diff -Nru a/Telegram/SourceFiles/core/update_checker.cpp b/Telegram/SourceFiles/
  };
  #endif // !Q_OS_WIN && !Q_OS_MAC
  
-@@ -1597,6 +1586,7 @@
+@@ -1338,6 +1322,7 @@
  	};
  }
  
@@ -134,32 +130,39 @@ diff -Nru a/Telegram/SourceFiles/media/system_media_controls_manager.cpp b/Teleg
  namespace {
  
 diff -Nru a/Telegram/SourceFiles/platform/linux/integration_linux.cpp b/Telegram/SourceFiles/platform/linux/integration_linux.cpp
---- a/Telegram/SourceFiles/platform/linux/integration_linux.cpp	2026-09-10 21:11:45.000000000 +0200
-+++ b/Telegram/SourceFiles/platform/linux/integration_linux.cpp	2026-09-11 23:03:48.714891778 +0200
-@@ -12,16 +12,16 @@
- #include "base/platform/linux/base_linux_xdp_utilities.h"
+--- a/Telegram/SourceFiles/platform/linux/integration_linux.cpp
++++ b/Telegram/SourceFiles/platform/linux/integration_linux.cpp
+@@ -9,20 +9,21 @@
+ 
+ #include "platform/platform_integration.h"
+ #include "base/platform/base_platform_info.h"
+-#include "base/platform/linux/base_linux_xdp_utilities.h"
  #include "core/sandbox.h"
  #include "core/application.h"
 -#if QT_VERSION < QT_VERSION_CHECK(6, 5, 0)
- #include "core/core_settings.h"
+-#include "core/core_settings.h"
 -#endif
 -#include "base/random.h"
  #include "base/qt_connection.h"
  
  #include <QtCore/QAbstractEventDispatcher>
--
--#include <gio/gio.hpp>
--#include <xdpinhibit/xdpinhibit.hpp>
 +#include <QtCore/QCoreApplication>
-+#include <QtGui/QGuiApplication>
++#include <QtCore/QStringList>
++#include <QtCore/QUrl>
 +#include <QtGui/QFileOpenEvent>
++#include <QtGui/QGuiApplication>
 +#include <QtGui/QIcon>
-+#include <QtDBus/QDBusConnection>
 +#include <QtDBus/QDBusAbstractAdaptor>
++#include <QtDBus/QDBusConnection>
+ 
+-#include <gio/gio.hpp>
+-#include <logind/logind.hpp>
+-#include <xdpinhibit/xdpinhibit.hpp>
++#include <memory>
  
  #ifdef __GLIBC__
  #include <malloc.h>
-@@ -30,91 +30,102 @@
+@@ -31,91 +32,123 @@
  namespace Platform {
  namespace {
  
@@ -272,28 +275,6 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/integration_linux.cpp b/Telegram
 -	const auto appId = QGuiApplication::desktopFileName().toStdString();
 -	if (Gio::Application::id_is_valid(appId)) {
 -		set_application_id(appId);
--	}
--	set_flags(Gio::ApplicationFlags::HANDLES_OPEN_);
--
--	auto actionMap = Gio::ActionMap(*this);
--
--	auto quitAction = Gio::SimpleAction::new_("quit");
--	quitAction.signal_activate().connect([](
--			Gio::SimpleAction,
--			GLib::Variant parameter) {
--		Core::Sandbox::Instance().customEnterFromEventLoop([] {
--			Core::Quit();
--		});
--	});
--	actionMap.add_action(quitAction);
--}
--
--gi::ref_ptr<Application> MakeApplication() {
--	const auto result = gi::make_ref<Application>();
--	if (const auto registered = result->register_(); !registered) {
--		LOG(("App Error: Failed to register: %1").arg(
--			registered.error().message_().c_str()));
--		return nullptr;
 +class ApplicationObject final : public QObject {
 +public:
 +	ApplicationObject() {
@@ -305,7 +286,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/integration_linux.cpp b/Telegram
 +		}
 +
 +		// FreeDesktop: org.telegram.desktop -> /org/telegram/desktop
-+		auto path = '/' + id;
++		auto path = u"/"_q + id;
 +		path.replace('.', '/');
 +
 +		// Own the well-known name when possible (non-sandboxed package).
@@ -320,15 +301,54 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/integration_linux.cpp b/Telegram
 +			LOG(("App Error: Failed to export D-Bus object %1").arg(path));
 +		}
  	}
+-	set_flags(Gio::ApplicationFlags::HANDLES_OPEN_);
++};
+ 
+-	auto actionMap = Gio::ActionMap(*this);
++// org.freedesktop.login1.Manager.PrepareForSleep, from the upstream XML
++// (service org.freedesktop.login1, path /org/freedesktop/login1).
++// The gboolean is ignored: both sleep and resume notify the app.
++class SystemSleepWatcher final : public QObject {
++	Q_OBJECT
+ 
+-	auto quitAction = Gio::SimpleAction::new_("quit");
+-	quitAction.signal_activate().connect([](
+-			Gio::SimpleAction,
+-			GLib::Variant parameter) {
+-		Core::Sandbox::Instance().customEnterFromEventLoop([] {
+-			Core::Quit();
+-		});
+-	});
+-	actionMap.add_action(quitAction);
+-}
++public:
++	SystemSleepWatcher() {
++		QDBusConnection::systemBus().connect(
++			u"org.freedesktop.login1"_q,
++			u"/org/freedesktop/login1"_q,
++			u"org.freedesktop.login1.Manager"_q,
++			u"PrepareForSleep"_q,
++			this,
++			SLOT(onPrepareForSleep(bool)));
++	}
+ 
+-gi::ref_ptr<Application> MakeApplication() {
+-	const auto result = gi::make_ref<Application>();
+-	if (const auto registered = result->register_(); !registered) {
+-		LOG(("App Error: Failed to register: %1").arg(
+-			registered.error().message_().c_str()));
+-		return nullptr;
++public Q_SLOTS:
++	void onPrepareForSleep(bool) {
++		Core::App().notifySystemSleep();
+ 	}
 -	return result;
 -}
 +};
-+
-+} // namespace
  
  class LinuxIntegration final : public Integration, public base::has_weak_ptr {
  public:
-@@ -123,44 +134,22 @@
+@@ -124,47 +157,25 @@
  	void init() override;
  
  private:
@@ -336,18 +356,22 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/integration_linux.cpp b/Telegram
 -		return _inhibitProxy;
 -	}
 -
+ 	void initSystemSleep();
 -	void initInhibit();
--
+ 
 -	const gi::ref_ptr<Application> _application;
 -	XdpInhibit::InhibitProxy _inhibitProxy;
+-	Logind::ManagerProxy _logindProxy;
 -#if QT_VERSION < QT_VERSION_CHECK(6, 5, 0)
 -	base::Platform::XDP::SettingWatcher _darkModeWatcher;
 -#endif // Qt < 6.5.0
 +	std::unique_ptr<ApplicationObject> _application;
++	std::unique_ptr<SystemSleepWatcher> _systemSleep;
  #ifdef __GLIBC__
  	base::qt_connection _memoryTrim;
  	crl::time _memoryTrimmed = 0;
  #endif // __GLIBC__
+-
  };
  
 -LinuxIntegration::LinuxIntegration()
@@ -380,45 +404,321 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/integration_linux.cpp b/Telegram
  
  #ifdef __GLIBC__
  	_memoryTrim = QObject::connect(
-diff -Nru a/Telegram/SourceFiles/platform/linux/launcher_linux.cpp b/Telegram/SourceFiles/platform/linux/launcher_linux.cpp
---- a/Telegram/SourceFiles/platform/linux/launcher_linux.cpp	2026-09-10 21:11:45.000000000 +0200
-+++ b/Telegram/SourceFiles/platform/linux/launcher_linux.cpp	2026-09-11 23:03:48.714930738 +0200
-@@ -9,18 +9,17 @@
+@@ -181,112 +192,10 @@
  
+ void LinuxIntegration::init() {
+ 	initSystemSleep();
+-
+-	XdpInhibit::InhibitProxy::new_for_bus(
+-		Gio::BusType::SESSION_,
+-		Gio::DBusProxyFlags::NONE_,
+-		base::Platform::XDP::kService,
+-		base::Platform::XDP::kObjectPath,
+-		crl::guard(this, [=](GObject::Object, Gio::AsyncResult res) {
+-			_inhibitProxy = XdpInhibit::InhibitProxy::new_for_bus_finish(
+-				res,
+-				nullptr);
+-
+-			initInhibit();
+-		}));
+ }
+ 
+ void LinuxIntegration::initSystemSleep() {
+-	const auto info = Logind::Manager::interface_info();
+-	const auto annotations = gi::wrap_to<gi::Collection<
+-		gi::ZTSpan,
+-		GDBusAnnotationInfo*,
+-		gi::transfer_none_t>>(
+-			info.gobj_()->annotations,
+-			gi::transfer_none);
+-	const auto service = Gio::DBusAnnotationInfo::lookup(
+-		annotations,
+-		"org.telegram.DBus.Service");
+-	const auto objectPath = Gio::DBusAnnotationInfo::lookup(
+-		annotations,
+-		"org.telegram.DBus.ObjectPath");
+-	if (!service || !objectPath) {
+-		return;
+-	}
+-
+-	Logind::ManagerProxy::new_for_bus(
+-		Gio::BusType::SYSTEM_,
+-		Gio::DBusProxyFlags::DO_NOT_AUTO_START_
+-			| Gio::DBusProxyFlags::DO_NOT_LOAD_PROPERTIES_,
+-		service,
+-		objectPath,
+-		crl::guard(this, [=](GObject::Object, Gio::AsyncResult res) {
+-			_logindProxy = Logind::ManagerProxy::new_for_bus_finish(
+-				res,
+-				nullptr);
+-			if (!_logindProxy) {
+-				return;
+-			}
+-			Logind::Manager(_logindProxy).signal_prepare_for_sleep().connect(
+-				crl::guard(this, [](Logind::Manager, gboolean) {
+-					Core::App().notifySystemSleep();
+-				}));
+-		}));
+-}
+-
+-void LinuxIntegration::initInhibit() {
+-	if (!_inhibitProxy) {
+-		return;
+-	}
+-
+-	std::string uniqueName = _inhibitProxy.get_connection().get_unique_name();
+-	uniqueName.erase(0, 1);
+-	uniqueName.replace(uniqueName.find('.'), 1, 1, '_');
+-
+-	const auto handleToken = "tdesktop"
+-		+ std::to_string(base::RandomValue<uint>());
+-
+-	const auto sessionHandleToken = "tdesktop"
+-		+ std::to_string(base::RandomValue<uint>());
+-
+-	const auto sessionHandle = base::Platform::XDP::kObjectPath
+-		+ std::string("/session/")
+-		+ uniqueName
+-		+ '/'
+-		+ sessionHandleToken;
+-
+-	inhibit().signal_state_changed().connect([
+-		mySessionHandle = sessionHandle
+-	](
+-			XdpInhibit::Inhibit,
+-			const std::string &sessionHandle,
+-			GLib::Variant state) {
+-		if (sessionHandle != mySessionHandle) {
+-			return;
+-		}
+-
+-		Core::App().setScreenIsLocked(
+-			GLib::VariantDict::new_(
+-				state
+-			).lookup_value(
+-				"screensaver-active"
+-			).get_boolean()
+-		);
+-	});
+-
+-	inhibit().call_create_monitor(
+-		"",
+-		GLib::Variant::new_array({
+-			GLib::Variant::new_dict_entry(
+-				GLib::Variant::new_string("handle_token"),
+-				GLib::Variant::new_variant(
+-					GLib::Variant::new_string(handleToken))),
+-			GLib::Variant::new_dict_entry(
+-				GLib::Variant::new_string("session_handle_token"),
+-				GLib::Variant::new_variant(
+-					GLib::Variant::new_string(sessionHandleToken))),
+-		}),
+-		nullptr);
++	_systemSleep = std::make_unique<SystemSleepWatcher>();
+ }
+ 
+ } // namespace
+@@ -296,3 +205,5 @@
+ }
+ 
+ } // namespace Platform
++
++#include "integration_linux.moc"
+diff -Nru a/Telegram/SourceFiles/platform/linux/launcher_linux.cpp b/Telegram/SourceFiles/platform/linux/launcher_linux.cpp
+--- a/Telegram/SourceFiles/platform/linux/launcher_linux.cpp
++++ b/Telegram/SourceFiles/platform/linux/launcher_linux.cpp
+@@ -10,11 +10,12 @@
  #include "core/crash_reports.h"
  #include "core/update_checker.h"
+ #include "platform/linux/update_install_linux.h"
 -#include "webview/platform/linux/webview_linux_webkitgtk.h"
  
- #include <QtWidgets/QApplication>
-+#include <QtCore/QProcess>
-+#include <QtCore/QStringList>
-+
- #include <ksandbox.h>
+ #include <QtCore/QDateTime>
+ #include <QtCore/QFile>
 -#include <glib/glib.hpp>
++#include <QtCore/QProcess>
++#include <QtCore/QStandardPaths>
++#include <QtCore/QStringList>
+ #include <ksandbox.h>
  
- #ifdef __GLIBC__
+ #include <sys/stat.h>
+@@ -28,12 +29,17 @@
  #include <malloc.h>
  #endif // __GLIBC__
  
 -using namespace gi::repository;
 -
  namespace Platform {
+ namespace {
  
- Launcher::Launcher(int argc, char *argv[])
-@@ -31,13 +30,6 @@
+-using SpawnOutput = gi::Collection<gi::ZTSpan, guint8, gi::transfer_full_t>;
++[[nodiscard]] QStringList ToQStringList(const std::vector<std::string> &list) {
++	QStringList result;
++	result.reserve(int(list.size()));
++	for (const auto &item : list) {
++		result.push_back(QString::fromStdString(item));
++	}
++	return result;
++}
+ 
+ void ReportLaunchError(const QString &error) {
+ 	LOG(("Update Error: %1").arg(error));
+@@ -41,8 +47,8 @@
  }
  
- int Launcher::exec() {
+ [[nodiscard]] bool WriteUpdateLog(
+-		const SpawnOutput &output,
+-		const SpawnOutput &errors,
++		const QByteArray &output,
++		const QByteArray &errors,
+ 		bool spawned,
+ 		int status,
+ 		const QString &spawnError) {
+@@ -98,12 +104,8 @@
+ 			.arg(status)
+ 			.arg(spawnError.isEmpty() ? QString() : u", "_q + spawnError)
+ 			.toUtf8();
+-		if (file.write(
+-				reinterpret_cast<const char*>(output.data()),
+-				output.size()) != qint64(output.size())
+-			|| file.write(
+-				reinterpret_cast<const char*>(errors.data()),
+-				errors.size()) != qint64(errors.size())
++		if (file.write(output.constData(), output.size()) != qint64(output.size())
++			|| file.write(errors.constData(), errors.size()) != qint64(errors.size())
+ 			|| file.write(result) != result.size()
+ 			|| !file.flush()) {
+ 			return false;
+@@ -127,12 +129,6 @@
+ 	if (const auto result = InstallUpdateIfRequested(arguments())) {
+ 		return *result;
+ 	}
 -	for (auto i = arguments().begin(), e = arguments().end(); i != e; ++i) {
 -		if (*i == u"-webviewhelper"_q && std::distance(i, e) > 1) {
 -			Webview::WebKitGTK::SetSocketPath((i + 1)->toStdString());
 -			return Webview::WebKitGTK::Exec();
 -		}
 -	}
--
+ 
  	return Core::Launcher::exec();
  }
+@@ -217,39 +213,28 @@
+ 	Logs::closeMain();
+ 	CrashReports::Finish();
  
+-	int waitStatus = 0;
+ 	if (justRelaunch) {
+-		auto error = GLib::Error();
+-		const auto result = GLib::spawn_async(
+-			initialWorkingDir().toStdString(),
+-			argumentsList,
+-			{},
+-			KSandbox::isFlatpak() && _updating
+-				? GLib::SpawnFlags::SEARCH_PATH_
+-				: GLib::SpawnFlags::FILE_AND_ARGV_ZERO_,
+-			nullptr,
+-			nullptr,
+-			&error);
+-		if (!result) {
+-			ReportLaunchError(u"Could not relaunch Telegram: %1"_q.arg(
+-				QString::fromUtf8(error.message_().c_str())));
+-		}
+-		return result;
+-	} else if (!GLib::spawn_sync(
+-			argumentsList,
+-			{},
+-			// if the spawn is sync, working directory is not set
+-			// and GLib::SpawnFlags::LEAVE_DESCRIPTORS_OPEN_ is set,
+-			// it goes through an optimized code path
+-			GLib::SpawnFlags::SEARCH_PATH_
+-				| GLib::SpawnFlags::LEAVE_DESCRIPTORS_OPEN_,
+-			nullptr,
+-			nullptr,
+-			nullptr,
+-			&waitStatus,
+-			nullptr) || !g_spawn_check_exit_status(waitStatus, nullptr)) {
+-		ReportLaunchError(u"The ordinary update helper failed (status %1)."_q
+-			.arg(waitStatus));
++		const auto searchPath = KSandbox::isFlatpak() && _updating;
++		auto args = ToQStringList(argumentsList);
++		if (args.isEmpty()) {
++			ReportLaunchError(u"Could not relaunch Telegram."_q);
++			return false;
++		}
++		const auto program = args.takeFirst();
++		// FILE_AND_ARGV_ZERO: drop the explicit argv[0] copy.
++		if (!searchPath && !args.isEmpty()) {
++			args.removeFirst();
++		}
++		if (!QProcess::startDetached(program, args, initialWorkingDir())) {
++			ReportLaunchError(u"Could not relaunch Telegram."_q);
++			return false;
++		}
++		return true;
++	}
++
++	auto args = ToQStringList(argumentsList);
++	if (args.isEmpty() || QProcess::execute(args.takeFirst(), args) != 0) {
++		ReportLaunchError(u"The ordinary update helper failed."_q);
+ 		return relaunchAfterUpdate(false);
+ 	}
+ 	return launchUpdater(UpdaterLaunch::JustRelaunch);
+@@ -276,7 +261,9 @@
+ 		return relaunchAfterUpdate(false);
+ 	}
+ 	auto command = std::vector<std::string>{
+-		GLib::find_program_in_path("run0") ? "run0" : "pkexec",
++		QStandardPaths::findExecutable(u"run0"_q).isEmpty()
++			? "pkexec"
++			: "run0",
+ 		executable->toStdString(),
+ 		"-installupdate",
+ 		package.toStdString(),
+@@ -286,27 +273,26 @@
+ 	}
+ 	Logs::closeMain();
+ 	CrashReports::Finish();
+-	auto output = SpawnOutput();
+-	auto errors = SpawnOutput();
+-	auto spawnError = GLib::Error();
+-	auto status = 0;
+-	const auto spawned = GLib::spawn_sync(
+-		command,
+-		{},
+-		GLib::SpawnFlags::SEARCH_PATH_,
+-		nullptr,
+-		&output,
+-		&errors,
+-		&status,
+-		&spawnError);
+-	const auto description = spawned
+-		? QString()
+-		: QString::fromUtf8(spawnError.message_().c_str());
++	auto args = ToQStringList(command);
++	const auto program = args.isEmpty() ? QString() : args.takeFirst();
++	QProcess process;
++	if (!program.isEmpty()) {
++		process.start(program, args);
++	}
++	const auto spawned = !program.isEmpty() && process.waitForStarted(30000);
++	if (spawned) {
++		process.waitForFinished(-1);
++	}
++	const auto output = process.readAllStandardOutput();
++	const auto errors = process.readAllStandardError();
++	const auto status = process.exitCode();
++	const auto description = spawned ? QString() : process.errorString();
+ 	if (!WriteUpdateLog(output, errors, spawned, status, description)) {
+ 		ReportLaunchError(u"Could not write a fresh user update log."_q);
+ 	}
+-	// cppgir drops the wrapper as deprecated on GLib 2.70+, older lack the new.
+-	const auto installed = spawned && g_spawn_check_exit_status(status, nullptr);
++	const auto installed = spawned
++		&& process.exitStatus() == QProcess::NormalExit
++		&& process.exitCode() == 0;
+ 	if (!installed) {
+ 		ReportLaunchError(u"Protected update failed (wait status %1): %2"_q
+ 			.arg(status)
 diff -Nru a/Telegram/SourceFiles/platform/linux/main_window_linux.cpp b/Telegram/SourceFiles/platform/linux/main_window_linux.cpp
 --- a/Telegram/SourceFiles/platform/linux/main_window_linux.cpp	2026-09-10 21:11:45.000000000 +0200
 +++ b/Telegram/SourceFiles/platform/linux/main_window_linux.cpp	2026-09-11 23:03:48.714977939 +0200
@@ -1692,8 +1992,8 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp 
  
  Manager::Manager(not_null<Window::Notifications::System*> system)
 diff -Nru a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/SourceFiles/platform/linux/specific_linux.cpp
---- a/Telegram/SourceFiles/platform/linux/specific_linux.cpp	2026-09-10 21:11:45.000000000 +0200
-+++ b/Telegram/SourceFiles/platform/linux/specific_linux.cpp	2026-09-11 23:03:48.715364093 +0200
+--- a/Telegram/SourceFiles/platform/linux/specific_linux.cpp
++++ b/Telegram/SourceFiles/platform/linux/specific_linux.cpp
 @@ -11,37 +11,38 @@
  #include "base/random.h"
  #include "base/platform/base_platform_info.h"
@@ -2480,13 +2780,16 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/So
  		});
  	}
  	return true;
-@@ -853,31 +441,17 @@
+@@ -853,7 +441,7 @@
  	static const auto Result = KSandbox::isSnap()
  		? u"snap.%1."_q.arg(qEnvironmentVariable("SNAP_INSTANCE_NAME"))
  		: QGuiApplication::desktopFileName().remove(
 -		u"._"_q + Core::Launcher::Instance().instanceHash());
 +			u"._"_q + Core::Launcher::Instance().instanceHash());
  	return Result;
+ }
+ 
+@@ -864,26 +452,12 @@
  }
  
  void LaunchMaps(const Data::LocationPoint &point, Fn<void()> fail) {
@@ -2510,16 +2813,16 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/So
 -			}
 -		}, fail);
 -	});
-+	const auto url = u"geo:%1,%2"_q.arg(
++	const auto url = QUrl(u"geo:%1,%2"_q.arg(
 +		point.latAsString(),
-+		point.lonAsString());
++		point.lonAsString()));
 +	if (!QDesktopServices::openUrl(url) && fail) {
 +		fail();
 +	}
  }
  
  namespace ThirdParty {
-@@ -886,7 +460,6 @@
+@@ -892,7 +466,6 @@
  }
  
  } // namespace ThirdParty

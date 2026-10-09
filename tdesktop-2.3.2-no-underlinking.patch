@@ -1,10 +1,8 @@
-diff --git a/Telegram/CMakeLists.txt b/Telegram/CMakeLists.txt
-index 1567c97a..d96697dd 100644
 --- a/Telegram/CMakeLists.txt
 +++ b/Telegram/CMakeLists.txt
-@@ -99,6 +99,7 @@ PRIVATE
-     desktop-app::external_openssl
+@@ -109,6 +109,7 @@
      desktop-app::external_openal
+     desktop-app::external_wallet_engine
      desktop-app::external_xxhash
 +    -ljpeg -lvpx -lopenh264
  )

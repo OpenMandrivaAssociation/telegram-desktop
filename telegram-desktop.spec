@@ -43,8 +43,8 @@
 Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
-Version:	7.2.10
-Release:	2
+Version:	7.3.0
+Release:	1
 Group:	Networking/Instant Messenger
 
 # Application and 3rd-party modules licensing:
@@ -193,7 +193,6 @@ tdesktop-7.2.9-qtify-nokeywords.patch
 tdesktop-7.2.9-qtify-moc.patch
 tdesktop-7.2.9-webauthn-automoc.patch
 tdesktop-7.2.9-update-checker-endif.patch
-tdesktop-7.2.9-launcher-qt.patch
 tdesktop-7.2.9-xdp-moc.patch
 tdesktop-7.2.9-libbase-automoc.patch
 tdesktop-7.2.9-webengine-link.patch
