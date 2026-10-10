@@ -36,6 +36,10 @@
 %if %{with mindbg}
 %global optflags %(echo %{optflags} | sed 's/-g3 /-gdwarf-5 -g1 /')
 %endif
+# optflags are -Os and then -O3; the last -O wins. The cmake macro copies
+# that string into CMAKE_CXX_FLAGS and CMAKE_CXX_FLAGS_RELEASE. -O3 on the
+# Telegram PCH OOMs znver1 at -j2 (671629) and at -j1 (671684).
+%global optflags %(echo %{optflags} | sed -e 's/ -O3 / -O2 /g' -e 's/ -O3$/ -O2/')
 # dwz on the Telegram binary OOMs/fails in %%install after a successful link.
 %global _find_debuginfo_dwz_opts %{nil}
 %undefine _debugsource_packages
@@ -244,7 +248,6 @@ export CFLAGS="${CFLAGS:-%{optflags}} $(pkg-config --cflags gio-2.0)"
 	-DDESKTOP_APP_USE_PACKAGED_QRCODE:BOOL=ON \
 	-DDESKTOP_APP_USE_GLIBC_WRAPS:BOOL=OFF \
 	-DDESKTOP_APP_DISABLE_CRASH_REPORTS:BOOL=ON \
-	-DCMAKE_DISABLE_PRECOMPILE_HEADERS:BOOL=ON \
 	-DDESKTOP_APP_DISABLE_QT_PLUGINS:BOOL=ON \
 %if %{with pango}
 	-DDESKTOP_APP_USE_PANGO:BOOL=ON \
@@ -262,10 +265,9 @@ touch build/changelog.txt
 %global _lto_cflags %{_lto_cflags} -ffat-lto-objects
 CFLAGS="%{optflags} -fPIC -g1 -Wl,-v -fuse-ld=mold"
 
-# PCH builds peak at several GB. znver1 671629 was SIGKILLed at -j2, and
-# 671684 died at -j1 right after the Telegram PCH with no compiler error.
-# Precompiled headers are disabled above. Two jobs is enough without them.
-RPM_BUILD_NCPUS=2
+# PCH stays on: the sources use names that only the precompiled header
+# provides. One job keeps a second -O2 PCH from stacking on the first.
+RPM_BUILD_NCPUS=1
 %ninja_build -C build
 
 %install
