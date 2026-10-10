@@ -262,8 +262,9 @@ touch build/changelog.txt
 CFLAGS="%{optflags} -fPIC -g1 -Wl,-v -fuse-ld=mold"
 
 # clang PCH jobs peak at several GB. -j4 SIGKILLed bot_attach_web_view.cpp
-# on the x86_64 builder (exit 137). Two jobs fits that machine.
-%global _smp_ncpus_max 2
+# on the x86_64 builder. -j2 SIGKILLed history_view_compose_controls.cpp
+# on znver1 (671629, exit 137). One job fits.
+RPM_BUILD_NCPUS=1
 %ninja_build -C build
 
 %install
