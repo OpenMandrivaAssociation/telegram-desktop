@@ -244,6 +244,7 @@ export CFLAGS="${CFLAGS:-%{optflags}} $(pkg-config --cflags gio-2.0)"
 	-DDESKTOP_APP_USE_PACKAGED_QRCODE:BOOL=ON \
 	-DDESKTOP_APP_USE_GLIBC_WRAPS:BOOL=OFF \
 	-DDESKTOP_APP_DISABLE_CRASH_REPORTS:BOOL=ON \
+	-DCMAKE_DISABLE_PRECOMPILE_HEADERS:BOOL=ON \
 	-DDESKTOP_APP_DISABLE_QT_PLUGINS:BOOL=ON \
 %if %{with pango}
 	-DDESKTOP_APP_USE_PANGO:BOOL=ON \
@@ -261,10 +262,10 @@ touch build/changelog.txt
 %global _lto_cflags %{_lto_cflags} -ffat-lto-objects
 CFLAGS="%{optflags} -fPIC -g1 -Wl,-v -fuse-ld=mold"
 
-# clang PCH jobs peak at several GB. -j4 SIGKILLed bot_attach_web_view.cpp
-# on the x86_64 builder. -j2 SIGKILLed history_view_compose_controls.cpp
-# on znver1 (671629, exit 137). One job fits.
-RPM_BUILD_NCPUS=1
+# PCH builds peak at several GB. znver1 671629 was SIGKILLed at -j2, and
+# 671684 died at -j1 right after the Telegram PCH with no compiler error.
+# Precompiled headers are disabled above. Two jobs is enough without them.
+RPM_BUILD_NCPUS=2
 %ninja_build -C build
 
 %install
