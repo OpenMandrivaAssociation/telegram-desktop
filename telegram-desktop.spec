@@ -49,9 +49,10 @@ Group:	Networking/Instant Messenger
 
 # Application and 3rd-party modules licensing:
 # * Telegram Desktop - GPLv3+ with OpenSSL exception -- main tarball;
-# * tlottie - MIT -- system static library since 7.2.7;
+# * tdesktop-rust - MIT and Apache-2.0 -- one static library since 7.3.0
+#   (tlottie and wallet-engine).
 # * qt_functions.cpp - LGPLv3 -- build-time dependency.
-License: GPLv3+ and LGPLv2+ and LGPLv3
+License: GPLv3+ and LGPLv2+ and LGPLv3 and MIT and Apache-2.0
 URL: https://github.com/telegramdesktop/%{appname}
 Summary: Telegram Desktop official messaging app
 
@@ -62,9 +63,8 @@ Source0: https://github.com/telegramdesktop/tdesktop/releases/download/v%{versio
 
 Requires: hicolor-icon-theme
 
-# 7.2.7 replaced rlottie with tlottie (Rust C API). Official Linux
-# docker pins the same 758c7cb snapshot as the cooker tlottie package.
-BuildRequires: pkgconfig(tlottie)
+# 7.3.0 links tlottie and wallet-engine as one static library.
+BuildRequires: pkgconfig(tdesktop_rust) >= 7.3.0
 
 # Telegram Desktop require patched version of lxqt-qtplugin.
 # Pull Request pending: https://github.com/lxqt/lxqt-qtplugin/pull/52
