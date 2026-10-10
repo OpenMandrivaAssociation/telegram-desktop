@@ -1,0 +1,27 @@
+--- a/Telegram/lib_webview/webview/platform/linux/webview_linux.cpp	2026-10-10 03:43:52.815276993 +0200
++++ b/Telegram/lib_webview/webview/platform/linux/webview_linux.cpp	2026-10-10 03:43:52.816389566 +0200
+@@ -460,7 +460,7 @@
+ 			});
+ 		}
+ 	});
+-	_page->setNavigationStartHandler(_config.navigationStartHandler);
++	_page->setNavigationStartHandler(_config.navigationPolicyHandler);
+ 	_page->setNavigationDoneHandler(_config.navigationDoneHandler);
+ 
+ 	if (_config.dataRequestHandler) {
+@@ -590,6 +590,15 @@
+ void QtWebEngineInterface::connectViewSignals() {
+ 	QObject::connect(
+ 		_page,
++		&QWebEnginePage::loadStarted,
++		_view.get(),
++		[=] {
++			if (_config.navigationStartHandler) {
++				_config.navigationStartHandler();
++			}
++		});
++	QObject::connect(
++		_page,
+ 		&QWebEnginePage::loadFinished,
+ 		_view.get(),
+ 		[=](bool ok) {

@@ -196,6 +196,7 @@ tdesktop-7.2.9-update-checker-endif.patch
 tdesktop-7.2.9-xdp-moc.patch
 tdesktop-7.2.9-libbase-automoc.patch
 tdesktop-7.2.9-webengine-link.patch
+tdesktop-7.3.0-webview-nav.patch
 
 %description
 Telegram is a non-profit cloud-based instant messaging service.
