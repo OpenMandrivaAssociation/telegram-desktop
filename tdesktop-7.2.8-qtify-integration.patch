@@ -3893,14 +3893,16 @@ diff -Nru a/Telegram/lib_base/base/platform/linux/base_linux_dbus_utilities.h b/
  namespace base::Platform::DBus {
  
 diff -Nru a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp
---- a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp	2026-09-06 15:51:18.000000000 +0200
-+++ b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp	2026-09-11 23:03:48.715832988 +0200
-@@ -8,8 +8,11 @@
+--- a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp
++++ b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp
+@@ -8,10 +8,13 @@
  
  #include "base/platform/base_platform_info.h"
  
 -#include <xdpsettings/xdpsettings.hpp>
 -
+ #include <QtCore/QEventLoop>
+ #include <QtCore/QFutureWatcher>
 +#include <QtCore/QVariant>
 +#include <QtDBus/QDBusConnection>
 +#include <QtDBus/QDBusInterface>
@@ -3909,45 +3911,32 @@ diff -Nru a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.cpp b
  #include <QtGui/QGuiApplication>
  #include <QtGui/QWindow>
  
-@@ -18,20 +21,14 @@
- #include <private/qguiapplication_p.h>
- #if QT_VERSION >= QT_VERSION_CHECK(6, 9, 0)
- #include <private/qdesktopunixservices_p.h>
--#else // Qt >= 6.9.0
-+#else
- #include <private/qgenericunixservices_p.h>
--#endif // Qt < 6.9.0
--#endif // Qt >= 6.5.0
-+#endif
-+#endif
+@@ -27,14 +30,7 @@
+ #include <KWaylandExtras>
+ #endif // (Qt < 6.5.0 || DESKTOP_APP_DISABLE_PRIVATE_QT_API) && __has_include(<KWaylandExtras>)
  
- #include <sstream>
- 
- namespace base::Platform::XDP {
--namespace {
+-#include <sstream>
+-
+-namespace base::Platform::XDP {
+ namespace {
 -
 -using namespace gi::repository;
 -namespace GObject = gi::repository::GObject;
 -
--} // namespace
+ #if (QT_VERSION < QT_VERSION_CHECK(6, 5, 0) || defined DESKTOP_APP_DISABLE_PRIVATE_QT_API) && __has_include(<KWaylandExtras>)
+ constexpr auto kUnexportOnHideProperty = "_td_unexport_on_hide";
  
+@@ -71,6 +67,10 @@
+ 
+ } // namespace
+ 
++#include <sstream>
++
++namespace base::Platform::XDP {
++
  std::string ParentWindowID() {
  	return ParentWindowID(QGuiApplication::focusWindow());
-@@ -45,12 +42,12 @@
- #if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)
- #if QT_VERSION < QT_VERSION_CHECK(6, 9, 0)
- 	using QDesktopUnixServices = QGenericUnixServices;
--#endif // Qt < 6.9.0
-+#endif
- 	if (const auto services = dynamic_cast<QDesktopUnixServices*>(
- 			QGuiApplicationPrivate::platformIntegration()->services())) {
- 		return services->portalWindowIdentifier(window).toStdString();
- 	}
--#endif // Qt >= 6.5.0
-+#endif
- 
- 	if (::Platform::IsX11()) {
- 		std::stringstream result;
+ }
 diff -Nru a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h
 --- a/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h	2026-09-06 15:51:18.000000000 +0200
 +++ b/Telegram/lib_base/base/platform/linux/base_linux_xdp_utilities.h	2026-09-11 23:03:48.715869229 +0200
