@@ -48,7 +48,7 @@ Name: telegram-desktop
 # before every upgrade
 # try to up tg_owt project first
 Version:	7.3.3
-Release:	1
+Release:	2
 Group:	Networking/Instant Messenger
 
 # Application and 3rd-party modules licensing:
@@ -266,8 +266,13 @@ touch build/changelog.txt
 CFLAGS="%{optflags} -fPIC -g1 -Wl,-v -fuse-ld=mold"
 
 # PCH stays on: the sources use names that only the precompiled header
-# provides. One job keeps a second -O2 PCH from stacking on the first.
+# provides. One job on x86 keeps a second -O2 PCH from stacking on the
+# first. aarch64 at one job hits mock's 10 hour rpmbuild timeout.
+%ifarch aarch64
+RPM_BUILD_NCPUS=4
+%else
 RPM_BUILD_NCPUS=1
+%endif
 %ninja_build -C build
 
 %install
