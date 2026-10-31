@@ -1447,7 +1447,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp 
  	const auto peer = info.peer;
  	const auto options = info.options;
  	const auto key = ContextId{
-@@ -562,367 +275,231 @@
+@@ -562,358 +275,222 @@
  		.topicRootId = info.topicRootId,
  		.monoforumPeerId = info.monoforumPeerId,
  	};
@@ -1814,18 +1814,13 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp 
  }
  
  void Manager::Private::clearFromItem(not_null<HistoryItem*> item) {
--	const auto i = _notifications.find(ContextId{
-+	const auto key = ContextId{
- 		.sessionId = item->history()->session().uniqueId(),
- 		.peerId = item->history()->peer->id,
- 		.topicRootId = item->topicRootId(),
- 		.monoforumPeerId = item->sublistPeerId(),
--	});
+-	const auto i = _notifications.find(ItemContextId(item));
 -	if (i != _notifications.cend()
 -			&& i->second.remove(item->id)
 -			&& i->second.empty()) {
 -		_notifications.erase(i);
-+	};
+-	}
++	const auto key = ItemContextId(item);
 +	if (auto i = _notifications.find(key); i != _notifications.end()) {
 +		if (auto j = i->second.find(item->id); j != i->second.end()) {
 +			if (_interface) {
@@ -1836,7 +1831,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp 
 +				_notifications.erase(i);
 +			}
 +		}
- 	}
++	}
  }
  
  void Manager::Private::clearFromTopic(not_null<Data::ForumTopic*> topic) {
@@ -1859,13 +1854,8 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp 
  
  void Manager::Private::clearFromSublist(
  		not_null<Data::SavedSublist*> sublist) {
--	_notifications.remove(ContextId{
-+	const auto key = ContextId{
- 		.sessionId = sublist->session().uniqueId(),
- 		.peerId = sublist->owningHistory()->peer->id,
- 		.monoforumPeerId = sublist->sublistPeer()->id,
--	});
-+	};
+-	_notifications.remove(SublistContextId(sublist));
++	const auto key = SublistContextId(sublist);
 +	if (auto i = _notifications.find(key); i != _notifications.end()) {
 +		for (const auto &[mid, nid] : i->second) {
 +			if (_interface) {
@@ -1994,7 +1984,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp 
 diff -Nru a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/SourceFiles/platform/linux/specific_linux.cpp
 --- a/Telegram/SourceFiles/platform/linux/specific_linux.cpp
 +++ b/Telegram/SourceFiles/platform/linux/specific_linux.cpp
-@@ -11,37 +11,38 @@
+@@ -11,38 +11,39 @@
  #include "base/random.h"
  #include "base/platform/base_platform_info.h"
  #include "base/platform/linux/base_linux_dbus_utilities.h"
@@ -2037,13 +2027,14 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/So
 -#include <xdpopenuri/xdpopenuri.hpp>
 -#include <xdprequest/xdprequest.hpp>
 -
+ #include <sys/socket.h>
  #include <sys/stat.h>
  #include <sys/types.h>
 -#include <sys/un.h>
  #include <cstdlib>
  #include <unistd.h>
  #include <dirent.h>
-@@ -49,175 +50,47 @@
+@@ -50,175 +51,47 @@
  
  namespace {
  
@@ -2255,7 +2246,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/So
  }
  
  bool GenerateDesktopFile(
-@@ -231,115 +104,52 @@
+@@ -232,115 +105,52 @@
  	}
  
  	DEBUG_LOG(("App Info: placing .desktop file to %1").arg(targetPath));
@@ -2406,7 +2397,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/So
  
  	QFile::setPermissions(
  		targetFile,
-@@ -352,127 +162,17 @@
+@@ -353,127 +163,17 @@
  		DEBUG_LOG(("App Info: removing old .desktop files"));
  		QFile::remove(u"%1telegram.desktop"_q.arg(targetPath));
  		QFile::remove(u"%1telegramdesktop.desktop"_q.arg(targetPath));
@@ -2535,7 +2526,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/So
  		return;
  	}
  
-@@ -480,103 +180,7 @@
+@@ -481,103 +181,7 @@
  		QStandardPaths::ApplicationsLocation) + '/';
  
  	GenerateDesktopFile(applicationsPath);
@@ -2640,7 +2631,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/So
  }
  
  } // namespace
-@@ -607,13 +211,18 @@
+@@ -608,13 +212,18 @@
  
  #if QT_VERSION < QT_VERSION_CHECK(6, 5, 0)
  std::optional<bool> IsDarkMode() {
@@ -2664,7 +2655,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/So
  }
  #endif // Qt < 6.5.0
  
-@@ -623,7 +232,7 @@
+@@ -624,7 +233,7 @@
  
  void AutostartToggle(bool enabled, Fn<void(bool)> done) {
  	if (KSandbox::isFlatpak()) {
@@ -2673,7 +2664,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/So
  		return;
  	}
  
-@@ -631,23 +240,21 @@
+@@ -632,23 +241,21 @@
  		const auto autostart = QStandardPaths::writableLocation(
  			QStandardPaths::GenericConfigLocation)
  			+ u"/autostart/"_q;
@@ -2699,7 +2690,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/So
  	}
  }
  
-@@ -660,13 +267,15 @@
+@@ -661,13 +268,15 @@
  }
  
  bool SkipTaskbarSupported() {
@@ -2717,7 +2708,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/So
  }
  
  QString ExecutablePathForShortcuts() {
-@@ -687,7 +296,6 @@
+@@ -688,7 +297,6 @@
  
  QString psAppDataPath() {
  	// Previously we used ~/.TelegramDesktop, so look there first.
@@ -2725,7 +2716,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/So
  	auto home = QDir::homePath();
  	if (!home.isEmpty()) {
  		auto oldPath = home + u"/.TelegramDesktop/"_q;
-@@ -698,8 +306,8 @@
+@@ -699,8 +307,8 @@
  			return oldPath;
  		}
  	}
@@ -2736,7 +2727,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/So
  }
  
  void psDoCleanup() {
-@@ -757,14 +365,7 @@
+@@ -758,14 +366,7 @@
  		"PULSE_PROP_application.icon_name",
  		ApplicationIconName().toUtf8());
  
@@ -2752,7 +2743,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/So
  	InstallLauncher();
  }
  
-@@ -807,23 +408,10 @@
+@@ -808,23 +409,10 @@
  		add("pavucontrol");
  		add("alsamixergui");
  		return ranges::any_of(options, [](const Command &command) {
@@ -2780,7 +2771,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/So
  		});
  	}
  	return true;
-@@ -853,7 +441,7 @@
+@@ -854,7 +442,7 @@
  	static const auto Result = KSandbox::isSnap()
  		? u"snap.%1."_q.arg(qEnvironmentVariable("SNAP_INSTANCE_NAME"))
  		: QGuiApplication::desktopFileName().remove(
@@ -2789,7 +2780,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/So
  	return Result;
  }
  
-@@ -864,26 +452,12 @@
+@@ -865,26 +453,12 @@
  }
  
  void LaunchMaps(const Data::LocationPoint &point, Fn<void()> fail) {
@@ -2822,7 +2813,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/So
  }
  
  namespace ThirdParty {
-@@ -892,7 +466,6 @@
+@@ -893,7 +467,6 @@
  }
  
  } // namespace ThirdParty
