@@ -289,16 +289,16 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/integration_linux.cpp b/Telegram
 +		auto path = u"/"_q + id;
 +		path.replace('.', '/');
 +
-+		// Own the well-known name when possible (non-sandboxed package).
-+		if (!bus.registerService(id)) {
-+			LOG(("App Info: D-Bus name %1 already taken "
-+				"(another instance?). Still exporting %2.").arg(id, path));
-+		}
++		// Export the object before claiming the name. D-Bus can dispatch
++		// an activation request as soon as the name is registered.
 +		if (!bus.registerObject(
 +				path,
 +				this,
 +				QDBusConnection::ExportAdaptors)) {
 +			LOG(("App Error: Failed to export D-Bus object %1").arg(path));
++		} else if (!bus.registerService(id)) {
++			LOG(("App Info: D-Bus name %1 already taken "
++				"(another instance?). Object %2 is exported.").arg(id, path));
 +		}
  	}
 -	set_flags(Gio::ApplicationFlags::HANDLES_OPEN_);
