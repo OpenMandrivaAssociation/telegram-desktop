@@ -26,30 +26,30 @@ diff -Nru a/Telegram/SourceFiles/core/update_checker.cpp b/Telegram/SourceFiles/
 @@ -43,10 +43,9 @@
  #include <ksandbox.h>
  
- #if !defined Q_OS_WIN && !defined Q_OS_MAC
+ #if !defined Q_OS_WIN && !defined Q_OS_MACOS
 -#include "base/platform/linux/base_linux_xdp_utilities.h"
  #include "platform/linux/update_install_linux.h"
 -
 -#include <flatpakportal/flatpakportal.hpp>
 +// Flatpak portal / cppgir auto-update is disabled. Distro packages update
 +// through the package manager. The out-of-line FlatpakChecker below is #if 0.
- #endif // !Q_OS_WIN && !Q_OS_MAC
- 
- extern "C" {
-@@ -103,8 +102,7 @@
+ #elif defined Q_OS_MACOS // !Q_OS_WIN && !Q_OS_MACOS
+ #include "platform/mac/update_install_mac.h"
+ #else // Q_OS_MACOS
+@@ -107,8 +106,7 @@
  using Loader = MTP::AbstractDedicatedLoader;
  
- #if !defined Q_OS_WIN && !defined Q_OS_MAC
+ #if !defined Q_OS_WIN && !defined Q_OS_MACOS
 -using namespace gi::repository;
 -namespace GObject = gi::repository::GObject;
 +// using namespace gi::repository;  // removed (no more glibmm / cppgir / gi)
- #endif // !Q_OS_WIN && !Q_OS_MAC
+ #endif // !Q_OS_WIN && !Q_OS_MACOS
  
  struct BIODeleter {
-@@ -262,36 +260,22 @@
+@@ -266,36 +264,22 @@
  };
  
- #if !defined Q_OS_WIN && !defined Q_OS_MAC
+ #if !defined Q_OS_WIN && !defined Q_OS_MACOS
 +// Intentionally disabled: RPM packages use the distro package manager for updates,
 +// not the Flatpak portal auto-update path (which also required glibmm/cppgir).
  class FlatpakChecker : public Checker {
@@ -90,16 +90,25 @@ diff -Nru a/Telegram/SourceFiles/core/update_checker.cpp b/Telegram/SourceFiles/
 -
 +	void startLoading() override {}
  };
- #endif // !Q_OS_WIN && !Q_OS_MAC
+ #endif // !Q_OS_WIN && !Q_OS_MACOS
  
-@@ -1338,6 +1322,7 @@
+@@ -1380,6 +1364,7 @@
  	};
  }
  
 +#if 0
- #if !defined Q_OS_WIN && !defined Q_OS_MAC
+ #if !defined Q_OS_WIN && !defined Q_OS_MACOS
  FlatpakChecker::FlatpakChecker(bool testing)
  : Checker(testing)
+@@ -1534,6 +1519,7 @@
+ 	}
+ }
+ #endif // !Q_OS_WIN && !Q_OS_MACOS
++#endif
+ 
+ } // namespace
+ 
+
 diff -Nru a/Telegram/SourceFiles/media/system_media_controls_manager.cpp b/Telegram/SourceFiles/media/system_media_controls_manager.cpp
 --- a/Telegram/SourceFiles/media/system_media_controls_manager.cpp	2026-09-10 21:11:45.000000000 +0200
 +++ b/Telegram/SourceFiles/media/system_media_controls_manager.cpp	2026-09-11 23:03:48.714804817 +0200
