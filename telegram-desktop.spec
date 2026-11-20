@@ -265,10 +265,13 @@ touch build/changelog.txt
 CFLAGS="%{optflags} -fPIC -g1 -Wl,-v -fuse-ld=mold"
 
 # PCH stays on: the sources use names that only the precompiled header
-# provides. One job on x86 keeps a second -O2 PCH from stacking on the
-# first. aarch64 at one job hits mock's 10 hour rpmbuild timeout.
+# provides. One job on znver1 keeps a second -O2 PCH from stacking on the
+# first. x86_64 at one job reached 2344/2522 when mock's 10 hour rpmbuild
+# timeout expired (694428), so that arch gets two jobs. aarch64 stays at four.
 %ifarch aarch64
 RPM_BUILD_NCPUS=4
+%elifarch x86_64
+RPM_BUILD_NCPUS=2
 %else
 RPM_BUILD_NCPUS=1
 %endif
