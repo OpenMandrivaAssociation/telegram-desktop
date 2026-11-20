@@ -1,9 +1,8 @@
 diff --git a/Telegram/CMakeLists.txt b/Telegram/CMakeLists.txt
 --- a/Telegram/CMakeLists.txt
 +++ b/Telegram/CMakeLists.txt
-@@ -98,7 +98,7 @@
+@@ -109,6 +109,6 @@
      desktop-app::lib_stripe
-     desktop-app::external_ada
      desktop-app::external_zlib
 -    desktop-app::external_minizip
 +    minizip
