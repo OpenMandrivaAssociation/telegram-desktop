@@ -72,8 +72,9 @@ Source1: twidget-7.4.7-rust-vendor.tar.xz
 
 Requires: hicolor-icon-theme
 
-# 7.3.0 links tlottie and wallet-engine as one static library.
-BuildRequires: pkgconfig(tdesktop_rust) >= 7.3.0
+# 7.4.7 needs PrepareTransferRequest.gasless_messages and
+# wallet_client_error::UnsupportedSendMode from tdesktop-rust 7.4.7.
+BuildRequires: pkgconfig(tdesktop_rust) >= 7.4.7
 # 7.4.7 builds TelegramWidgetHelper from twidget. The workspace asks for rust 1.96.
 BuildRequires: cargo >= 1.96
 
