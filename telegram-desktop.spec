@@ -299,6 +299,8 @@ appstream-util validate-relax --nonet %{buildroot}%{_metainfodir}/org.telegram.d
 %doc README.md changelog.txt
 %license LICENSE LEGAL
 %{_bindir}/Telegram
+%dir %{_libexecdir}/TelegramDesktop
+%{_libexecdir}/TelegramDesktop/TelegramWidgetHelper
 %{_datadir}/applications/org.telegram.desktop.desktop
 %{_datadir}/icons/hicolor/*/apps/*.*
 %{_datadir}/dbus-1/services/org.telegram.desktop.service
