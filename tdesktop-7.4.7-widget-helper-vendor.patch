@@ -1,0 +1,13 @@
+--- a/Telegram/cmake/build_widget_helper_rust.cmake
++++ b/Telegram/cmake/build_widget_helper_rust.cmake
+@@ -44,7 +44,9 @@
+ function(build)
+     run("${CMAKE_COMMAND}" -E env ${environment}
+         # As a static library alone: with the crate's rlib type beside it cargo leaves out link-time optimisation.
+-        "${HELPER_CARGO}" rustc --release --locked
++        "${HELPER_CARGO}" rustc --release --locked --offline
++        --config source.crates-io.replace-with=\"vendored-sources\"
++        --config "source.vendored-sources.directory=\"${HELPER_ROOT}/vendor\""
+         --package twidget_helper_ffi --lib --crate-type staticlib
+         ${ARGN}
+         --config profile.release.overflow-checks=true

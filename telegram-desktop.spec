@@ -55,8 +55,10 @@ Group:	Networking/Instant Messenger
 # * Telegram Desktop - GPLv3+ with OpenSSL exception -- main tarball;
 # * tdesktop-rust - MIT and Apache-2.0 -- one static library since 7.3.0
 #   (tlottie and wallet-engine).
+# * twidget (TelegramWidgetHelper) - BSD-3-Clause -- static library built here.
+#   Its crates.io dependencies are vendored (MIT and Apache-2.0).
 # * qt_functions.cpp - LGPLv3 -- build-time dependency.
-License: GPLv3+ and LGPLv2+ and LGPLv3 and MIT and Apache-2.0
+License: GPLv3+ and LGPLv2+ and LGPLv3 and MIT and Apache-2.0 and BSD-3-Clause
 URL: https://github.com/telegramdesktop/%{appname}
 Summary: Telegram Desktop official messaging app
 
@@ -64,11 +66,16 @@ Summary: Telegram Desktop official messaging app
 # Upstream frequently forgets to make the -full release. When that happens,
 # use the package-source.sh script in this repository.
 Source0: https://github.com/telegramdesktop/tdesktop/releases/download/v%{version}/%{appname}-%{version}%{tarsuffix}.tar.gz
+# cargo vendor of Telegram/ThirdParty/twidget/rust for this release.
+# The build has no network.
+Source1: twidget-7.4.7-rust-vendor.tar.xz
 
 Requires: hicolor-icon-theme
 
 # 7.3.0 links tlottie and wallet-engine as one static library.
 BuildRequires: pkgconfig(tdesktop_rust) >= 7.3.0
+# 7.4.7 builds TelegramWidgetHelper from twidget. The workspace asks for rust 1.96.
+BuildRequires: cargo >= 1.96
 
 # Telegram Desktop require patched version of lxqt-qtplugin.
 # Pull Request pending: https://github.com/lxqt/lxqt-qtplugin/pull/52
@@ -200,6 +207,7 @@ tdesktop-7.2.9-xdp-moc.patch
 tdesktop-7.2.9-libbase-automoc.patch
 tdesktop-7.2.9-webengine-link.patch
 tdesktop-7.3.0-webview-nav.patch
+tdesktop-7.4.7-widget-helper-vendor.patch
 
 %description
 Telegram is a non-profit cloud-based instant messaging service.
@@ -214,6 +222,7 @@ The service also provides APIs to independent developers.
 export LC_ALL=en_US.utf-8
 # Unpacking Telegram Desktop source archive...
 %autosetup -p1 -n %{appname}-%{version}%{tarsuffix}
+tar -C Telegram/ThirdParty/twidget/rust -xf %{SOURCE1}
 
 # Unbundling libraries...
 rm -rf Telegram/ThirdParty/{Catch,GSL,QR,SPMediaKeyTap,expected,libdbusmenu-qt,libtgvoip,lz4,variant,xxHash,mallocng,minizip,zlib}
