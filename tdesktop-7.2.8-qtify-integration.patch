@@ -1993,7 +1993,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/notifications_manager_linux.cpp 
 diff -Nru a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/SourceFiles/platform/linux/specific_linux.cpp
 --- a/Telegram/SourceFiles/platform/linux/specific_linux.cpp
 +++ b/Telegram/SourceFiles/platform/linux/specific_linux.cpp
-@@ -11,38 +11,39 @@
+@@ -11,39 +11,40 @@
  #include "base/random.h"
  #include "base/platform/base_platform_info.h"
  #include "base/platform/linux/base_linux_dbus_utilities.h"
@@ -2011,6 +2011,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/specific_linux.cpp b/Telegram/So
  #include "core/update_checker.h"
  #include "core/version.h"
  #include "data/data_location.h"
+ #include "platform/linux/widget_helper_linux.h"
  #include "window/window_controller.h"
 -#include "webview/platform/linux/webview_linux_webkitgtk.h"
 +#ifndef DESKTOP_APP_DISABLE_X11_INTEGRATION
@@ -3422,20 +3423,6 @@ diff -Nru a/Telegram/SourceFiles/webauthn/cable_scanner_linux.cpp b/Telegram/Sou
  
  } // namespace
  
---- a/Telegram/ThirdParty/hunspell/tests/suggestiontest/Makefile.orig	2026-08-13 13:45:06.000000000 +0200
-+++ b/Telegram/ThirdParty/hunspell/tests/suggestiontest/Makefile.orig	1970-01-01 01:00:00.000000000 +0100
-@@ -1,11 +0,0 @@
--all:
--	./prepare
--	./test
--
--single:
--	./prepare2
--	./test
--
--clean:
--	rm *.[1-5] result.*
--
 diff -Nru a/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp b/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp
 --- a/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp	2026-09-06 15:51:18.000000000 +0200
 +++ b/Telegram/lib_base/base/platform/linux/base_file_utilities_linux.cpp	2026-09-11 23:03:48.715660456 +0200

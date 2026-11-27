@@ -17,8 +17,9 @@ index d5085396..12b2bc73 100644
 +++ b/Telegram/SourceFiles/payments/ui/payments_panel.cpp
 @@ -26,6 +26,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
  #include "webview/webview_interface.h"
- #include "styles/style_payments.h"
+ 
  #include "styles/style_layers.h"
+ #include "styles/style_payments.h"
 +#include <QJsonDocument>
  
  namespace Payments::Ui {
