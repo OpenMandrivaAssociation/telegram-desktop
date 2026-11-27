@@ -15,7 +15,7 @@ diff --git a/Telegram/SourceFiles/payments/ui/payments_panel.cpp b/Telegram/Sour
 index d5085396..12b2bc73 100644
 --- a/Telegram/SourceFiles/payments/ui/payments_panel.cpp
 +++ b/Telegram/SourceFiles/payments/ui/payments_panel.cpp
-@@ -26,6 +26,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
+@@ -26,8 +26,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
  #include "webview/webview_interface.h"
  
  #include "styles/style_layers.h"
@@ -24,6 +24,7 @@ index d5085396..12b2bc73 100644
  
  namespace Payments::Ui {
  namespace {
+ 
 diff --git a/Telegram/SourceFiles/window/themes/window_theme_editor_box.cpp b/Telegram/SourceFiles/window/themes/window_theme_editor_box.cpp
 index fe51b4b0..0b569d0c 100644
 --- a/Telegram/SourceFiles/window/themes/window_theme_editor_box.cpp

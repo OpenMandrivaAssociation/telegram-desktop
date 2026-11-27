@@ -112,13 +112,14 @@ diff -Nru a/Telegram/SourceFiles/core/update_checker.cpp b/Telegram/SourceFiles/
 diff -Nru a/Telegram/SourceFiles/media/system_media_controls_manager.cpp b/Telegram/SourceFiles/media/system_media_controls_manager.cpp
 --- a/Telegram/SourceFiles/media/system_media_controls_manager.cpp	2026-09-10 21:11:45.000000000 +0200
 +++ b/Telegram/SourceFiles/media/system_media_controls_manager.cpp	2026-09-11 23:03:48.714804817 +0200
-@@ -9,6 +9,7 @@
+@@ -9,7 +9,8 @@
  
  #include "base/platform/base_platform_system_media_controls.h"
  #include "core/application.h"
 +#include "core/sandbox.h"
  #include "core/core_settings.h"
  #include "core/version.h"
+ #include "data/data_document.h"
  #include "data/data_document_media.h"
 @@ -29,6 +30,17 @@
  #include "media/system_media_controls_video.h"
@@ -2851,9 +2852,7 @@ diff -Nru a/Telegram/SourceFiles/platform/linux/tray_linux.cpp b/Telegram/Source
 diff -Nru a/Telegram/SourceFiles/webauthn/cable_scanner_linux.cpp b/Telegram/SourceFiles/webauthn/cable_scanner_linux.cpp
 --- a/Telegram/SourceFiles/webauthn/cable_scanner_linux.cpp	2026-09-10 21:11:45.000000000 +0200
 +++ b/Telegram/SourceFiles/webauthn/cable_scanner_linux.cpp	2026-09-11 23:03:48.715576996 +0200
-@@ -13,8 +13,15 @@
- #include "base/debug_log.h"
- #include "base/weak_ptr.h"
+@@ -13,6 +13,13 @@
  
 -#include <crl/crl_on_main.h>
 -#include <bluez/bluez.hpp>
